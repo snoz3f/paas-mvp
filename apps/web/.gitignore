@@ -1,0 +1,9 @@
+# compiled output
+dist
+dist-ssr
+
+# test coverage
+coverage
+
+# orval generated
+src/api/generated
