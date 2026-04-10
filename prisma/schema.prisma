@@ -23,6 +23,7 @@ model Project {
   repoUrl   String
   domain    String?  @unique
   framework String?
+  port      Int      @default(3000)
   createdAt DateTime @default(now())
 
   user        User         @relation(fields: [userId], references: [id])
@@ -37,6 +38,8 @@ model Deployment {
   containerId String?
   imageTag    String?
   commitHash  String?
+  url         String?
+  error       String?
   createdAt   DateTime         @default(now())
   startedAt   DateTime?
   finishedAt  DateTime?
