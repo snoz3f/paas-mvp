@@ -1,4 +1,4 @@
-import { globalStyle } from '@vanilla-extract/css';
+import { globalKeyframes, globalStyle } from '@vanilla-extract/css';
 import { vars } from './tokens.css';
 
 globalStyle('*, *::before, *::after', {
@@ -13,8 +13,9 @@ globalStyle('html, body', {
   color: vars.color.text,
   fontFamily: vars.font.sans,
   fontSize: vars.font.size.md,
-  lineHeight: '1.5',
+  lineHeight: '1.6',
   WebkitFontSmoothing: 'antialiased',
+  MozOsxFontSmoothing: 'grayscale',
 });
 
 globalStyle('#root', {
@@ -35,4 +36,9 @@ globalStyle('button', {
 
 globalStyle('input, textarea, select', {
   font: 'inherit',
+});
+
+globalKeyframes('spin', {
+  from: { transform: 'rotate(0deg)' },
+  to: { transform: 'rotate(360deg)' },
 });
