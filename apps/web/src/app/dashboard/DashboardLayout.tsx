@@ -1,4 +1,5 @@
 import { Outlet, NavLink, useNavigate } from 'react-router';
+import { useAuthStore } from '@/stores/authStore';
 import * as s from './dashboard.css';
 
 const NAV_ITEMS = [
@@ -42,10 +43,10 @@ const NAV_ITEMS = [
 
 export function DashboardLayout() {
   const navigate = useNavigate();
-  const email = 'user@example.com'; // TODO: from auth store
+  const { email, clear } = useAuthStore();
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
+    clear();
     void navigate('/login');
   };
 

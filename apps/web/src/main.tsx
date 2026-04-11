@@ -4,7 +4,10 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { BrowserRouter } from 'react-router';
 import { App } from './App';
+import { useAuthStore } from './stores/authStore';
 import './styles/global.css';
+
+useAuthStore.getState().init();
 
 const queryClient = new QueryClient({
   defaultOptions: {

@@ -6,6 +6,7 @@ import { Link, useNavigate } from 'react-router';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { useLogin } from '@/api/generated/auth/auth';
+import { useAuthStore } from '@/stores/authStore';
 import * as s from './auth.css';
 
 const schema = z.object({
@@ -19,6 +20,7 @@ export function LoginPage() {
   const navigate = useNavigate();
   const [formError, setFormError] = useState<string | null>(null);
   const { mutateAsync: loginMutation, isPending } = useLogin();
+  const { init } = useAuthStore();
 
   const {
     register,
@@ -31,6 +33,7 @@ export function LoginPage() {
     try {
       const res = await loginMutation({ data });
       localStorage.setItem('token', res.accessToken);
+      init();
       void navigate('/dashboard');
     } catch {
       setFormError('Invalid email or password');

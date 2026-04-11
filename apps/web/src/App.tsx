@@ -4,6 +4,7 @@ import { RegisterPage } from '@/app/auth/RegisterPage';
 import { DashboardLayout } from '@/app/dashboard/DashboardLayout';
 import { ProjectsPage } from '@/app/dashboard/projects/ProjectsPage';
 import { NewProjectPage } from '@/app/dashboard/projects/NewProjectPage';
+import { ProjectPage } from '@/app/dashboard/projects/ProjectPage';
 import { AuthGuard } from '@/components/AuthGuard';
 
 function Placeholder({ title }: { title: string }) {
@@ -25,7 +26,7 @@ export function App() {
       >
         <Route index element={<ProjectsPage />} />
         <Route path="projects/new" element={<NewProjectPage />} />
-        <Route path="projects/:id" element={<Placeholder title="Project detail" />} />
+        <Route path="projects/:id" element={<ProjectPage />} />
         <Route path="settings" element={<Placeholder title="Settings" />} />
         <Route path="billing" element={<Placeholder title="Billing" />} />
       </Route>
