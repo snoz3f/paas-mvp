@@ -8,8 +8,10 @@ import {
   ParseUUIDPipe,
   Patch,
   Post,
+  Res,
   UseGuards,
 } from '@nestjs/common';
+import type { Response } from 'express';
 import {
   ApiBearerAuth,
   ApiCreatedResponse,
@@ -22,6 +24,7 @@ import type { JwtPayload } from '@/auth/auth.service';
 import { CurrentUser } from '@/auth/decorators/current-user.decorator';
 import { Public } from '@/auth/decorators/public.decorator';
 import { DeploymentResponseDto } from './dto/deployment-response.dto';
+import { TerminalInfoResponseDto } from './dto/terminal-info-response.dto';
 import { UpdateDeploymentStatusDto } from './dto/update-deployment-status.dto';
 import { WorkerAuthGuard } from './guards/worker-auth.guard';
 import { DeploymentsService } from './deployments.service';
@@ -78,6 +81,59 @@ export class DeploymentsController {
     @Param('id', ParseUUIDPipe) id: string,
   ) {
     return this.deploymentsService.stop(user.sub, projectId, id);
+  }
+
+  @Get(':id/logs')
+  @ApiOperation({ operationId: 'streamDeploymentLogs', summary: 'Stream deployment logs (SSE)' })
+  @ApiOkResponse({ schema: { type: 'string' }, description: 'text/event-stream SSE response' })
+  async streamLogs(
+    @CurrentUser() user: JwtPayload,
+    @Param('projectId', ParseUUIDPipe) projectId: string,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Res() res: Response,
+  ) {
+    const { node, containerId } = await this.deploymentsService.getWorkerForDeployment(
+      user.sub, projectId, id,
+    );
+
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+    res.flushHeaders();
+
+    const workerUrl = `http://${node.ip}:4000/containers/${containerId}/logs`;
+    const response = await fetch(workerUrl, {
+      headers: { 'x-worker-secret': process.env.WORKER_SECRET ?? '' },
+    });
+
+    if (!response.body) { res.end(); return; }
+
+    const reader = response.body.getReader();
+    const pump = async () => {
+      const { done, value } = await reader.read();
+      if (done) { res.end(); return; }
+      res.write(value);
+      void pump();
+    };
+    void pump();
+    res.on('close', () => reader.cancel());
+  }
+
+  @Get(':id/terminal-info')
+  @ApiOperation({ operationId: 'getTerminalInfo', summary: 'Get worker WebSocket URL for terminal' })
+  @ApiOkResponse({ type: TerminalInfoResponseDto })
+  async getTerminalInfo(
+    @CurrentUser() user: JwtPayload,
+    @Param('projectId', ParseUUIDPipe) projectId: string,
+    @Param('id', ParseUUIDPipe) id: string,
+  ) {
+    const { node, containerId } = await this.deploymentsService.getWorkerForDeployment(
+      user.sub, projectId, id,
+    );
+    return {
+      wsUrl: `ws://${node.ip}:4000/containers/terminal`,
+      containerId,
+    };
   }
 }
 

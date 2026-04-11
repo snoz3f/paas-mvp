@@ -1,0 +1,124 @@
+import { useEffect, useRef } from 'react';
+import { Terminal } from '@xterm/xterm';
+import { FitAddon } from '@xterm/addon-fit';
+import { AttachAddon } from '@xterm/addon-attach';
+import '@xterm/xterm/css/xterm.css';
+import * as s from './XTerm.css';
+
+const THEME = {
+  background: '#0d0d0d',
+  foreground: '#ebebeb',
+  cursor: '#f0e468',
+  cursorAccent: '#0d0d0d',
+  black: '#0d0d0d',
+  brightBlack: '#444444',
+  red: '#ff5c5c',
+  brightRed: '#ff5c5c',
+  green: '#4dff91',
+  brightGreen: '#4dff91',
+  yellow: '#f0e468',
+  brightYellow: '#f0e468',
+  blue: '#6699ff',
+  brightBlue: '#6699ff',
+  magenta: '#cc99ff',
+  brightMagenta: '#cc99ff',
+  cyan: '#66ffff',
+  brightCyan: '#66ffff',
+  white: '#ebebeb',
+  brightWhite: '#ffffff',
+};
+
+interface XTermProps {
+  /** SSE endpoint для логов (read-only) */
+  logsUrl?: string;
+  /** WebSocket URL для интерактивного терминала */
+  wsUrl?: string;
+  containerId?: string;
+  workerSecret?: string;
+}
+
+export function XTerm({ logsUrl, wsUrl, containerId, workerSecret }: XTermProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const termRef = useRef<Terminal | null>(null);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    const term = new Terminal({
+      theme: THEME,
+      fontFamily: '"Martian Mono", "JetBrains Mono", monospace',
+      fontSize: 13,
+      lineHeight: 1.5,
+      cursorBlink: true,
+      convertEol: true,
+    });
+
+    const fitAddon = new FitAddon();
+    term.loadAddon(fitAddon);
+    term.open(containerRef.current);
+    fitAddon.fit();
+    termRef.current = term;
+
+    const observer = new ResizeObserver(() => fitAddon.fit());
+    observer.observe(containerRef.current);
+
+    // ── Режим логов (SSE) ──────────────────────────────────
+    if (logsUrl) {
+      term.writeln('\x1b[2m── logs ──\x1b[0m\r\n');
+      const source = new EventSource(logsUrl);
+      source.onmessage = (e) => {
+        const text = JSON.parse(e.data as string) as string;
+        term.write(text);
+      };
+      source.addEventListener('end', () => {
+        term.writeln('\r\n\x1b[2m── stream ended ──\x1b[0m');
+        source.close();
+      });
+      source.onerror = () => {
+        term.writeln('\r\n\x1b[31mSSE connection lost\x1b[0m');
+        source.close();
+      };
+      return () => {
+        source.close();
+        observer.disconnect();
+        term.dispose();
+      };
+    }
+
+    // ── Режим терминала (WebSocket) ────────────────────────
+    if (wsUrl && containerId && workerSecret) {
+      term.writeln('\x1b[2m── connecting… ──\x1b[0m\r\n');
+      const ws = new WebSocket(wsUrl);
+
+      ws.onopen = () => {
+        ws.send(JSON.stringify({ event: 'attach', data: { containerId, secret: workerSecret } }));
+        const attachAddon = new AttachAddon(ws, { bidirectional: true });
+        term.loadAddon(attachAddon);
+        term.writeln('\x1b[2m── connected ──\x1b[0m\r\n');
+
+        // Отправляем resize при изменении размера
+        term.onResize(({ cols, rows }) => {
+          if (ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify({ event: 'resize', data: { cols, rows } }));
+          }
+        });
+      };
+
+      ws.onclose = () => term.writeln('\r\n\x1b[31mConnection closed\x1b[0m');
+      ws.onerror = () => term.writeln('\r\n\x1b[31mConnection error\x1b[0m');
+
+      return () => {
+        ws.close();
+        observer.disconnect();
+        term.dispose();
+      };
+    }
+
+    return () => {
+      observer.disconnect();
+      term.dispose();
+    };
+  }, [logsUrl, wsUrl, containerId, workerSecret]);
+
+  return <div ref={containerRef} className={s.wrapper} />;
+}

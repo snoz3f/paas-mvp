@@ -88,6 +88,16 @@ export class DeploymentsService {
     });
   }
 
+  async getWorkerForDeployment(userId: string, projectId: string, id: string) {
+    const deployment = await this.findOne(userId, projectId, id);
+    if (!deployment.nodeId || !deployment.containerId) {
+      throw new NotFoundException('No active container for this deployment');
+    }
+    const node = await this.prisma.node.findUnique({ where: { id: deployment.nodeId } });
+    if (!node) throw new NotFoundException('Node not found');
+    return { node, containerId: deployment.containerId };
+  }
+
   async updateStatus(id: string, dto: UpdateDeploymentStatusDto) {
     const now = new Date();
     const terminalStatuses: DeploymentStatus[] = [
