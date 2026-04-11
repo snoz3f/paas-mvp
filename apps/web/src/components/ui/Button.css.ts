@@ -42,6 +42,16 @@ export const ghost = style({
   },
 });
 
+export const danger = style({
+  backgroundColor: 'rgba(255,92,92,0.1)',
+  color: vars.color.danger,
+  border: `1px solid rgba(255,92,92,0.2)`,
+  ':hover': {
+    backgroundColor: 'rgba(255,92,92,0.18)',
+    borderColor: 'rgba(255,92,92,0.35)',
+  },
+});
+
 export const auto = style({
   width: 'auto',
   padding: `14px ${vars.space.lg}`,
@@ -58,6 +68,18 @@ export const spinner = style({
   height: '14px',
   border: '2px solid rgba(10,10,10,0.3)',
   borderTopColor: '#0a0a0a',
+  borderRadius: vars.radius.full,
+  animationName: 'spin',
+  animationDuration: '0.6s',
+  animationTimingFunction: 'linear',
+  animationIterationCount: 'infinite',
+});
+
+export const spinnerDanger = style({
+  width: '14px',
+  height: '14px',
+  border: `2px solid rgba(255,92,92,0.2)`,
+  borderTopColor: vars.color.danger,
   borderRadius: vars.radius.full,
   animationName: 'spin',
   animationDuration: '0.6s',

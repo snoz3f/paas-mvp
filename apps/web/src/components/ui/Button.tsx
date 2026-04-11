@@ -3,13 +3,13 @@ import * as styles from './Button.css';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   loading?: boolean;
-  variant?: 'primary' | 'ghost';
+  variant?: 'primary' | 'ghost' | 'danger';
   width?: 'full' | 'auto';
   size?: 'md' | 'sm';
 }
 
 export function Button({ children, loading, variant = 'primary', width = 'full', size = 'md', className, ...props }: ButtonProps) {
-  const variantStyle = variant === 'ghost' ? styles.ghost : styles.primary;
+  const variantStyle = variant === 'ghost' ? styles.ghost : variant === 'danger' ? styles.danger : styles.primary;
   const widthStyle = size === 'sm' ? styles.sm : width === 'auto' ? styles.auto : '';
 
   return (
@@ -18,7 +18,7 @@ export function Button({ children, loading, variant = 'primary', width = 'full',
       disabled={loading ?? props.disabled}
       {...props}
     >
-      {loading && <span className={styles.spinner} />}
+      {loading && <span className={variant === 'danger' ? styles.spinnerDanger : styles.spinner} />}
       {children}
     </button>
   );

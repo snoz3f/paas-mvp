@@ -1,0 +1,259 @@
+import { style } from '@vanilla-extract/css';
+import { vars } from '@/styles/tokens.css';
+
+export const topbar = style({
+  height: '56px',
+  flexShrink: 0,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  padding: `0 ${vars.space.xl}`,
+  borderBottom: `1px solid ${vars.color.border}`,
+});
+
+export const topbarLeft = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: vars.space.md,
+});
+
+export const backBtn = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: vars.space.xs,
+  fontSize: vars.font.size.sm,
+  color: vars.color.textMuted,
+  transition: `color ${vars.transition.fast}`,
+  ':hover': { color: vars.color.text },
+});
+
+export const topbarTitle = style({
+  fontFamily: vars.font.heading,
+  fontSize: vars.font.size.md,
+  fontWeight: '600',
+  color: vars.color.text,
+  letterSpacing: '-0.03em',
+});
+
+export const content = style({
+  flex: 1,
+  overflowY: 'auto',
+  padding: vars.space.xl,
+  display: 'flex',
+  flexDirection: 'column',
+  gap: vars.space.xl,
+  maxWidth: '640px',
+});
+
+// ── Section ───────────────────────────────────────────────
+export const section = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: vars.space.lg,
+});
+
+export const sectionTitle = style({
+  fontFamily: vars.font.heading,
+  fontSize: vars.font.size.md,
+  fontWeight: '600',
+  letterSpacing: '-0.03em',
+  color: vars.color.text,
+  paddingBottom: vars.space.sm,
+  borderBottom: `1px solid ${vars.color.border}`,
+});
+
+export const card = style({
+  backgroundColor: vars.color.surface,
+  border: `1px solid ${vars.color.border}`,
+  borderRadius: vars.radius.lg,
+  padding: vars.space.lg,
+  display: 'flex',
+  flexDirection: 'column',
+  gap: vars.space.md,
+  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.03)',
+});
+
+export const formRow = style({
+  display: 'grid',
+  gridTemplateColumns: '1fr 1fr',
+  gap: vars.space.md,
+});
+
+export const saveRow = style({
+  display: 'flex',
+  justifyContent: 'flex-end',
+  gap: vars.space.sm,
+  paddingTop: vars.space.sm,
+});
+
+export const successMsg = style({
+  fontSize: vars.font.size.sm,
+  color: vars.color.success,
+  alignSelf: 'center',
+});
+
+// ── Env vars ──────────────────────────────────────────────
+export const envTable = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: vars.space.xs,
+});
+
+export const envRow = style({
+  display: 'grid',
+  gridTemplateColumns: '1fr 1fr auto',
+  gap: vars.space.sm,
+  alignItems: 'center',
+});
+
+export const envInput = style({
+  backgroundColor: vars.color.bg,
+  border: `1px solid ${vars.color.border}`,
+  borderRadius: vars.radius.md,
+  padding: `6px ${vars.space.sm}`,
+  fontSize: vars.font.size.sm,
+  fontFamily: vars.font.mono,
+  color: vars.color.text,
+  width: '100%',
+  transition: `border-color ${vars.transition.fast}, box-shadow ${vars.transition.fast}`,
+  ':focus': {
+    outline: 'none',
+    borderColor: vars.color.accent,
+    boxShadow: '0 0 0 3px rgba(240,228,104,0.08)',
+  },
+  '::placeholder': { color: vars.color.textSubtle },
+});
+
+export const envRemoveBtn = style({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  width: '28px',
+  height: '28px',
+  borderRadius: vars.radius.sm,
+  color: vars.color.textSubtle,
+  transition: `color ${vars.transition.fast}, background ${vars.transition.fast}`,
+  flexShrink: 0,
+  ':hover': {
+    color: vars.color.danger,
+    backgroundColor: 'rgba(255,92,92,0.08)',
+  },
+});
+
+export const envAddBtn = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: vars.space.xs,
+  fontSize: vars.font.size.sm,
+  color: vars.color.textMuted,
+  padding: `6px 0`,
+  transition: `color ${vars.transition.fast}`,
+  ':hover': { color: vars.color.accent },
+});
+
+export const envHeader = style({
+  display: 'grid',
+  gridTemplateColumns: '1fr 1fr auto',
+  gap: vars.space.sm,
+  paddingBottom: vars.space.xs,
+  marginBottom: vars.space.xs,
+  borderBottom: `1px solid ${vars.color.border}`,
+});
+
+export const envHeaderLabel = style({
+  fontSize: vars.font.size.xs,
+  fontWeight: '500',
+  letterSpacing: '0.08em',
+  textTransform: 'uppercase',
+  color: vars.color.textSubtle,
+});
+
+// ── Danger zone ───────────────────────────────────────────
+export const dangerCard = style({
+  backgroundColor: vars.color.surface,
+  border: `1px solid rgba(255,92,92,0.2)`,
+  borderRadius: vars.radius.lg,
+  padding: vars.space.lg,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  gap: vars.space.lg,
+});
+
+export const dangerInfo = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '4px',
+});
+
+export const dangerTitle = style({
+  fontSize: vars.font.size.sm,
+  fontWeight: '600',
+  color: vars.color.text,
+});
+
+export const dangerDesc = style({
+  fontSize: vars.font.size.sm,
+  color: vars.color.textMuted,
+});
+
+// ── Delete confirm dialog ─────────────────────────────────
+export const dialogOverlay = style({
+  position: 'fixed',
+  inset: 0,
+  backgroundColor: 'rgba(0,0,0,0.7)',
+  backdropFilter: 'blur(4px)',
+  zIndex: 100,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+});
+
+export const dialogCard = style({
+  backgroundColor: vars.color.surface,
+  border: `1px solid ${vars.color.border}`,
+  borderRadius: vars.radius.lg,
+  padding: vars.space.xl,
+  width: '400px',
+  display: 'flex',
+  flexDirection: 'column',
+  gap: vars.space.lg,
+  boxShadow: '0 24px 64px rgba(0,0,0,0.6)',
+});
+
+export const dialogTitle = style({
+  fontFamily: vars.font.heading,
+  fontSize: vars.font.size.lg,
+  fontWeight: '700',
+  letterSpacing: '-0.03em',
+  color: vars.color.text,
+});
+
+export const dialogDesc = style({
+  fontSize: vars.font.size.sm,
+  color: vars.color.textMuted,
+  lineHeight: '1.6',
+});
+
+export const dialogConfirmInput = style({
+  backgroundColor: vars.color.bg,
+  border: `1px solid ${vars.color.border}`,
+  borderRadius: vars.radius.md,
+  padding: `8px ${vars.space.sm}`,
+  fontSize: vars.font.size.sm,
+  fontFamily: vars.font.mono,
+  color: vars.color.text,
+  width: '100%',
+  transition: `border-color ${vars.transition.fast}`,
+  ':focus': {
+    outline: 'none',
+    borderColor: vars.color.danger,
+    boxShadow: '0 0 0 3px rgba(255,92,92,0.08)',
+  },
+});
+
+export const dialogActions = style({
+  display: 'flex',
+  gap: vars.space.sm,
+  justifyContent: 'flex-end',
+});

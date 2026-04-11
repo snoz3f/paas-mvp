@@ -1,5 +1,5 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsOptional, IsString, IsUrl, MinLength } from 'class-validator';
+import { IsInt, IsObject, IsOptional, IsString, IsUrl, Max, Min, MinLength } from 'class-validator';
 
 export class UpdateProjectDto {
   @ApiPropertyOptional({ example: 'my-backend-v2' })
@@ -17,4 +17,16 @@ export class UpdateProjectDto {
   @IsString()
   @IsOptional()
   framework?: string;
+
+  @ApiPropertyOptional({ example: 3000 })
+  @IsInt()
+  @Min(1)
+  @Max(65535)
+  @IsOptional()
+  port?: number;
+
+  @ApiPropertyOptional({ example: { NODE_ENV: 'production' }, type: Object })
+  @IsObject()
+  @IsOptional()
+  envVars?: Record<string, string>;
 }

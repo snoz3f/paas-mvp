@@ -19,6 +19,12 @@ export class ProjectResponseDto {
   @ApiPropertyOptional({ example: 'nestjs', type: String, nullable: true })
   framework: string | null;
 
+  @ApiProperty({ example: 3000 })
+  port: number;
+
+  @ApiProperty({ example: { NODE_ENV: 'production' }, type: Object })
+  envVars: Record<string, string>;
+
   @ApiProperty({ example: '2024-01-15T10:30:00Z', type: Date })
   createdAt: Date;
 }
