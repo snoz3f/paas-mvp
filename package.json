@@ -19,6 +19,6 @@
     "build:api": "pnpm --filter api build",
     "build:web": "pnpm --filter web build",
     "lint": "pnpm -r lint",
-    "generate": "pnpm --filter web orval"
+    "generate": "pnpm --filter web generate"
   }
 }

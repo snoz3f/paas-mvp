@@ -42,6 +42,11 @@ export const ghost = style({
   },
 });
 
+export const auto = style({
+  width: 'auto',
+  padding: `14px ${vars.space.lg}`,
+});
+
 export const spinner = style({
   width: '14px',
   height: '14px',

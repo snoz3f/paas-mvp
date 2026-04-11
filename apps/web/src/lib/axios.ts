@@ -1,6 +1,6 @@
-import axios, { type AxiosRequestConfig } from 'axios';
+import Axios, { type AxiosError, type AxiosRequestConfig } from 'axios';
 
-export const axiosInstance = axios.create({
+export const axiosInstance = Axios.create({
   baseURL: '/api',
 });
 
@@ -15,7 +15,7 @@ axiosInstance.interceptors.request.use((config) => {
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    if ((error as AxiosError).response?.status === 401) {
       localStorage.removeItem('token');
       window.location.href = '/login';
     }
@@ -23,6 +23,12 @@ axiosInstance.interceptors.response.use(
   },
 );
 
-export const customInstance = <T>(config: AxiosRequestConfig): Promise<T> => {
-  return axiosInstance(config).then((res) => res.data as T);
+export const customInstance = <T>(
+  config: AxiosRequestConfig,
+  options?: AxiosRequestConfig,
+): Promise<T> => {
+  return axiosInstance({ ...config, ...options }).then(({ data }) => data as T);
 };
+
+export type ErrorType<Error> = AxiosError<Error>;
+export type BodyType<BodyData> = BodyData;

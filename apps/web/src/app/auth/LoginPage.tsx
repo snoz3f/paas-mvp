@@ -5,7 +5,7 @@ import { z } from 'zod';
 import { Link, useNavigate } from 'react-router';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
-import { axiosInstance } from '@/lib/axios';
+import { useLogin } from '@/api/generated/auth/auth';
 import * as s from './auth.css';
 
 const schema = z.object({
@@ -18,18 +18,19 @@ type LoginForm = z.infer<typeof schema>;
 export function LoginPage() {
   const navigate = useNavigate();
   const [formError, setFormError] = useState<string | null>(null);
+  const { mutateAsync: loginMutation, isPending } = useLogin();
 
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm<LoginForm>({ resolver: zodResolver(schema) });
 
   const onSubmit = async (data: LoginForm) => {
     setFormError(null);
     try {
-      const res = await axiosInstance.post<{ accessToken: string }>('/auth/login', data);
-      localStorage.setItem('token', res.data.accessToken);
+      const res = await loginMutation({ data });
+      localStorage.setItem('token', res.accessToken);
       void navigate('/dashboard');
     } catch {
       setFormError('Invalid email or password');
@@ -68,7 +69,7 @@ export function LoginPage() {
             {...register('password')}
           />
 
-          <Button type="submit" loading={isSubmitting}>
+          <Button type="submit" loading={isPending}>
             Continue
           </Button>
         </form>

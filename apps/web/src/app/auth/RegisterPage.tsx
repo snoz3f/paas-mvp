@@ -5,7 +5,7 @@ import { z } from 'zod';
 import { Link, useNavigate } from 'react-router';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
-import { axiosInstance } from '@/lib/axios';
+import { useRegister } from '@/api/generated/auth/auth';
 import * as s from './auth.css';
 
 const schema = z
@@ -24,20 +24,18 @@ type RegisterForm = z.infer<typeof schema>;
 export function RegisterPage() {
   const navigate = useNavigate();
   const [formError, setFormError] = useState<string | null>(null);
+  const { mutateAsync: registerMutation, isPending } = useRegister();
 
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm<RegisterForm>({ resolver: zodResolver(schema) });
 
   const onSubmit = async (data: RegisterForm) => {
     setFormError(null);
     try {
-      await axiosInstance.post('/auth/register', {
-        email: data.email,
-        password: data.password,
-      });
+      await registerMutation({ data: { email: data.email, password: data.password } });
       void navigate('/login');
     } catch {
       setFormError('Something went wrong. Try again.');
@@ -84,7 +82,7 @@ export function RegisterPage() {
             {...register('confirmPassword')}
           />
 
-          <Button type="submit" loading={isSubmitting}>
+          <Button type="submit" loading={isPending}>
             Create account
           </Button>
         </form>
