@@ -47,14 +47,14 @@ export function ProjectPage() {
 
         <div className={s.topbarActions}>
           <Button
-            width="auto"
+            size="sm"
             variant="ghost"
             onClick={() => void navigate(`/dashboard/projects/${id}/settings`)}
           >
             Settings
           </Button>
           <Button
-            width="auto"
+            size="sm"
             loading={isDeploying}
             onClick={() => void handleDeploy()}
           >

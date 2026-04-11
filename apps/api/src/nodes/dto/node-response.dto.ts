@@ -11,10 +11,10 @@ export class NodeResponseDto {
   @ApiProperty({ example: '1.2.3.4' })
   ip: string;
 
-  @ApiPropertyOptional({ example: 'eu-west' })
+  @ApiPropertyOptional({ type: String, example: 'eu-west' })
   region: string | null;
 
-  @ApiPropertyOptional({ example: 'hetzner' })
+  @ApiPropertyOptional({ type: String, example: 'hetzner' })
   provider: string | null;
 
   @ApiProperty({ enum: NodeStatus, example: NodeStatus.ONLINE })

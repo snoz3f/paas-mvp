@@ -47,6 +47,12 @@ export const auto = style({
   padding: `14px ${vars.space.lg}`,
 });
 
+export const sm = style({
+  width: 'auto',
+  padding: `7px ${vars.space.md}`,
+  fontSize: vars.font.size.sm,
+});
+
 export const spinner = style({
   width: '14px',
   height: '14px',
