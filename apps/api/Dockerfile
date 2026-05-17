@@ -23,4 +23,4 @@ RUN pnpm install --frozen-lockfile --filter api... --prod
 COPY --from=builder /app/apps/api/dist ./apps/api/dist
 COPY --from=builder /app/apps/api/prisma ./apps/api/prisma
 EXPOSE 5001
-CMD ["sh", "-c", "cd apps/api && npx prisma migrate deploy && node dist/main"]
+CMD ["sh", "-c", "cd apps/api && node_modules/.bin/prisma migrate deploy && node dist/main"]
