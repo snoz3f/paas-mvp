@@ -3,9 +3,9 @@ RUN corepack enable && corepack prepare pnpm@latest --activate
 
 FROM base AS deps
 WORKDIR /app
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY .npmrc package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY apps/api/package.json ./apps/api/
-RUN pnpm install --frozen-lockfile --filter api... --ignore-scripts && pnpm rebuild argon2 @swc/core esbuild
+RUN pnpm install --frozen-lockfile --filter api...
 
 FROM base AS builder
 WORKDIR /app
@@ -17,9 +17,9 @@ RUN pnpm --filter api build
 FROM node:22-alpine AS runner
 WORKDIR /app
 RUN corepack enable && corepack prepare pnpm@latest --activate
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY .npmrc package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY apps/api/package.json ./apps/api/
-RUN pnpm install --frozen-lockfile --filter api... --prod --ignore-scripts && pnpm rebuild argon2
+RUN pnpm install --frozen-lockfile --filter api... --prod
 COPY --from=builder /app/apps/api/dist ./apps/api/dist
 COPY --from=builder /app/apps/api/prisma ./apps/api/prisma
 EXPOSE 5001
