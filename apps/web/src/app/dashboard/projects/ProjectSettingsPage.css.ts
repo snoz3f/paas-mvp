@@ -197,6 +197,119 @@ export const dangerDesc = style({
   color: vars.color.textMuted,
 });
 
+// ── Services ──────────────────────────────────────────────
+export const serviceList = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: vars.space.sm,
+});
+
+export const serviceRow = style({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  gap: vars.space.md,
+  padding: `10px ${vars.space.md}`,
+  backgroundColor: vars.color.bg,
+  border: `1px solid ${vars.color.border}`,
+  borderRadius: vars.radius.md,
+});
+
+export const serviceInfo = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: vars.space.md,
+});
+
+export const serviceIcon = style({
+  width: '32px',
+  height: '32px',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  backgroundColor: 'rgba(240,228,104,0.07)',
+  border: `1px solid rgba(240,228,104,0.12)`,
+  borderRadius: vars.radius.sm,
+  color: vars.color.accent,
+  flexShrink: 0,
+  fontSize: vars.font.size.xs,
+  fontFamily: vars.font.mono,
+  fontWeight: '700',
+});
+
+export const serviceDetails = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '2px',
+});
+
+export const serviceName = style({
+  fontSize: vars.font.size.sm,
+  fontWeight: '500',
+  color: vars.color.text,
+});
+
+export const serviceEnvKey = style({
+  fontSize: vars.font.size.xs,
+  fontFamily: vars.font.mono,
+  color: vars.color.textMuted,
+});
+
+export const serviceStatus = style({
+  fontSize: vars.font.size.xs,
+  fontWeight: '500',
+  letterSpacing: '0.06em',
+});
+
+export const serviceStatusRunning = style({
+  color: vars.color.success,
+});
+
+export const serviceStatusProvisioning = style({
+  color: vars.color.warning,
+});
+
+export const serviceStatusFailed = style({
+  color: vars.color.danger,
+});
+
+export const addServiceRow = style({
+  display: 'grid',
+  gridTemplateColumns: '1fr 80px 1fr auto',
+  gap: vars.space.sm,
+  alignItems: 'end',
+});
+
+export const addServiceSelect = style({
+  backgroundColor: vars.color.bg,
+  border: `1px solid ${vars.color.border}`,
+  borderRadius: vars.radius.md,
+  padding: `7px ${vars.space.sm}`,
+  fontSize: vars.font.size.sm,
+  color: vars.color.text,
+  width: '100%',
+  transition: `border-color ${vars.transition.fast}`,
+  ':focus': {
+    outline: 'none',
+    borderColor: vars.color.accent,
+    boxShadow: '0 0 0 3px rgba(240,228,104,0.08)',
+  },
+});
+
+export const addServiceLabel = style({
+  fontSize: vars.font.size.xs,
+  fontWeight: '500',
+  letterSpacing: '0.08em',
+  textTransform: 'uppercase',
+  color: vars.color.textMuted,
+  marginBottom: '6px',
+});
+
+export const addServiceField = style({
+  display: 'flex',
+  flexDirection: 'column',
+});
+
 // ── Delete confirm dialog ─────────────────────────────────
 export const dialogOverlay = style({
   position: 'fixed',

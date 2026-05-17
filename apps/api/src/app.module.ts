@@ -6,6 +6,7 @@ import { DeploymentsModule } from './deployments/deployments.module';
 import { NodesModule } from './nodes/nodes.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { ProjectsModule } from './projects/projects.module';
+import { ServicesModule } from './services/services.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { ProjectsModule } from './projects/projects.module';
     ProjectsModule,
     DeploymentsModule,
     NodesModule,
+    ServicesModule,
   ],
 })
 export class AppModule {}

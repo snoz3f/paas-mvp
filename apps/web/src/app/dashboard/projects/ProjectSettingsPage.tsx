@@ -11,6 +11,13 @@ import {
   getGetProjectsQueryKey,
   getGetProjectByIdQueryKey,
 } from '@/api/generated/projects/projects';
+import {
+  useGetServices,
+  useCreateService,
+  useDeleteService,
+  getGetServicesQueryKey,
+} from '@/api/generated/services/services';
+import { CreateServiceDtoType } from '@/api/generated/paaSMVPAPI.schemas';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import * as s from './ProjectSettingsPage.css';
@@ -43,6 +50,14 @@ export function ProjectSettingsPage() {
   const [envSaved, setEnvSaved] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState('');
+
+  const [newServiceType, setNewServiceType] = useState<CreateServiceDtoType>(CreateServiceDtoType.POSTGRES);
+  const [newServiceVersion, setNewServiceVersion] = useState('');
+  const [newServiceEnvKey, setNewServiceEnvKey] = useState('DATABASE_URL');
+
+  const { data: services } = useGetServices(id!);
+  const { mutateAsync: createService, isPending: isCreatingService } = useCreateService();
+  const { mutateAsync: deleteService } = useDeleteService();
 
   const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<GeneralForm>({
     resolver: zodResolver(generalSchema),
@@ -95,6 +110,27 @@ export function ProjectSettingsPage() {
     } finally {
       setEnvSaving(false);
     }
+  };
+
+  const handleAddService = async () => {
+    const defaultVersions: Record<string, string> = { POSTGRES: '16', REDIS: '7' };
+    await createService({
+      projectId: id!,
+      data: {
+        type: newServiceType,
+        version: newServiceVersion || defaultVersions[newServiceType],
+        envKey: newServiceEnvKey,
+      },
+    });
+    await queryClient.invalidateQueries({ queryKey: getGetServicesQueryKey(id!) });
+    setNewServiceEnvKey(newServiceType === CreateServiceDtoType.POSTGRES ? 'DATABASE_URL' : 'REDIS_URL');
+    setNewServiceVersion('');
+  };
+
+  const handleDeleteService = async (serviceId: string) => {
+    await deleteService({ projectId: id!, id: serviceId });
+    await queryClient.invalidateQueries({ queryKey: getGetServicesQueryKey(id!) });
+    await invalidate();
   };
 
   const handleDelete = async () => {
@@ -202,6 +238,98 @@ export function ProjectSettingsPage() {
                 Save variables
               </Button>
             </div>
+          </div>
+        </section>
+
+        {/* Services */}
+        <section className={s.section}>
+          <p className={s.sectionTitle}>Services</p>
+          <div className={s.card}>
+            {services && services.length > 0 && (
+              <div className={s.serviceList}>
+                {services.map((svc) => (
+                  <div key={svc.id} className={s.serviceRow}>
+                    <div className={s.serviceInfo}>
+                      <div className={s.serviceIcon}>
+                        {svc.type === 'POSTGRES' ? 'PG' : 'RD'}
+                      </div>
+                      <div className={s.serviceDetails}>
+                        <span className={s.serviceName}>{svc.type} {svc.version}</span>
+                        <span className={s.serviceEnvKey}>{svc.envKey}</span>
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <span className={`${s.serviceStatus} ${
+                        svc.status === 'RUNNING' ? s.serviceStatusRunning :
+                        svc.status === 'FAILED' ? s.serviceStatusFailed :
+                        s.serviceStatusProvisioning
+                      }`}>
+                        {svc.status}
+                      </span>
+                      <button
+                        className={s.envRemoveBtn}
+                        onClick={() => void handleDeleteService(svc.id)}
+                        type="button"
+                      >
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5">
+                          <path d="M2 2l10 10M12 2L2 12" />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div className={s.addServiceRow}>
+              <div className={s.addServiceField}>
+                <p className={s.addServiceLabel}>Type</p>
+                <select
+                  className={s.addServiceSelect}
+                  value={newServiceType}
+                  onChange={(e) => {
+                    const t = e.target.value as CreateServiceDtoType;
+                    setNewServiceType(t);
+                    setNewServiceEnvKey(t === CreateServiceDtoType.POSTGRES ? 'DATABASE_URL' : 'REDIS_URL');
+                  }}
+                >
+                  <option value={CreateServiceDtoType.POSTGRES}>PostgreSQL</option>
+                  <option value={CreateServiceDtoType.REDIS}>Redis</option>
+                </select>
+              </div>
+              <div className={s.addServiceField}>
+                <p className={s.addServiceLabel}>Version</p>
+                <input
+                  className={s.envInput}
+                  placeholder={newServiceType === CreateServiceDtoType.POSTGRES ? '16' : '7'}
+                  value={newServiceVersion}
+                  onChange={(e) => setNewServiceVersion(e.target.value)}
+                />
+              </div>
+              <div className={s.addServiceField}>
+                <p className={s.addServiceLabel}>Env Key</p>
+                <input
+                  className={s.envInput}
+                  placeholder="DATABASE_URL"
+                  value={newServiceEnvKey}
+                  onChange={(e) => setNewServiceEnvKey(e.target.value)}
+                  spellCheck={false}
+                />
+              </div>
+              <Button
+                size="sm"
+                loading={isCreatingService}
+                onClick={() => void handleAddService()}
+                type="button"
+              >
+                Add
+              </Button>
+            </div>
+
+            <p className={s.dangerDesc} style={{ marginTop: '4px' }}>
+              Connection string автоматически добавится в env vars проекта.
+              Активируется после следующего деплоя.
+            </p>
           </div>
         </section>
 

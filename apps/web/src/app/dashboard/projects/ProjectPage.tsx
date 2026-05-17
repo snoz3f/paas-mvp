@@ -8,6 +8,7 @@ import {
 } from '@/api/generated/deployments/deployments';
 import { Button } from '@/components/ui/Button';
 import { StatusBadge } from '@/components/ui/Badge';
+import { useGetServices } from '@/api/generated/services/services';
 import * as s from './ProjectPage.css';
 
 export function ProjectPage() {
@@ -17,6 +18,7 @@ export function ProjectPage() {
 
   const { data: project, isLoading: projectLoading } = useGetProjectById(id!);
   const { data: deployments, isLoading: deploymentsLoading } = useGetDeployments(id!);
+  const { data: services } = useGetServices(id!);
   const { mutateAsync: deploy, isPending: isDeploying } = useCreateDeployment();
 
   const handleDeploy = async () => {
@@ -96,6 +98,26 @@ export function ProjectPage() {
             <div className={s.metaItem}>
               <p className={s.metaLabel}>Framework</p>
               <span className={s.metaValue}>{project.framework ?? '—'}</span>
+            </div>
+          </div>
+        )}
+
+        {/* Services */}
+        {services && services.length > 0 && (
+          <div>
+            <p className={s.sectionTitle}>Services</p>
+            <div className={s.metaCard}>
+              {services.map((svc) => (
+                <div key={svc.id} className={s.metaItem}>
+                  <p className={s.metaLabel}>{svc.type} {svc.version}</p>
+                  <span className={s.metaValue} style={{
+                    color: svc.status === 'RUNNING' ? 'var(--color-success, #4dff91)' :
+                           svc.status === 'FAILED' ? 'var(--color-danger, #ff5c5c)' : undefined,
+                  }}>
+                    {svc.status === 'RUNNING' ? svc.envKey : svc.status}
+                  </span>
+                </div>
+              ))}
             </div>
           </div>
         )}

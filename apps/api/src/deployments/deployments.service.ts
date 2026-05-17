@@ -145,6 +145,8 @@ export class DeploymentsService {
         port: project.port,
         domain: project.domain ?? undefined,
         containerId: oldContainerId,
+        envVars: (project.envVars ?? {}) as Record<string, string>,
+        projectId: project.id,
         callbackUrl: `${process.env.API_URL}/internal/deployments/${deploymentId}/status`,
       });
     } catch (err) {

@@ -5,6 +5,19 @@ export interface WorkerJob {
   port?: number;
   domain?: string;
   containerId?: string;
+  envVars?: Record<string, string>;
+  projectId?: string;
+  callbackUrl: string;
+}
+
+export interface WorkerServiceJob {
+  type: 'provision-service' | 'remove-service';
+  serviceId: string;
+  projectId: string;
+  serviceType?: string;
+  version?: string;
+  password?: string;
+  containerId?: string;
   callbackUrl: string;
 }
 
