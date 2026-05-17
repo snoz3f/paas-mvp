@@ -9,6 +9,7 @@ RUN pnpm install --frozen-lockfile --filter api...
 
 FROM base AS builder
 WORKDIR /app
+ENV DATABASE_URL=postgresql://dummy:dummy@localhost:5432/dummy
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/apps/api/node_modules ./apps/api/node_modules
 COPY . .
