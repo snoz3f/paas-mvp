@@ -5,7 +5,7 @@ FROM base AS deps
 WORKDIR /app
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY apps/api/package.json ./apps/api/
-RUN pnpm install --frozen-lockfile --filter api...
+RUN pnpm install --frozen-lockfile --filter api... --ignore-scripts && pnpm rebuild argon2 @swc/core
 
 FROM base AS builder
 WORKDIR /app
