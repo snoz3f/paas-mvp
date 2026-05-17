@@ -22,5 +22,6 @@ COPY apps/api/package.json ./apps/api/
 RUN pnpm install --frozen-lockfile --filter api... --prod
 COPY --from=builder /app/apps/api/dist ./apps/api/dist
 COPY --from=builder /app/apps/api/prisma ./apps/api/prisma
+COPY --from=builder /app/apps/api/prisma.config.ts ./apps/api/prisma.config.ts
 EXPOSE 5001
 CMD ["sh", "-c", "cd apps/api && node_modules/.bin/prisma migrate deploy && node dist/main"]
