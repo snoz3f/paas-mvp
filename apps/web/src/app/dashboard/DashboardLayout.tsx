@@ -54,7 +54,7 @@ export function DashboardLayout() {
     <div className={s.layout}>
       <aside className={s.sidebar}>
         <div className={s.sidebarHeader}>
-          <span className={s.logo}>FORGE_</span>
+          <span className={s.logo}>INFRAL_</span>
         </div>
 
         <nav className={s.nav}>

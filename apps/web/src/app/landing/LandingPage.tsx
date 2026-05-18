@@ -126,7 +126,7 @@ export function LandingPage() {
       {/* Navbar */}
       <nav className={s.nav}>
         <Link to="/" className={s.navBrand}>
-          <span className={s.navBrandName}>FORGE</span>
+          <span className={s.navBrandName}>INFRAL</span>
           <span className={s.navCursor}>_</span>
         </Link>
 
@@ -260,13 +260,13 @@ export function LandingPage() {
       {/* Footer */}
       <footer>
         <div className={s.footer}>
-          <span className={s.footerBrand}>FORGE_</span>
+          <span className={s.footerBrand}>INFRAL_</span>
           <div className={s.footerLinks}>
             <a href="#features" className={s.footerLink}>Возможности</a>
             <a href="#pricing" className={s.footerLink}>Цены</a>
-            <a href="https://t.me/forgepaas" className={s.footerLink}>Telegram</a>
+            <a href="https://t.me/infraldev" className={s.footerLink}>Telegram</a>
           </div>
-          <span className={s.footerCopy}>© 2026 FORGE</span>
+          <span className={s.footerCopy}>© 2026 INFRAL</span>
         </div>
       </footer>
     </div>

@@ -45,7 +45,7 @@ export function LoginPage() {
       <div className={s.dotGrid} />
       <div className={s.card}>
         <div className={s.brand}>
-          <span className={s.brandName}>FORGE</span>
+          <span className={s.brandName}>INFRAL</span>
           <span className={s.cursor}>_</span>
         </div>
 
