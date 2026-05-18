@@ -29,6 +29,16 @@ export class DeploymentsService {
     return deployment;
   }
 
+  async createFromWebhook(projectId: string, commitHash?: string) {
+    const deployment = await this.prisma.deployment.create({
+      data: { projectId, status: DeploymentStatus.QUEUED, commitHash },
+    });
+
+    void this.triggerDeploy(deployment.id, projectId);
+
+    return deployment;
+  }
+
   findAll(userId: string, projectId: string) {
     return this.prisma.deployment.findMany({
       where: { projectId, project: { userId } },
@@ -138,10 +148,14 @@ export class DeploymentsService {
         data: { nodeId: node.id, status: DeploymentStatus.BUILDING, startedAt: new Date() },
       });
 
+      const repoUrl = project.gitToken
+        ? this.buildAuthenticatedUrl(project.repoUrl, project.gitToken)
+        : project.repoUrl;
+
       await this.workerClient.sendJob(node, {
         type: oldContainerId ? 'restart' : 'deploy',
         deploymentId,
-        repoUrl: project.repoUrl,
+        repoUrl,
         port: project.port,
         domain: project.domain ?? undefined,
         containerId: oldContainerId,
@@ -155,6 +169,17 @@ export class DeploymentsService {
         where: { id: deploymentId },
         data: { status: DeploymentStatus.FAILED, error: 'Internal scheduler error' },
       });
+    }
+  }
+
+  private buildAuthenticatedUrl(repoUrl: string, token: string): string {
+    try {
+      const url = new URL(repoUrl.replace(/^git@github\.com:/, 'https://github.com/'));
+      url.username = 'x-access-token';
+      url.password = token;
+      return url.toString();
+    } catch {
+      return repoUrl;
     }
   }
 }

@@ -17,15 +17,17 @@ model User {
 }
 
 model Project {
-  id        String   @id @default(uuid()) @db.Uuid
-  userId    String   @db.Uuid
-  name      String
-  repoUrl   String
-  domain    String?  @unique
-  framework String?
-  port      Int      @default(3000)
-  envVars   Json     @default("{}")
-  createdAt DateTime @default(now())
+  id            String   @id @default(uuid()) @db.Uuid
+  userId        String   @db.Uuid
+  name          String
+  repoUrl       String
+  domain        String?  @unique
+  framework     String?
+  port          Int      @default(3000)
+  envVars       Json     @default("{}")
+  gitToken      String?
+  webhookSecret String?
+  createdAt     DateTime @default(now())
 
   user        User         @relation(fields: [userId], references: [id])
   deployments Deployment[]

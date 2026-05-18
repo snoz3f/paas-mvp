@@ -7,6 +7,7 @@ import { NodesModule } from './nodes/nodes.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { ProjectsModule } from './projects/projects.module';
 import { ServicesModule } from './services/services.module';
+import { WebhooksModule } from './webhooks/webhooks.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { ServicesModule } from './services/services.module';
     DeploymentsModule,
     NodesModule,
     ServicesModule,
+    WebhooksModule,
   ],
 })
 export class AppModule {}

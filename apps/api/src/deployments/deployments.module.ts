@@ -8,5 +8,6 @@ import { DeploymentsService } from './deployments.service';
   imports: [SchedulerModule, WorkerClientModule],
   controllers: [DeploymentsController, InternalDeploymentsController],
   providers: [DeploymentsService],
+  exports: [DeploymentsService],
 })
 export class DeploymentsModule {}

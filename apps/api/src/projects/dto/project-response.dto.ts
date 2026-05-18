@@ -1,4 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Exclude } from 'class-transformer';
 
 export class ProjectResponseDto {
   @ApiProperty({ example: '550e8400-e29b-41d4-a716-446655440000' })
@@ -27,4 +28,13 @@ export class ProjectResponseDto {
 
   @ApiProperty({ example: '2024-01-15T10:30:00Z', type: Date })
   createdAt: Date;
+
+  @ApiProperty({ example: true })
+  hasGitToken: boolean;
+
+  @Exclude()
+  gitToken?: string | null;
+
+  @Exclude()
+  webhookSecret?: string | null;
 }
