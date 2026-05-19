@@ -26,6 +26,8 @@ services:
       GH_CALLBACK_URL: ${GH_CALLBACK_URL}
     depends_on:
       - postgres
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     networks:
       - infral
     labels:
