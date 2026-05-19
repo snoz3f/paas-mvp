@@ -156,8 +156,12 @@ export const frameworkOptionActive = style({
 });
 
 export const frameworkIcon = style({
-  fontSize: '22px',
-  lineHeight: 1,
+  width: '28px',
+  height: '28px',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  flexShrink: 0,
 });
 
 export const frameworkName = style({
