@@ -7,13 +7,8 @@ const blink = keyframes({
 });
 
 const fadeUp = keyframes({
-  from: { opacity: 0, transform: 'translateY(20px)' },
+  from: { opacity: 0, transform: 'translateY(16px)' },
   to: { opacity: 1, transform: 'translateY(0)' },
-});
-
-const pulse = keyframes({
-  '0%, 100%': { opacity: 1 },
-  '50%': { opacity: 0.4 },
 });
 
 // ── Page shell ────────────────────────────────────────────
@@ -26,7 +21,7 @@ export const page = style({
 export const dotGrid = style({
   position: 'fixed',
   inset: 0,
-  backgroundImage: `radial-gradient(circle, rgba(255,255,255,0.04) 1px, transparent 1px)`,
+  backgroundImage: `radial-gradient(circle, rgba(255,255,255,0.045) 1px, transparent 1px)`,
   backgroundSize: '28px 28px',
   maskImage: 'radial-gradient(ellipse 80% 60% at 50% 0%, black 0%, transparent 70%)',
   WebkitMaskImage: 'radial-gradient(ellipse 80% 60% at 50% 0%, black 0%, transparent 70%)',
@@ -36,12 +31,12 @@ export const dotGrid = style({
 
 export const glow = style({
   position: 'fixed',
-  top: '-30%',
+  top: '-20%',
   left: '50%',
   transform: 'translateX(-50%)',
-  width: '1000px',
-  height: '600px',
-  background: 'radial-gradient(ellipse at center, rgba(240,228,104,0.09) 0%, rgba(240,228,104,0.02) 40%, transparent 70%)',
+  width: '900px',
+  height: '500px',
+  background: 'radial-gradient(ellipse at center, rgba(240,228,104,0.06) 0%, transparent 65%)',
   pointerEvents: 'none',
   zIndex: 0,
 });
@@ -56,10 +51,10 @@ export const nav = style({
   alignItems: 'center',
   justifyContent: 'space-between',
   padding: `0 ${vars.space.xl}`,
-  borderBottom: `1px solid rgba(255,255,255,0.05)`,
+  borderBottom: `1px solid rgba(255,255,255,0.04)`,
   backgroundColor: 'rgba(10,10,10,0.85)',
-  backdropFilter: 'blur(16px)',
-  WebkitBackdropFilter: 'blur(16px)',
+  backdropFilter: 'blur(12px)',
+  WebkitBackdropFilter: 'blur(12px)',
 });
 
 export const navBrand = style({
@@ -136,7 +131,7 @@ export const hero = style({
   flexDirection: 'column',
   alignItems: 'center',
   textAlign: 'center',
-  padding: `100px ${vars.space.xl} 80px`,
+  padding: `120px ${vars.space.xl} 100px`,
   gap: vars.space.lg,
 });
 
@@ -144,9 +139,9 @@ export const heroBadge = style({
   display: 'inline-flex',
   alignItems: 'center',
   gap: vars.space.xs,
-  padding: `5px 14px`,
+  padding: `5px 12px`,
   backgroundColor: 'rgba(240,228,104,0.07)',
-  border: `1px solid rgba(240,228,104,0.18)`,
+  border: `1px solid rgba(240,228,104,0.15)`,
   borderRadius: vars.radius.full,
   fontSize: vars.font.size.xs,
   fontWeight: '600',
@@ -161,18 +156,17 @@ export const heroBadgeDot = style({
   height: '6px',
   borderRadius: vars.radius.full,
   backgroundColor: vars.color.success,
-  boxShadow: `0 0 8px ${vars.color.success}`,
-  animation: `${pulse} 2s ease infinite`,
+  boxShadow: `0 0 6px ${vars.color.success}`,
 });
 
 export const heroTitle = style({
   fontFamily: vars.font.heading,
-  fontSize: 'clamp(48px, 7.5vw, 96px)',
-  fontWeight: '800',
+  fontSize: 'clamp(44px, 7vw, 88px)',
+  fontWeight: '700',
   letterSpacing: '-0.04em',
   lineHeight: '1.0',
   color: vars.color.text,
-  maxWidth: '860px',
+  maxWidth: '820px',
   animation: `${fadeUp} 0.5s 0.08s ease both`,
 });
 
@@ -183,8 +177,8 @@ export const heroAccent = style({
 export const heroSub = style({
   fontSize: 'clamp(15px, 2vw, 18px)',
   color: vars.color.textMuted,
-  maxWidth: '500px',
-  lineHeight: '1.75',
+  maxWidth: '520px',
+  lineHeight: '1.7',
   animation: `${fadeUp} 0.5s 0.16s ease both`,
 });
 
@@ -207,11 +201,10 @@ export const heroBtnPrimary = style({
   color: '#0a0a0a',
   backgroundColor: vars.color.accent,
   borderRadius: vars.radius.md,
-  transition: `background-color ${vars.transition.fast}, transform ${vars.transition.fast}, box-shadow ${vars.transition.fast}`,
+  transition: `background-color ${vars.transition.fast}, transform ${vars.transition.fast}`,
   ':hover': {
     backgroundColor: vars.color.accentHover,
-    transform: 'translateY(-2px)',
-    boxShadow: '0 8px 24px rgba(240,228,104,0.2)',
+    transform: 'translateY(-1px)',
   },
 });
 
@@ -233,121 +226,27 @@ export const heroBtnGhost = style({
   },
 });
 
-// ── Terminal mockup ───────────────────────────────────────
-export const terminal = style({
-  width: '100%',
-  maxWidth: '560px',
-  backgroundColor: '#0d0d0d',
-  border: `1px solid ${vars.color.border}`,
-  borderRadius: vars.radius.lg,
-  overflow: 'hidden',
-  boxShadow: '0 32px 64px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.04)',
-  animation: `${fadeUp} 0.5s 0.32s ease both`,
-  fontFamily: vars.font.mono,
-  fontSize: '13px',
-  lineHeight: '1.7',
-  textAlign: 'left',
-});
-
-export const terminalBar = style({
-  height: '38px',
+export const heroCode = style({
   display: 'flex',
   alignItems: 'center',
-  padding: `0 ${vars.space.md}`,
+  gap: vars.space.md,
+  padding: `10px ${vars.space.md}`,
   backgroundColor: vars.color.surface,
-  borderBottom: `1px solid ${vars.color.border}`,
-  gap: vars.space.xs,
+  border: `1px solid ${vars.color.border}`,
+  borderRadius: vars.radius.md,
+  fontFamily: vars.font.mono,
+  fontSize: vars.font.size.sm,
+  color: vars.color.textMuted,
+  animation: `${fadeUp} 0.5s 0.32s ease both`,
 });
 
-export const terminalDot = style({
-  width: '10px',
-  height: '10px',
-  borderRadius: vars.radius.full,
-});
-
-export const terminalDotRed = style({ backgroundColor: '#ff5f57' });
-export const terminalDotYellow = style({ backgroundColor: '#febc2e' });
-export const terminalDotGreen = style({ backgroundColor: '#28c840' });
-
-export const terminalBody = style({
-  padding: vars.space.md,
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '4px',
-});
-
-export const terminalLine = style({
-  display: 'flex',
-  alignItems: 'flex-start',
-  gap: vars.space.sm,
-  color: vars.color.textSubtle,
-});
-
-export const terminalPrompt = style({
+export const heroCodePrompt = style({
   color: vars.color.accent,
   userSelect: 'none',
-  flexShrink: 0,
 });
 
-export const terminalCmd = style({
+export const heroCodeText = style({
   color: vars.color.text,
-});
-
-export const terminalOut = style({
-  color: vars.color.textMuted,
-  paddingLeft: '18px',
-});
-
-export const terminalSuccess = style({
-  color: vars.color.success,
-  paddingLeft: '18px',
-  fontWeight: '500',
-});
-
-// ── Stats row ─────────────────────────────────────────────
-export const statsRow = style({
-  position: 'relative',
-  zIndex: 1,
-  display: 'flex',
-  justifyContent: 'center',
-  gap: 0,
-  maxWidth: '700px',
-  margin: '0 auto',
-  borderTop: `1px solid ${vars.color.border}`,
-  borderBottom: `1px solid ${vars.color.border}`,
-});
-
-export const statItem = style({
-  flex: 1,
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'center',
-  padding: vars.space.xl,
-  gap: '4px',
-  borderRight: `1px solid ${vars.color.border}`,
-  selectors: {
-    '&:last-child': { borderRight: 'none' },
-  },
-});
-
-export const statValue = style({
-  fontFamily: vars.font.heading,
-  fontSize: 'clamp(24px, 3vw, 36px)',
-  fontWeight: '700',
-  letterSpacing: '-0.03em',
-  color: vars.color.text,
-});
-
-export const statAccent = style({
-  color: vars.color.accent,
-});
-
-export const statLabel = style({
-  fontSize: vars.font.size.xs,
-  color: vars.color.textSubtle,
-  letterSpacing: '0.06em',
-  textTransform: 'uppercase',
-  fontWeight: '500',
 });
 
 // ── Section shell ─────────────────────────────────────────
@@ -370,18 +269,18 @@ export const sectionLabel = style({
 
 export const sectionTitle = style({
   fontFamily: vars.font.heading,
-  fontSize: 'clamp(28px, 4vw, 46px)',
+  fontSize: 'clamp(28px, 4vw, 44px)',
   fontWeight: '700',
   letterSpacing: '-0.03em',
   color: vars.color.text,
   marginBottom: vars.space.md,
-  lineHeight: '1.1',
+  lineHeight: '1.15',
 });
 
 export const sectionSub = style({
   fontSize: vars.font.size.md,
   color: vars.color.textMuted,
-  maxWidth: '500px',
+  maxWidth: '520px',
   lineHeight: '1.7',
   marginBottom: vars.space.xxl,
 });
@@ -389,36 +288,37 @@ export const sectionSub = style({
 // ── Features grid ─────────────────────────────────────────
 export const featuresGrid = style({
   display: 'grid',
-  gridTemplateColumns: 'repeat(3, 1fr)',
-  gap: '1px',
-  backgroundColor: vars.color.border,
-  border: `1px solid ${vars.color.border}`,
-  borderRadius: vars.radius.lg,
-  overflow: 'hidden',
+  gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+  gap: vars.space.md,
 });
 
 export const featureCard = style({
   backgroundColor: vars.color.surface,
-  padding: vars.space.xl,
+  border: `1px solid ${vars.color.border}`,
+  borderRadius: vars.radius.lg,
+  padding: vars.space.lg,
   display: 'flex',
   flexDirection: 'column',
-  gap: vars.space.md,
-  transition: `background-color ${vars.transition.normal}`,
+  gap: vars.space.sm,
+  transition: `border-color ${vars.transition.normal}, box-shadow ${vars.transition.normal}`,
+  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.03)',
   ':hover': {
-    backgroundColor: '#131313',
+    borderColor: vars.color.borderHover,
+    boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.03), 0 0 0 1px rgba(240,228,104,0.04), 0 8px 24px rgba(0,0,0,0.3)',
   },
 });
 
 export const featureIcon = style({
-  width: '40px',
-  height: '40px',
+  width: '36px',
+  height: '36px',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  backgroundColor: 'rgba(240,228,104,0.06)',
-  border: `1px solid rgba(240,228,104,0.1)`,
+  backgroundColor: 'rgba(240,228,104,0.07)',
+  border: `1px solid rgba(240,228,104,0.12)`,
   borderRadius: vars.radius.md,
   color: vars.color.accent,
+  marginBottom: vars.space.xs,
   flexShrink: 0,
 });
 
@@ -435,61 +335,6 @@ export const featureDesc = style({
   lineHeight: '1.65',
 });
 
-// ── How it works ──────────────────────────────────────────
-export const stepsRow = style({
-  display: 'grid',
-  gridTemplateColumns: 'repeat(3, 1fr)',
-  gap: vars.space.xl,
-  position: 'relative',
-});
-
-export const stepsConnector = style({
-  position: 'absolute',
-  top: '20px',
-  left: 'calc(33.33% + 20px)',
-  right: 'calc(33.33% + 20px)',
-  height: '1px',
-  background: `linear-gradient(90deg, ${vars.color.border}, rgba(240,228,104,0.3), ${vars.color.border})`,
-  pointerEvents: 'none',
-});
-
-export const stepItem = style({
-  display: 'flex',
-  flexDirection: 'column',
-  gap: vars.space.md,
-});
-
-export const stepNum = style({
-  width: '40px',
-  height: '40px',
-  borderRadius: vars.radius.full,
-  border: `1px solid ${vars.color.border}`,
-  backgroundColor: vars.color.surface,
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  fontFamily: vars.font.mono,
-  fontSize: vars.font.size.xs,
-  fontWeight: '700',
-  color: vars.color.accent,
-  letterSpacing: '0.05em',
-  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)',
-});
-
-export const stepTitle = style({
-  fontFamily: vars.font.heading,
-  fontSize: vars.font.size.md,
-  fontWeight: '700',
-  letterSpacing: '-0.02em',
-  color: vars.color.text,
-});
-
-export const stepDesc = style({
-  fontSize: vars.font.size.sm,
-  color: vars.color.textMuted,
-  lineHeight: '1.65',
-});
-
 // ── Divider ───────────────────────────────────────────────
 export const divider = style({
   height: '1px',
@@ -501,9 +346,9 @@ export const divider = style({
 // ── Pricing ───────────────────────────────────────────────
 export const pricingGrid = style({
   display: 'grid',
-  gridTemplateColumns: 'repeat(3, 1fr)',
+  gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
   gap: vars.space.md,
-  alignItems: 'center',
+  alignItems: 'start',
 });
 
 export const pricingCard = style({
@@ -519,20 +364,18 @@ export const pricingCard = style({
 
 export const pricingCardFeatured = style({
   backgroundColor: vars.color.surface,
-  border: `1px solid rgba(240,228,104,0.3)`,
+  border: `1px solid rgba(240,228,104,0.25)`,
   borderRadius: vars.radius.lg,
   padding: vars.space.xl,
   display: 'flex',
   flexDirection: 'column',
   gap: vars.space.md,
   boxShadow: `
-    inset 0 1px 0 rgba(255,255,255,0.04),
-    0 0 0 1px rgba(240,228,104,0.05),
-    0 24px 64px rgba(0,0,0,0.5)
+    inset 0 1px 0 rgba(255,255,255,0.03),
+    0 0 0 1px rgba(240,228,104,0.04),
+    0 16px 48px rgba(0,0,0,0.4)
   `,
   position: 'relative',
-  transform: 'scale(1.03)',
-  background: `radial-gradient(ellipse 80% 50% at 50% -10%, rgba(240,228,104,0.05) 0%, transparent 70%), ${vars.color.surface}`,
 });
 
 export const pricingBadge = style({
@@ -647,12 +490,9 @@ export const pricingBtnPrimary = style({
   borderRadius: vars.radius.md,
   color: '#0a0a0a',
   backgroundColor: vars.color.accent,
-  transition: `background-color ${vars.transition.fast}, box-shadow ${vars.transition.fast}`,
+  transition: `background-color ${vars.transition.fast}`,
   marginTop: 'auto',
-  ':hover': {
-    backgroundColor: vars.color.accentHover,
-    boxShadow: '0 4px 16px rgba(240,228,104,0.2)',
-  },
+  ':hover': { backgroundColor: vars.color.accentHover },
 });
 
 // ── CTA ───────────────────────────────────────────────────
@@ -665,7 +505,8 @@ export const ctaSection = style({
 });
 
 export const ctaCard = style({
-  border: `1px solid rgba(240,228,104,0.15)`,
+  backgroundColor: vars.color.surface,
+  border: `1px solid ${vars.color.border}`,
   borderRadius: vars.radius.lg,
   padding: `${vars.space.xxl} ${vars.space.xl}`,
   textAlign: 'center',
@@ -673,27 +514,26 @@ export const ctaCard = style({
   flexDirection: 'column',
   alignItems: 'center',
   gap: vars.space.lg,
+  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.03)',
   background: `
-    radial-gradient(ellipse 70% 100% at 50% 100%, rgba(240,228,104,0.06) 0%, transparent 60%),
-    radial-gradient(ellipse 40% 60% at 50% 0%, rgba(240,228,104,0.03) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 80% at 50% 120%, rgba(240,228,104,0.04) 0%, transparent 60%),
     ${vars.color.surface}
   `,
-  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)',
 });
 
 export const ctaTitle = style({
   fontFamily: vars.font.heading,
-  fontSize: 'clamp(28px, 4vw, 48px)',
-  fontWeight: '800',
-  letterSpacing: '-0.04em',
+  fontSize: 'clamp(28px, 4vw, 44px)',
+  fontWeight: '700',
+  letterSpacing: '-0.03em',
   color: vars.color.text,
-  lineHeight: '1.1',
+  lineHeight: '1.15',
 });
 
 export const ctaSub = style({
   fontSize: vars.font.size.md,
   color: vars.color.textMuted,
-  maxWidth: '400px',
+  maxWidth: '420px',
   lineHeight: '1.7',
 });
 
