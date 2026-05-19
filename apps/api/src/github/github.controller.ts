@@ -33,6 +33,7 @@ export class GithubController {
 
   @Get('github/repos')
   @ApiOperation({ operationId: 'listGithubRepos', summary: 'List GitHub repositories for current user' })
+  @ApiOkResponse({ schema: { type: 'array', items: { properties: { id: { type: 'number' }, fullName: { type: 'string' }, name: { type: 'string' }, private: { type: 'boolean' }, url: { type: 'string' }, defaultBranch: { type: 'string' } } } } })
   async listRepos(@CurrentUser() user: JwtPayload): Promise<GithubRepo[]> {
     return this.github.getRepos(user.sub);
   }

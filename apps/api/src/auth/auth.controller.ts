@@ -32,6 +32,7 @@ export class AuthController {
 
   @Get('me')
   @ApiOperation({ operationId: 'getMe', summary: 'Get current user profile' })
+  @ApiOkResponse({ schema: { properties: { id: { type: 'string' }, email: { type: 'string' }, githubLogin: { type: 'string', nullable: true } } } })
   getMe(@CurrentUser() user: JwtPayload) {
     return this.authService.getMe(user.sub);
   }
