@@ -1,12 +1,20 @@
 import { style } from '@vanilla-extract/css';
 import { vars } from '@/styles/tokens.css';
 
+// ── Shell ─────────────────────────────────────────────────
+export const shell = style({
+  display: 'flex',
+  flexDirection: 'column',
+  height: '100%',
+  overflow: 'hidden',
+});
+
 export const topbar = style({
   height: '56px',
   flexShrink: 0,
   display: 'flex',
   alignItems: 'center',
-  justifyContent: 'space-between',
+  gap: vars.space.md,
   padding: `0 ${vars.space.xl}`,
   borderBottom: `1px solid ${vars.color.border}`,
 });
@@ -14,7 +22,7 @@ export const topbar = style({
 export const topbarLeft = style({
   display: 'flex',
   alignItems: 'center',
-  gap: vars.space.md,
+  gap: vars.space.sm,
 });
 
 export const backBtn = style({
@@ -27,14 +35,83 @@ export const backBtn = style({
   ':hover': { color: vars.color.text },
 });
 
-export const topbarTitle = style({
-  fontFamily: vars.font.heading,
-  fontSize: vars.font.size.md,
-  fontWeight: '600',
-  color: vars.color.text,
-  letterSpacing: '-0.03em',
+export const breadcrumbSep = style({
+  color: vars.color.textSubtle,
+  fontSize: vars.font.size.sm,
 });
 
+export const topbarTitle = style({
+  fontFamily: vars.font.heading,
+  fontSize: vars.font.size.sm,
+  fontWeight: '600',
+  color: vars.color.text,
+  letterSpacing: '-0.01em',
+});
+
+// ── Two-column body ───────────────────────────────────────
+export const body = style({
+  flex: 1,
+  display: 'flex',
+  overflow: 'hidden',
+});
+
+// ── Settings nav ──────────────────────────────────────────
+export const nav = style({
+  width: '200px',
+  flexShrink: 0,
+  padding: `${vars.space.xl} ${vars.space.md}`,
+  borderRight: `1px solid ${vars.color.border}`,
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '2px',
+  overflowY: 'auto',
+});
+
+export const navItem = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: vars.space.sm,
+  padding: `7px ${vars.space.md}`,
+  borderRadius: vars.radius.md,
+  fontSize: vars.font.size.sm,
+  color: vars.color.textMuted,
+  cursor: 'pointer',
+  transition: `color ${vars.transition.fast}, background ${vars.transition.fast}`,
+  userSelect: 'none',
+  ':hover': {
+    color: vars.color.text,
+    backgroundColor: vars.color.surfaceHover,
+  },
+});
+
+export const navItemActive = style({
+  color: vars.color.text,
+  backgroundColor: vars.color.surface,
+  boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.04)',
+});
+
+export const navItemIcon = style({
+  width: '16px',
+  height: '16px',
+  flexShrink: 0,
+  opacity: 0.6,
+});
+
+export const navDivider = style({
+  height: '1px',
+  backgroundColor: vars.color.border,
+  margin: `${vars.space.sm} ${vars.space.md}`,
+});
+
+export const navItemDanger = style({
+  color: 'rgba(255,92,92,0.6)',
+  ':hover': {
+    color: vars.color.danger,
+    backgroundColor: 'rgba(255,92,92,0.06)',
+  },
+});
+
+// ── Content panel ─────────────────────────────────────────
 export const content = style({
   flex: 1,
   overflowY: 'auto',
@@ -42,24 +119,27 @@ export const content = style({
   display: 'flex',
   flexDirection: 'column',
   gap: vars.space.xl,
-  maxWidth: '640px',
+  maxWidth: '680px',
 });
 
 // ── Section ───────────────────────────────────────────────
-export const section = style({
-  display: 'flex',
-  flexDirection: 'column',
-  gap: vars.space.lg,
+export const sectionHeading = style({
+  marginBottom: vars.space.lg,
 });
 
 export const sectionTitle = style({
   fontFamily: vars.font.heading,
-  fontSize: vars.font.size.md,
-  fontWeight: '600',
+  fontSize: vars.font.size.lg,
+  fontWeight: '700',
   letterSpacing: '-0.03em',
   color: vars.color.text,
-  paddingBottom: vars.space.sm,
-  borderBottom: `1px solid ${vars.color.border}`,
+  marginBottom: '4px',
+});
+
+export const sectionDesc = style({
+  fontSize: vars.font.size.sm,
+  color: vars.color.textMuted,
+  lineHeight: '1.6',
 });
 
 export const card = style({
@@ -71,6 +151,7 @@ export const card = style({
   flexDirection: 'column',
   gap: vars.space.md,
   boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.03)',
+  marginBottom: vars.space.md,
 });
 
 export const formRow = style({
@@ -82,14 +163,56 @@ export const formRow = style({
 export const saveRow = style({
   display: 'flex',
   justifyContent: 'flex-end',
+  alignItems: 'center',
   gap: vars.space.sm,
   paddingTop: vars.space.sm,
+  borderTop: `1px solid ${vars.color.border}`,
+  marginTop: vars.space.sm,
 });
 
 export const successMsg = style({
   fontSize: vars.font.size.sm,
   color: vars.color.success,
-  alignSelf: 'center',
+});
+
+// ── Git token status ──────────────────────────────────────
+export const tokenStatus = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: vars.space.sm,
+  padding: `${vars.space.sm} ${vars.space.md}`,
+  borderRadius: vars.radius.md,
+  fontSize: vars.font.size.sm,
+  fontWeight: '500',
+});
+
+export const tokenStatusActive = style({
+  backgroundColor: 'rgba(77,255,145,0.06)',
+  border: `1px solid rgba(77,255,145,0.15)`,
+  color: vars.color.success,
+});
+
+export const tokenStatusNone = style({
+  backgroundColor: vars.color.bg,
+  border: `1px solid ${vars.color.border}`,
+  color: vars.color.textMuted,
+});
+
+export const tokenHintIcon = style({
+  flexShrink: 0,
+  marginTop: '2px',
+});
+
+export const tokenHint = style({
+  display: 'flex',
+  gap: vars.space.sm,
+  padding: vars.space.md,
+  backgroundColor: 'rgba(240, 228, 104, 0.04)',
+  border: `1px solid rgba(240, 228, 104, 0.12)`,
+  borderRadius: vars.radius.md,
+  fontSize: vars.font.size.xs,
+  color: vars.color.textMuted,
+  lineHeight: '1.7',
 });
 
 // ── Env vars ──────────────────────────────────────────────
@@ -168,35 +291,6 @@ export const envHeaderLabel = style({
   color: vars.color.textSubtle,
 });
 
-// ── Danger zone ───────────────────────────────────────────
-export const dangerCard = style({
-  backgroundColor: vars.color.surface,
-  border: `1px solid rgba(255,92,92,0.2)`,
-  borderRadius: vars.radius.lg,
-  padding: vars.space.lg,
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'space-between',
-  gap: vars.space.lg,
-});
-
-export const dangerInfo = style({
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '4px',
-});
-
-export const dangerTitle = style({
-  fontSize: vars.font.size.sm,
-  fontWeight: '600',
-  color: vars.color.text,
-});
-
-export const dangerDesc = style({
-  fontSize: vars.font.size.sm,
-  color: vars.color.textMuted,
-});
-
 // ── Services ──────────────────────────────────────────────
 export const serviceList = style({
   display: 'flex',
@@ -261,17 +355,9 @@ export const serviceStatus = style({
   letterSpacing: '0.06em',
 });
 
-export const serviceStatusRunning = style({
-  color: vars.color.success,
-});
-
-export const serviceStatusProvisioning = style({
-  color: vars.color.warning,
-});
-
-export const serviceStatusFailed = style({
-  color: vars.color.danger,
-});
+export const serviceStatusRunning = style({ color: vars.color.success });
+export const serviceStatusProvisioning = style({ color: vars.color.warning });
+export const serviceStatusFailed = style({ color: vars.color.danger });
 
 export const addServiceRow = style({
   display: 'grid',
@@ -308,6 +394,55 @@ export const addServiceLabel = style({
 export const addServiceField = style({
   display: 'flex',
   flexDirection: 'column',
+});
+
+export const serviceNote = style({
+  fontSize: vars.font.size.xs,
+  color: vars.color.textSubtle,
+  lineHeight: '1.6',
+  marginTop: vars.space.xs,
+});
+
+export const formGap = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: vars.space.md,
+});
+
+export const serviceActions = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '12px',
+});
+
+// ── Danger zone ───────────────────────────────────────────
+export const dangerCard = style({
+  backgroundColor: vars.color.surface,
+  border: `1px solid rgba(255,92,92,0.2)`,
+  borderRadius: vars.radius.lg,
+  padding: vars.space.lg,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  gap: vars.space.lg,
+});
+
+export const dangerInfo = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '4px',
+});
+
+export const dangerTitle = style({
+  fontSize: vars.font.size.sm,
+  fontWeight: '600',
+  color: vars.color.text,
+});
+
+export const dangerDesc = style({
+  fontSize: vars.font.size.sm,
+  color: vars.color.textMuted,
+  lineHeight: '1.5',
 });
 
 // ── Delete confirm dialog ─────────────────────────────────
