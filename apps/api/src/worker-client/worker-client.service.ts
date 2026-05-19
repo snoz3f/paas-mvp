@@ -18,7 +18,10 @@ export class WorkerClientService {
   private async post(node: WorkerNode, body: unknown): Promise<void> {
     const response = await fetch(`http://${node.ip}:4000/job`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'x-worker-secret': process.env.WORKER_SECRET ?? '',
+      },
       body: JSON.stringify(body),
     });
     if (!response.ok) {
