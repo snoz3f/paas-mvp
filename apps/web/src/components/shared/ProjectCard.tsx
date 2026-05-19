@@ -7,6 +7,7 @@ interface Project {
   name: string;
   repoUrl: string;
   createdAt: string;
+  hasGitToken?: boolean;
   latestDeployment?: {
     status: 'RUNNING' | 'FAILED' | 'QUEUED' | 'BUILDING' | 'STOPPED';
   };
@@ -45,9 +46,20 @@ export function ProjectCard({ project }: ProjectCardProps) {
             year: 'numeric',
           })}
         </span>
-        {!project.latestDeployment && (
-          <span className={s.noDeployment}>No deployments yet</span>
-        )}
+        <div className={s.footerRight}>
+          {project.hasGitToken && (
+            <span className={s.autoDeploy}>
+              <svg width="10" height="10" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M1 4v6a2 2 0 002 2h10a2 2 0 002-2V4" />
+                <path d="M8 12V2M5 5l3-3 3 3" />
+              </svg>
+              Auto-deploy
+            </span>
+          )}
+          {!project.latestDeployment && (
+            <span className={s.noDeployment}>No deployments yet</span>
+          )}
+        </div>
       </div>
     </div>
   );

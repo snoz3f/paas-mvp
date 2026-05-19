@@ -45,6 +45,9 @@ export function ProjectSettingsPage() {
   const { mutateAsync: deleteProject, isPending: isDeleting } = useDeleteProject();
 
   const [generalSaved, setGeneralSaved] = useState(false);
+  const [gitToken, setGitToken] = useState('');
+  const [gitTokenSaving, setGitTokenSaving] = useState(false);
+  const [gitTokenSaved, setGitTokenSaved] = useState(false);
   const [envEntries, setEnvEntries] = useState<EnvEntry[]>([]);
   const [envSaving, setEnvSaving] = useState(false);
   const [envSaved, setEnvSaved] = useState(false);
@@ -75,6 +78,20 @@ export function ProjectSettingsPage() {
     const vars = (project.envVars ?? {}) as Record<string, string>;
     setEnvEntries(Object.entries(vars).map(([key, value]) => ({ key, value })));
   }, [project, reset]);
+
+  const handleSaveGitToken = async () => {
+    if (!gitToken.trim()) return;
+    setGitTokenSaving(true);
+    try {
+      await updateProject({ id: id!, data: { gitToken: gitToken.trim() } });
+      await invalidate();
+      setGitToken('');
+      setGitTokenSaved(true);
+      setTimeout(() => setGitTokenSaved(false), 2500);
+    } finally {
+      setGitTokenSaving(false);
+    }
+  };
 
   const invalidate = async () => {
     await queryClient.invalidateQueries({ queryKey: getGetProjectByIdQueryKey(id!) });
@@ -187,6 +204,46 @@ export function ProjectSettingsPage() {
                 <Button size="sm" loading={isSubmitting}>Save changes</Button>
               </div>
             </form>
+          </div>
+        </section>
+
+        {/* Git Access */}
+        <section className={s.section}>
+          <p className={s.sectionTitle}>Git access</p>
+          <div className={s.card}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ fontSize: '13px', color: 'var(--color-textMuted, #666)' }}>
+                  {(project as { hasGitToken?: boolean })?.hasGitToken
+                    ? '✓ Token connected — auto-deploy active'
+                    : 'No token — manual deploys only'}
+                </span>
+              </div>
+              <Input
+                label="New GitHub Personal Access Token"
+                type="password"
+                placeholder="github_pat_..."
+                value={gitToken}
+                onChange={(e) => setGitToken(e.target.value)}
+              />
+              <p style={{ fontSize: '12px', color: '#444', lineHeight: '1.6' }}>
+                Fine-grained token with <strong>Contents: Read</strong> and{' '}
+                <strong>Webhooks: Read & write</strong> permissions.
+                Updating the token re-registers the GitHub webhook automatically.
+              </p>
+            </div>
+            <div className={s.saveRow}>
+              {gitTokenSaved && <span className={s.successMsg}>Token saved</span>}
+              <Button
+                size="sm"
+                loading={gitTokenSaving}
+                disabled={!gitToken.trim()}
+                onClick={() => void handleSaveGitToken()}
+                type="button"
+              >
+                Update token
+              </Button>
+            </div>
           </div>
         </section>
 

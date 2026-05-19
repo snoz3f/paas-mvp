@@ -26,6 +26,7 @@ const schema = z.object({
     .max(32, 'Max 32 characters')
     .regex(/^[a-z0-9-]+$/, 'Only lowercase letters, numbers and hyphens'),
   repoUrl: z.string().url('Enter a valid URL'),
+  gitToken: z.string().optional(),
 });
 
 type FormData = z.infer<typeof schema>;
@@ -47,7 +48,12 @@ export function NewProjectPage() {
     setFormError(null);
     try {
       const project = await createProject({
-        data: { ...data, framework: framework ?? undefined },
+        data: {
+          name: data.name,
+          repoUrl: data.repoUrl,
+          framework: framework ?? undefined,
+          gitToken: data.gitToken || undefined,
+        },
       });
       void navigate(`/dashboard/projects/${project.id}`);
     } catch {
@@ -70,6 +76,7 @@ export function NewProjectPage() {
       <div className={s.content}>
         <div className={s.card}>
           <form onSubmit={handleSubmit(onSubmit)} noValidate>
+            {/* Project details */}
             <div className={s.section}>
               <div className={s.sectionHeader}>
                 <p className={s.sectionTitle}>Project details</p>
@@ -121,6 +128,39 @@ export function NewProjectPage() {
                       </button>
                     ))}
                   </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Git Access */}
+            <div className={`${s.section} ${s.sectionGit}`}>
+              <div className={s.sectionHeader}>
+                <div className={s.sectionTitleRow}>
+                  <p className={s.sectionTitle}>Git access</p>
+                  <span className={s.optionalBadge}>optional</span>
+                </div>
+                <p className={s.sectionDesc}>
+                  For private repos and auto-deploy on push. Provide a GitHub Personal Access Token.
+                </p>
+              </div>
+              <div className={s.sectionBody}>
+                <Input
+                  label="GitHub Personal Access Token"
+                  type="password"
+                  placeholder="github_pat_..."
+                  error={errors.gitToken?.message}
+                  {...register('gitToken')}
+                />
+                <div className={s.tokenHint}>
+                  <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ flexShrink: 0, marginTop: '1px' }}>
+                    <circle cx="8" cy="8" r="6.5" />
+                    <path d="M8 7v4M8 5.5v.5" />
+                  </svg>
+                  <span>
+                    GitHub → Settings → Developer settings → Personal access tokens → Fine-grained token.
+                    Permissions needed: <strong>Contents: Read</strong>, <strong>Webhooks: Read & write</strong>.
+                    After saving, INFRAL auto-registers a webhook — every push to the default branch triggers a deploy.
+                  </span>
                 </div>
               </div>
             </div>

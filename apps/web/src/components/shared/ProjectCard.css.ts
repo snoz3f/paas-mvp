@@ -57,8 +57,25 @@ export const date = style({
   color: vars.color.textSubtle,
 });
 
+export const footerRight = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: vars.space.sm,
+});
+
 export const noDeployment = style({
   fontSize: vars.font.size.xs,
   color: vars.color.textSubtle,
   fontStyle: 'italic',
+});
+
+export const autoDeploy = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '4px',
+  fontSize: '10px',
+  fontWeight: '500',
+  letterSpacing: '0.04em',
+  color: vars.color.success,
+  opacity: 0.8,
 });

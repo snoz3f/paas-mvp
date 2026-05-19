@@ -50,6 +50,41 @@ export const section = style({
   overflow: 'hidden',
 });
 
+export const sectionGit = style({
+  marginTop: vars.space.md,
+});
+
+export const sectionTitleRow = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: vars.space.sm,
+  marginBottom: '2px',
+});
+
+export const optionalBadge = style({
+  fontSize: '10px',
+  fontWeight: '500',
+  letterSpacing: '0.06em',
+  textTransform: 'uppercase',
+  color: vars.color.textSubtle,
+  backgroundColor: vars.color.bg,
+  border: `1px solid ${vars.color.border}`,
+  borderRadius: vars.radius.sm,
+  padding: '2px 6px',
+});
+
+export const tokenHint = style({
+  display: 'flex',
+  gap: vars.space.sm,
+  padding: vars.space.md,
+  backgroundColor: 'rgba(240, 228, 104, 0.04)',
+  border: `1px solid rgba(240, 228, 104, 0.12)`,
+  borderRadius: vars.radius.md,
+  fontSize: vars.font.size.xs,
+  color: vars.color.textMuted,
+  lineHeight: '1.6',
+});
+
 export const sectionHeader = style({
   padding: `${vars.space.lg} ${vars.space.xl}`,
   borderBottom: `1px solid ${vars.color.border}`,
