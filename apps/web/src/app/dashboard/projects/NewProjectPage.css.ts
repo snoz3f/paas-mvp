@@ -188,3 +188,121 @@ export const formError = style({
   fontSize: vars.font.size.sm,
   color: vars.color.danger,
 });
+
+// ── GitHub connect banner ─────────────────────────────────
+
+export const connectBanner = style({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  gap: vars.space.md,
+  padding: vars.space.md,
+  backgroundColor: vars.color.bg,
+  border: `1px solid ${vars.color.border}`,
+  borderRadius: vars.radius.md,
+});
+
+export const connectBannerText = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: vars.space.sm,
+  fontSize: vars.font.size.sm,
+  color: vars.color.textMuted,
+});
+
+export const githubConnected = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: vars.space.xs,
+  fontSize: vars.font.size.xs,
+  fontWeight: '500',
+  color: vars.color.success,
+});
+
+// ── Repo picker ───────────────────────────────────────────
+
+export const repoSearch = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: vars.space.sm,
+  padding: `8px ${vars.space.md}`,
+  backgroundColor: vars.color.bg,
+  border: `1px solid ${vars.color.border}`,
+  borderRadius: vars.radius.md,
+  color: vars.color.textMuted,
+  transition: `border-color ${vars.transition.fast}`,
+  ':focus-within': {
+    borderColor: vars.color.accent,
+  },
+});
+
+export const repoSearchInput = style({
+  flex: 1,
+  background: 'none',
+  border: 'none',
+  outline: 'none',
+  fontSize: vars.font.size.sm,
+  color: vars.color.text,
+  '::placeholder': {
+    color: vars.color.textSubtle,
+  },
+});
+
+export const repoList = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '2px',
+  maxHeight: '240px',
+  overflowY: 'auto',
+  border: `1px solid ${vars.color.border}`,
+  borderRadius: vars.radius.md,
+  backgroundColor: vars.color.bg,
+});
+
+export const repoListEmpty = style({
+  padding: vars.space.lg,
+  textAlign: 'center',
+  fontSize: vars.font.size.sm,
+  color: vars.color.textSubtle,
+});
+
+export const repoItem = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: vars.space.sm,
+  padding: `9px ${vars.space.md}`,
+  fontSize: vars.font.size.sm,
+  color: vars.color.textMuted,
+  cursor: 'pointer',
+  transition: `background-color ${vars.transition.fast}`,
+  textAlign: 'left',
+  ':hover': {
+    backgroundColor: vars.color.surfaceHover,
+    color: vars.color.text,
+  },
+});
+
+export const repoItemActive = style({
+  backgroundColor: 'rgba(240,228,104,0.06)',
+  color: vars.color.text,
+  boxShadow: `inset 3px 0 0 ${vars.color.accent}`,
+});
+
+export const repoItemName = style({
+  flex: 1,
+  fontFamily: vars.font.mono,
+  fontSize: '12px',
+});
+
+export const repoPrivateBadge = style({
+  fontSize: '10px',
+  fontWeight: '500',
+  letterSpacing: '0.06em',
+  textTransform: 'uppercase',
+  color: vars.color.textSubtle,
+  backgroundColor: vars.color.surface,
+  border: `1px solid ${vars.color.border}`,
+  borderRadius: vars.radius.sm,
+  padding: '2px 6px',
+  flexShrink: 0,
+});

@@ -1,6 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsInt, IsObject, IsOptional, IsString, IsUrl, Max, Min, MinLength } from 'class-validator';
-import { Exclude } from 'class-transformer';
 
 export class CreateProjectDto {
   @ApiProperty({ example: 'my-backend' })
@@ -28,9 +27,4 @@ export class CreateProjectDto {
   @IsObject()
   @IsOptional()
   envVars?: Record<string, string>;
-
-  @ApiPropertyOptional({ example: 'github_pat_...' })
-  @IsString()
-  @IsOptional()
-  gitToken?: string;
 }

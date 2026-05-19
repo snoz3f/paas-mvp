@@ -39,6 +39,15 @@ export class AuthService {
     return this.signToken({ sub: user.id, email: user.email });
   }
 
+  async getMe(userId: string) {
+    const user = await this.prisma.user.findUniqueOrThrow({ where: { id: userId } });
+    return {
+      id: user.id,
+      email: user.email,
+      githubLogin: user.githubLogin ?? null,
+    };
+  }
+
   private async signToken(payload: JwtPayload): Promise<{ accessToken: string }> {
     const accessToken = await this.jwt.signAsync(payload);
     return { accessToken };

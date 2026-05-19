@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
 import { AuthModule } from './auth/auth.module';
 import { DeploymentsModule } from './deployments/deployments.module';
+import { GithubModule } from './github/github.module';
 import { NodesModule } from './nodes/nodes.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { ProjectsModule } from './projects/projects.module';
@@ -15,6 +16,7 @@ import { WebhooksModule } from './webhooks/webhooks.module';
     ScheduleModule.forRoot(),
     PrismaModule,
     AuthModule,
+    GithubModule,
     ProjectsModule,
     DeploymentsModule,
     NodesModule,

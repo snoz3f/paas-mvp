@@ -30,8 +30,4 @@ export class UpdateProjectDto {
   @IsOptional()
   envVars?: Record<string, string>;
 
-  @ApiPropertyOptional({ example: 'github_pat_...' })
-  @IsString()
-  @IsOptional()
-  gitToken?: string;
 }

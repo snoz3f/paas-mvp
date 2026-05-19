@@ -1,14 +1,18 @@
 import { useState } from 'react';
 import type React from 'react';
 import { siNodedotjs, siNestjs, siNextdotjs, siReact, siPython, siDocker } from 'simple-icons';
+import { useQuery } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useNavigate } from 'react-router';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
+import { axiosInstance } from '@/lib/axios';
 import { useCreateProject } from '@/api/generated/projects/projects';
 import * as s from './NewProjectPage.css';
+
+// ── Icons ─────────────────────────────────────────────────
 
 function si(icon: { path: string; hex: string }, size = 26): React.ReactNode {
   return (
@@ -38,40 +42,78 @@ const FRAMEWORKS = [
 
 type Framework = typeof FRAMEWORKS[number]['value'];
 
+// ── API types ─────────────────────────────────────────────
+
+interface MeResponse {
+  id: string;
+  email: string;
+  githubLogin: string | null;
+}
+
+interface GithubRepo {
+  id: number;
+  fullName: string;
+  name: string;
+  private: boolean;
+  url: string;
+  defaultBranch: string;
+}
+
+// ── Form ──────────────────────────────────────────────────
+
 const schema = z.object({
   name: z
     .string()
     .min(2, 'At least 2 characters')
     .max(32, 'Max 32 characters')
     .regex(/^[a-z0-9-]+$/, 'Only lowercase letters, numbers and hyphens'),
-  repoUrl: z.string().url('Enter a valid URL'),
-  gitToken: z.string().optional(),
 });
 
 type FormData = z.infer<typeof schema>;
 
+// ── Component ─────────────────────────────────────────────
+
 export function NewProjectPage() {
   const navigate = useNavigate();
   const [framework, setFramework] = useState<Framework | null>(null);
+  const [selectedRepo, setSelectedRepo] = useState<GithubRepo | null>(null);
+  const [repoSearch, setRepoSearch] = useState('');
   const [formError, setFormError] = useState<string | null>(null);
 
   const { mutateAsync: createProject, isPending } = useCreateProject();
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<FormData>({ resolver: zodResolver(schema) });
+  const { data: me } = useQuery<MeResponse>({
+    queryKey: ['me'],
+    queryFn: () => axiosInstance.get<MeResponse>('/auth/me').then((r) => r.data),
+  });
+
+  const { data: repos = [], isLoading: reposLoading } = useQuery<GithubRepo[]>({
+    queryKey: ['github-repos'],
+    queryFn: () => axiosInstance.get<GithubRepo[]>('/github/repos').then((r) => r.data),
+    enabled: !!me?.githubLogin,
+  });
+
+  const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
+    resolver: zodResolver(schema),
+  });
+
+  const handleConnectGithub = async () => {
+    const { data } = await axiosInstance.get<{ url: string }>('/auth/github/url');
+    window.location.href = data.url;
+  };
 
   const onSubmit = async (data: FormData) => {
+    if (!selectedRepo) {
+      setFormError('Please select a repository.');
+      return;
+    }
     setFormError(null);
     try {
       const project = await createProject({
         data: {
           name: data.name,
-          repoUrl: data.repoUrl,
+          repoUrl: selectedRepo.url,
           framework: framework ?? undefined,
-          gitToken: data.gitToken || undefined,
         },
       });
       void navigate(`/dashboard/projects/${project.id}`);
@@ -79,6 +121,10 @@ export function NewProjectPage() {
       setFormError('Failed to create project. Try again.');
     }
   };
+
+  const filteredRepos = repos.filter((r) =>
+    r.fullName.toLowerCase().includes(repoSearch.toLowerCase()),
+  );
 
   return (
     <>
@@ -95,30 +141,97 @@ export function NewProjectPage() {
       <div className={s.content}>
         <div className={s.card}>
           <form onSubmit={handleSubmit(onSubmit)} noValidate>
-            {/* Project details */}
+
+            {/* Repository */}
             <div className={s.section}>
               <div className={s.sectionHeader}>
-                <p className={s.sectionTitle}>Project details</p>
-                <p className={s.sectionDesc}>Basic information about your project</p>
+                <p className={s.sectionTitle}>Repository</p>
+                <p className={s.sectionDesc}>Select a GitHub repository to deploy</p>
               </div>
               <div className={s.sectionBody}>
-                {formError && <div className={s.formError}>{formError}</div>}
+                {!me?.githubLogin ? (
+                  <div className={s.connectBanner}>
+                    <div className={s.connectBannerText}>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z" />
+                      </svg>
+                      <span>Connect your GitHub account to import repositories</span>
+                    </div>
+                    <Button type="button" variant="ghost" width="auto" onClick={() => void handleConnectGithub()}>
+                      Connect GitHub
+                    </Button>
+                  </div>
+                ) : (
+                  <>
+                    <div className={s.githubConnected}>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z" />
+                      </svg>
+                      <span>@{me.githubLogin}</span>
+                    </div>
 
-                <div className={s.row}>
-                  <Input
-                    label="Project name"
-                    placeholder="my-backend"
-                    error={errors.name?.message}
-                    {...register('name')}
-                  />
-                  <Input
-                    label="Repository URL"
-                    placeholder="https://github.com/user/repo"
-                    type="url"
-                    error={errors.repoUrl?.message}
-                    {...register('repoUrl')}
-                  />
-                </div>
+                    <div className={s.repoSearch}>
+                      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+                        <circle cx="6.5" cy="6.5" r="4.5" />
+                        <path d="M10 10l3 3" />
+                      </svg>
+                      <input
+                        className={s.repoSearchInput}
+                        placeholder="Search repositories..."
+                        value={repoSearch}
+                        onChange={(e) => setRepoSearch(e.target.value)}
+                      />
+                    </div>
+
+                    <div className={s.repoList}>
+                      {reposLoading ? (
+                        <div className={s.repoListEmpty}>Loading repositories...</div>
+                      ) : filteredRepos.length === 0 ? (
+                        <div className={s.repoListEmpty}>No repositories found</div>
+                      ) : (
+                        filteredRepos.map((repo) => (
+                          <button
+                            key={repo.id}
+                            type="button"
+                            className={
+                              selectedRepo?.id === repo.id
+                                ? `${s.repoItem} ${s.repoItemActive}`
+                                : s.repoItem
+                            }
+                            onClick={() => setSelectedRepo(repo)}
+                          >
+                            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+                              <path d="M2 2.5A2.5 2.5 0 014.5 0h8.75a.75.75 0 01.75.75v12.5a.75.75 0 01-.75.75h-2.5a.75.75 0 110-1.5h1.75v-2h-8a1 1 0 00-.714 1.7.75.75 0 01-1.072 1.05A2.495 2.495 0 012 11.5v-9zm10.5-1V9h-8c-.356 0-.694.074-1 .208V2.5a1 1 0 011-1h8z" />
+                            </svg>
+                            <span className={s.repoItemName}>{repo.fullName}</span>
+                            {repo.private && <span className={s.repoPrivateBadge}>Private</span>}
+                          </button>
+                        ))
+                      )}
+                    </div>
+                    {formError && !selectedRepo && (
+                      <div className={s.formError}>{formError}</div>
+                    )}
+                  </>
+                )}
+              </div>
+            </div>
+
+            {/* Project details */}
+            <div className={`${s.section} ${s.sectionGit}`}>
+              <div className={s.sectionHeader}>
+                <p className={s.sectionTitle}>Project details</p>
+                <p className={s.sectionDesc}>Configure your project</p>
+              </div>
+              <div className={s.sectionBody}>
+                {formError && selectedRepo && <div className={s.formError}>{formError}</div>}
+
+                <Input
+                  label="Project name"
+                  placeholder="my-backend"
+                  error={errors.name?.message}
+                  {...register('name')}
+                />
 
                 <div>
                   <span className={s.frameworkLabel}>Framework (optional)</span>
@@ -151,39 +264,6 @@ export function NewProjectPage() {
               </div>
             </div>
 
-            {/* Git Access */}
-            <div className={`${s.section} ${s.sectionGit}`}>
-              <div className={s.sectionHeader}>
-                <div className={s.sectionTitleRow}>
-                  <p className={s.sectionTitle}>Git access</p>
-                  <span className={s.optionalBadge}>optional</span>
-                </div>
-                <p className={s.sectionDesc}>
-                  For private repos and auto-deploy on push. Provide a GitHub Personal Access Token.
-                </p>
-              </div>
-              <div className={s.sectionBody}>
-                <Input
-                  label="GitHub Personal Access Token"
-                  type="password"
-                  placeholder="github_pat_..."
-                  error={errors.gitToken?.message}
-                  {...register('gitToken')}
-                />
-                <div className={s.tokenHint}>
-                  <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ flexShrink: 0, marginTop: '1px' }}>
-                    <circle cx="8" cy="8" r="6.5" />
-                    <path d="M8 7v4M8 5.5v.5" />
-                  </svg>
-                  <span>
-                    GitHub → Settings → Developer settings → Personal access tokens → Fine-grained token.
-                    Permissions needed: <strong>Contents: Read</strong>, <strong>Webhooks: Read & write</strong>.
-                    After saving, INFRAL auto-registers a webhook — every push to the default branch triggers a deploy.
-                  </span>
-                </div>
-              </div>
-            </div>
-
             <div className={s.footer}>
               <Button
                 type="button"
@@ -193,7 +273,7 @@ export function NewProjectPage() {
               >
                 Cancel
               </Button>
-              <Button type="submit" loading={isPending}>
+              <Button type="submit" loading={isPending} disabled={!me?.githubLogin || !selectedRepo}>
                 Create project
               </Button>
             </div>

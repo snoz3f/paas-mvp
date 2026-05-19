@@ -14,10 +14,10 @@ export class ProjectsService {
   ) {}
 
   async create(userId: string, dto: CreateProjectDto) {
-    const { gitToken, ...rest } = dto;
+    const gitToken = await this.github.getTokenForUser(userId);
 
     const project = await this.prisma.project.create({
-      data: { ...rest, userId, gitToken: gitToken ?? null },
+      data: { ...dto, userId, gitToken },
     });
 
     if (gitToken && project.repoUrl.includes('github.com')) {
