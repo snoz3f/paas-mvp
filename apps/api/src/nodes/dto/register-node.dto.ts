@@ -1,13 +1,13 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsIP, IsOptional, IsString } from 'class-validator';
+import { IsOptional, IsString } from 'class-validator';
 
 export class RegisterNodeDto {
   @ApiProperty({ example: 'hetzner-fsn1-1' })
   @IsString()
   name: string;
 
-  @ApiProperty({ example: '1.2.3.4' })
-  @IsIP()
+  @ApiProperty({ example: '1.2.3.4 or docker-service-name' })
+  @IsString()
   ip: string;
 
   @ApiPropertyOptional({ example: 'eu-west' })
