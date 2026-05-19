@@ -41,22 +41,13 @@ jobs:
           host: ${{ secrets.SERVER_HOST }}
           username: root
           key: ${{ secrets.SERVER_SSH_KEY }}
-          envs: FRONTEND_URL,GH_CLIENT_ID,GH_CLIENT_SECRET,GH_CALLBACK_URL
           script: |
             echo ${{ secrets.CR_PAT }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
             docker pull ghcr.io/${{ github.repository }}/api:latest
             cd /opt/infral/api
-            # Update secrets in .env
-            for var in FRONTEND_URL GH_CLIENT_ID GH_CLIENT_SECRET GH_CALLBACK_URL; do
-              val="${!var}"
-              if [ -n "$val" ]; then
-                sed -i "/^${var}=/d" .env 2>/dev/null || true
-                echo "${var}=${val}" >> .env
-              fi
-            done
+            sed -i '/^FRONTEND_URL=/d;/^GH_CLIENT_ID=/d;/^GH_CLIENT_SECRET=/d;/^GH_CALLBACK_URL=/d' .env 2>/dev/null || true
+            echo 'FRONTEND_URL=${{ secrets.FRONTEND_URL }}' >> .env
+            echo 'GH_CLIENT_ID=${{ secrets.GH_CLIENT_ID }}' >> .env
+            echo 'GH_CLIENT_SECRET=${{ secrets.GH_CLIENT_SECRET }}' >> .env
+            echo 'GH_CALLBACK_URL=${{ secrets.GH_CALLBACK_URL }}' >> .env
             docker compose up -d --force-recreate api
-        env:
-          FRONTEND_URL: ${{ secrets.FRONTEND_URL }}
-          GH_CLIENT_ID: ${{ secrets.GH_CLIENT_ID }}
-          GH_CLIENT_SECRET: ${{ secrets.GH_CLIENT_SECRET }}
-          GH_CALLBACK_URL: ${{ secrets.GH_CALLBACK_URL }}
