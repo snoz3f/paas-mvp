@@ -3,7 +3,8 @@ import { useNavigate, useParams } from 'react-router';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import axiosInstance from '@/lib/axios';
 import {
   useGetProjectById,
   useUpdateProject,
@@ -95,10 +96,12 @@ export function ProjectSettingsPage() {
   const { mutateAsync: updateProject } = useUpdateProject();
   const { mutateAsync: deleteProject, isPending: isDeleting } = useDeleteProject();
 
+  const { data: me } = useQuery({
+    queryKey: ['me'],
+    queryFn: () => axiosInstance.get<{ id: string; email: string; githubLogin: string | null }>('/auth/me').then((r) => r.data),
+  });
+
   const [generalSaved, setGeneralSaved] = useState(false);
-  const [gitToken, setGitToken] = useState('');
-  const [gitTokenSaving, setGitTokenSaving] = useState(false);
-  const [gitTokenSaved, setGitTokenSaved] = useState(false);
   const [envEntries, setEnvEntries] = useState<EnvEntry[]>([]);
   const [envSaving, setEnvSaving] = useState(false);
   const [envSaved, setEnvSaved] = useState(false);
@@ -134,20 +137,6 @@ export function ProjectSettingsPage() {
     await invalidate();
     setGeneralSaved(true);
     setTimeout(() => setGeneralSaved(false), 2500);
-  };
-
-  const handleSaveGitToken = async () => {
-    if (!gitToken.trim()) return;
-    setGitTokenSaving(true);
-    try {
-      await updateProject({ id: id!, data: { gitToken: gitToken.trim() } });
-      await invalidate();
-      setGitToken('');
-      setGitTokenSaved(true);
-      setTimeout(() => setGitTokenSaved(false), 2500);
-    } finally {
-      setGitTokenSaving(false);
-    }
   };
 
   const handleSaveEnv = async () => {
@@ -255,45 +244,28 @@ export function ProjectSettingsPage() {
             <>
               <div className={s.sectionHeading}>
                 <p className={s.sectionTitle}>Git Access</p>
-                <p className={s.sectionDesc}>Connect a GitHub Personal Access Token to enable auto-deploy on push and private repo access.</p>
+                <p className={s.sectionDesc}>Connect your GitHub account to enable private repo access and auto-deploy on push.</p>
               </div>
               <div className={s.card}>
-                <div className={`${s.tokenStatus} ${(project as { hasGitToken?: boolean })?.hasGitToken ? s.tokenStatusActive : s.tokenStatusNone}`}>
+                <div className={`${s.tokenStatus} ${me?.githubLogin ? s.tokenStatusActive : s.tokenStatusNone}`}>
                   <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2">
-                    {(project as { hasGitToken?: boolean })?.hasGitToken
+                    {me?.githubLogin
                       ? <path d="M2 8l4 4 8-8" />
                       : <><circle cx="8" cy="8" r="6.5" /><path d="M8 5v3M8 10.5v.5" /></>
                     }
                   </svg>
-                  {(project as { hasGitToken?: boolean })?.hasGitToken
-                    ? 'Token connected — auto-deploy active'
-                    : 'No token — manual deploys only'}
+                  {me?.githubLogin
+                    ? `Connected as @${me.githubLogin}`
+                    : 'GitHub not connected'}
                 </div>
-
-                <Input
-                  label="New GitHub Personal Access Token"
-                  type="password"
-                  placeholder="github_pat_..."
-                  value={gitToken}
-                  onChange={(e) => setGitToken(e.target.value)}
-                />
-
-                <div className={s.tokenHint}>
-                  <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" className={s.tokenHintIcon}>
-                    <circle cx="8" cy="8" r="6.5" />
-                    <path d="M8 7v4M8 5.5v.5" />
-                  </svg>
-                  <span>
-                    GitHub → Settings → Developer settings → Personal access tokens → Fine-grained token.
-                    Required permissions: <strong>Contents: Read</strong> and <strong>Webhooks: Read & write</strong>.
-                    Saving re-registers the GitHub webhook — every push to the default branch triggers a deploy automatically.
-                  </span>
-                </div>
-
                 <div className={s.saveRow}>
-                  {gitTokenSaved && <span className={s.successMsg}>Token updated</span>}
-                  <Button size="sm" loading={gitTokenSaving} disabled={!gitToken.trim()} onClick={() => void handleSaveGitToken()} type="button">
-                    Update token
+                  <Button
+                    size="sm"
+                    variant={me?.githubLogin ? 'ghost' : 'primary'}
+                    onClick={() => void axiosInstance.get<{ url: string }>('/auth/github/url').then((r) => { window.location.href = r.data.url; })}
+                    type="button"
+                  >
+                    {me?.githubLogin ? 'Reconnect GitHub' : 'Connect GitHub'}
                   </Button>
                 </div>
               </div>
