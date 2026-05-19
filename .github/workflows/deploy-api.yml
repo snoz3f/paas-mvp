@@ -4,10 +4,6 @@ on:
   push:
     branches:
       - master
-    paths:
-      - 'apps/api/**'
-      - 'pnpm-lock.yaml'
-      - '.github/workflows/deploy-api.yml'
 
 env:
   REGISTRY: ghcr.io
