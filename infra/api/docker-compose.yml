@@ -1,0 +1,41 @@
+services:
+  postgres:
+    image: postgres:16
+    restart: always
+    environment:
+      POSTGRES_DB: infral
+      POSTGRES_USER: infral
+      POSTGRES_PASSWORD: YXqmjGPt00TG1T7Pw5OZoZrw
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - infral
+
+  api:
+    image: ghcr.io/snoz3f/paas-mvp/api:latest
+    restart: always
+    environment:
+      DATABASE_URL: postgresql://infral:YXqmjGPt00TG1T7Pw5OZoZrw@postgres:5432/infral
+      JWT_SECRET: 3Zpw11hNke4PlZNfqKouSV90EXC5U3pE2meeVTshjs2cp6Sj
+      PORT: 5001
+      FRONTEND_URL: ${FRONTEND_URL}
+      GH_CLIENT_ID: ${GH_CLIENT_ID}
+      GH_CLIENT_SECRET: ${GH_CLIENT_SECRET}
+      GH_CALLBACK_URL: ${GH_CALLBACK_URL}
+    depends_on:
+      - postgres
+    networks:
+      - infral
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.api.rule=Host(`api.infral.dev`)
+      - traefik.http.routers.api.entrypoints=websecure
+      - traefik.http.routers.api.tls.certresolver=letsencrypt
+      - traefik.http.services.api.loadbalancer.server.port=5001
+
+volumes:
+  postgres_data:
+
+networks:
+  infral:
+    external: true
