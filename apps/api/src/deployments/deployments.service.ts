@@ -54,7 +54,9 @@ export class DeploymentsService {
     if (!deployment) throw new NotFoundException('Deployment not found');
     if (deployment.project.userId !== userId) throw new ForbiddenException();
     if (deployment.projectId !== projectId) throw new NotFoundException('Deployment not found');
-    return deployment;
+
+    const { gitToken, webhookSecret, ...safeProject } = deployment.project;
+    return { ...deployment, project: { ...safeProject, hasGitToken: !!gitToken } };
   }
 
   async restart(userId: string, projectId: string, id: string) {
@@ -165,9 +167,10 @@ export class DeploymentsService {
       });
     } catch (err) {
       this.logger.error(`Failed to trigger deploy for ${deploymentId}`, err);
+      const message = err instanceof Error ? err.message : 'Internal scheduler error';
       await this.prisma.deployment.update({
         where: { id: deploymentId },
-        data: { status: DeploymentStatus.FAILED, error: 'Internal scheduler error' },
+        data: { status: DeploymentStatus.FAILED, error: message },
       });
     }
   }

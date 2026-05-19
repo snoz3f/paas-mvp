@@ -18,6 +18,7 @@ services:
       DATABASE_URL: postgresql://infral:YXqmjGPt00TG1T7Pw5OZoZrw@postgres:5432/infral
       JWT_SECRET: 3Zpw11hNke4PlZNfqKouSV90EXC5U3pE2meeVTshjs2cp6Sj
       PORT: 5001
+      API_URL: https://api.infral.dev
       FRONTEND_URL: ${FRONTEND_URL}
       GH_CLIENT_ID: ${GH_CLIENT_ID}
       GH_CLIENT_SECRET: ${GH_CLIENT_SECRET}
