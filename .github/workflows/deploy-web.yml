@@ -1,0 +1,67 @@
+name: Deploy Web
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'apps/web/**'
+      - 'pnpm-lock.yaml'
+      - '.github/workflows/deploy-web.yml'
+  workflow_run:
+    workflows: ["Deploy API"]
+    types: [completed]
+    branches: [master]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'push' ||
+      (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: latest
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --filter web...
+
+      - name: Wait for API
+        run: |
+          echo "Waiting for API to be ready..."
+          for i in $(seq 1 30); do
+            if curl -sf https://api.infral.dev/docs-json > /dev/null 2>&1; then
+              echo "API is ready after $((i * 10))s"
+              break
+            fi
+            if [ $i -eq 30 ]; then
+              echo "API did not become ready in time"
+              exit 1
+            fi
+            echo "Attempt $i/30, retrying in 10s..."
+            sleep 10
+          done
+
+      - name: Generate API types
+        run: API_URL=https://api.infral.dev pnpm --filter web generate
+
+      - name: Build
+        run: pnpm --filter web build
+        env:
+          VITE_API_URL: https://api.infral.dev
+
+      - name: Deploy to Cloudflare Workers
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: apps/web
+          command: deploy
