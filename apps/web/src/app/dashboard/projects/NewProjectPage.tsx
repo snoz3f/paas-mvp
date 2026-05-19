@@ -8,7 +8,7 @@ import { z } from 'zod';
 import { useNavigate } from 'react-router';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
-import { axiosInstance } from '@/lib/axios';
+import { customInstance } from '@/lib/axios';
 import { useCreateProject } from '@/api/generated/projects/projects';
 import * as s from './NewProjectPage.css';
 
@@ -84,12 +84,12 @@ export function NewProjectPage() {
 
   const { data: me } = useQuery<MeResponse>({
     queryKey: ['me'],
-    queryFn: () => axiosInstance.get<MeResponse>('/auth/me').then((r) => r.data),
+    queryFn: () => customInstance<MeResponse>({ url: '/auth/me', method: 'GET' }),
   });
 
   const { data: repos = [], isLoading: reposLoading } = useQuery<GithubRepo[]>({
     queryKey: ['github-repos'],
-    queryFn: () => axiosInstance.get<GithubRepo[]>('/github/repos').then((r) => r.data),
+    queryFn: () => customInstance<GithubRepo[]>({ url: '/github/repos', method: 'GET' }),
     enabled: !!me?.githubLogin,
   });
 
@@ -98,7 +98,7 @@ export function NewProjectPage() {
   });
 
   const handleConnectGithub = async () => {
-    const { data } = await axiosInstance.get<{ url: string }>('/auth/github/url');
+    const data = await customInstance<{ url: string }>({ url: '/auth/github/url', method: 'GET' });
     window.location.href = data.url;
   };
 

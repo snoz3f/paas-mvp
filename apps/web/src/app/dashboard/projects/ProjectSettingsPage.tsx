@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import axiosInstance from '@/lib/axios';
+import { customInstance } from '@/lib/axios';
 import {
   useGetProjectById,
   useUpdateProject,
@@ -98,7 +98,7 @@ export function ProjectSettingsPage() {
 
   const { data: me } = useQuery({
     queryKey: ['me'],
-    queryFn: () => axiosInstance.get<{ id: string; email: string; githubLogin: string | null }>('/auth/me').then((r) => r.data),
+    queryFn: () => customInstance<{ id: string; email: string; githubLogin: string | null }>({ url: '/auth/me', method: 'GET' }),
   });
 
   const [generalSaved, setGeneralSaved] = useState(false);
@@ -262,7 +262,7 @@ export function ProjectSettingsPage() {
                   <Button
                     size="sm"
                     variant={me?.githubLogin ? 'ghost' : 'primary'}
-                    onClick={() => void axiosInstance.get<{ url: string }>('/auth/github/url').then((r) => { window.location.href = r.data.url; })}
+                    onClick={() => void customInstance<{ url: string }>({ url: '/auth/github/url', method: 'GET' }).then((r) => { window.location.href = r.url; })}
                     type="button"
                   >
                     {me?.githubLogin ? 'Reconnect GitHub' : 'Connect GitHub'}
