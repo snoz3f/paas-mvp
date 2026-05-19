@@ -63,6 +63,24 @@ const FEATURES = [
   },
 ];
 
+const STEPS = [
+  {
+    num: '01',
+    title: 'Подключи репозиторий',
+    desc: 'Вставь GitHub-ссылку и (опционально) Personal Access Token для приватных репо и авто-деплоя.',
+  },
+  {
+    num: '02',
+    title: 'Задай окружение',
+    desc: 'Выбери фреймворк, добавь env-переменные. INFRAL сам поднимет Docker и маршрутизацию.',
+  },
+  {
+    num: '03',
+    title: 'Push — и готово',
+    desc: 'Каждый git push → webhook → билд → деплой. Логи в реальном времени прямо в браузере.',
+  },
+];
+
 const PRICING = [
   {
     name: 'Hobby',
@@ -132,6 +150,7 @@ export function LandingPage() {
 
         <div className={s.navLinks}>
           <a href="#features" className={s.navLink}>Возможности</a>
+          <a href="#how" className={s.navLink}>Как это работает</a>
           <a href="#pricing" className={s.navLink}>Цены</a>
         </div>
 
@@ -165,17 +184,68 @@ export function LandingPage() {
               <path d="M3 8h10M9 4l4 4-4 4" />
             </svg>
           </Link>
-          <a href="#features" className={s.heroBtnGhost}>
+          <a href="#how" className={s.heroBtnGhost}>
             Как это работает
           </a>
         </div>
 
-        <div className={s.heroCode}>
-          <span className={s.heroCodePrompt}>$</span>
-          <span className={s.heroCodeText}>git push origin main</span>
-          <span style={{ color: '#4dff91', fontSize: '12px', fontFamily: 'inherit' }}>✓ deployed in 43s</span>
+        {/* Terminal mockup */}
+        <div className={s.terminal}>
+          <div className={s.terminalBar}>
+            <span className={`${s.terminalDot} ${s.terminalDotRed}`} />
+            <span className={`${s.terminalDot} ${s.terminalDotYellow}`} />
+            <span className={`${s.terminalDot} ${s.terminalDotGreen}`} />
+          </div>
+          <div className={s.terminalBody}>
+            <div className={s.terminalLine}>
+              <span className={s.terminalPrompt}>$</span>
+              <span className={s.terminalCmd}>git push origin main</span>
+            </div>
+            <div className={s.terminalLine}>
+              <span className={s.terminalOut}>Enumerating objects: 5, done.</span>
+            </div>
+            <div className={s.terminalLine}>
+              <span className={s.terminalOut}>To github.com:user/my-app.git</span>
+            </div>
+            <div className={s.terminalLine}>
+              <span className={s.terminalOut}>   a1b2c3d..e4f5g6h  main → main</span>
+            </div>
+            <div className={s.terminalLine}>
+              <span className={s.terminalPrompt}>›</span>
+              <span className={s.terminalCmd}>INFRAL detected push · triggering deploy</span>
+            </div>
+            <div className={s.terminalLine}>
+              <span className={s.terminalOut}>Building Docker image...</span>
+            </div>
+            <div className={s.terminalLine}>
+              <span className={s.terminalOut}>Running npm ci · 312 packages installed</span>
+            </div>
+            <div className={s.terminalLine}>
+              <span className={s.terminalSuccess}>✓ Deployed in 43s · my-app.infral.dev</span>
+            </div>
+          </div>
         </div>
       </section>
+
+      {/* Stats row */}
+      <div className={s.statsRow}>
+        <div className={s.statItem}>
+          <span className={s.statValue}>
+            43<span className={s.statAccent}>s</span>
+          </span>
+          <span className={s.statLabel}>Среднее время деплоя</span>
+        </div>
+        <div className={s.statItem}>
+          <span className={s.statValue}>
+            <span className={s.statAccent}>99.9</span>%
+          </span>
+          <span className={s.statLabel}>Uptime SLA</span>
+        </div>
+        <div className={s.statItem}>
+          <span className={s.statValue}>6</span>
+          <span className={s.statLabel}>Фреймворков</span>
+        </div>
+      </div>
 
       {/* Features */}
       <div className={s.divider} />
@@ -192,6 +262,27 @@ export function LandingPage() {
               <div className={s.featureIcon}>{f.icon}</div>
               <p className={s.featureTitle}>{f.title}</p>
               <p className={s.featureDesc}>{f.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* How it works */}
+      <div className={s.divider} />
+      <section className={s.section} id="how">
+        <p className={s.sectionLabel}>Как это работает</p>
+        <h2 className={s.sectionTitle}>Три шага до продакшна</h2>
+        <p className={s.sectionSub}>
+          От пустого репозитория до работающего приложения
+          — за несколько минут.
+        </p>
+        <div className={s.stepsRow}>
+          <div className={s.stepsConnector} />
+          {STEPS.map((step) => (
+            <div key={step.num} className={s.stepItem}>
+              <div className={s.stepNum}>{step.num}</div>
+              <p className={s.stepTitle}>{step.title}</p>
+              <p className={s.stepDesc}>{step.desc}</p>
             </div>
           ))}
         </div>
