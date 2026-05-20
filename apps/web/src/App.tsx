@@ -8,6 +8,9 @@ import { NewProjectPage } from '@/app/dashboard/projects/NewProjectPage';
 import { ProjectPage } from '@/app/dashboard/projects/ProjectPage';
 import { DeploymentPage } from '@/app/dashboard/projects/DeploymentPage';
 import { ProjectSettingsPage } from '@/app/dashboard/projects/ProjectSettingsPage';
+import { AdminLayout } from '@/app/admin/AdminLayout';
+import { AdminOverviewPage } from '@/app/admin/AdminOverviewPage';
+import { AdminNodesPage } from '@/app/admin/AdminNodesPage';
 import { AuthGuard } from '@/components/AuthGuard';
 
 function Placeholder({ title }: { title: string }) {
@@ -34,6 +37,17 @@ export function App() {
         <Route path="projects/:id/settings" element={<ProjectSettingsPage />} />
         <Route path="settings" element={<Placeholder title="Settings" />} />
         <Route path="billing" element={<Placeholder title="Billing" />} />
+      </Route>
+      <Route
+        path="/admin"
+        element={
+          <AuthGuard>
+            <AdminLayout />
+          </AuthGuard>
+        }
+      >
+        <Route index element={<AdminOverviewPage />} />
+        <Route path="nodes" element={<AdminNodesPage />} />
       </Route>
       <Route path="/" element={<LandingPage />} />
       <Route path="*" element={<Navigate to="/" replace />} />
