@@ -1,4 +1,10 @@
 services:
+  redis:
+    image: redis:7-alpine
+    restart: always
+    networks:
+      - infral
+
   postgres:
     image: postgres:16
     restart: always
@@ -19,6 +25,7 @@ services:
       JWT_SECRET: 3Zpw11hNke4PlZNfqKouSV90EXC5U3pE2meeVTshjs2cp6Sj
       PORT: 5001
       API_URL: https://api.infral.dev
+      REDIS_URL: redis://redis:6379
       WORKER_SECRET: ${WORKER_SECRET}
       FRONTEND_URL: ${FRONTEND_URL}
       GH_CLIENT_ID: ${GH_CLIENT_ID}
@@ -26,6 +33,7 @@ services:
       GH_CALLBACK_URL: ${GH_CALLBACK_URL}
     depends_on:
       - postgres
+      - redis
     extra_hosts:
       - "host.docker.internal:host-gateway"
     networks:

@@ -64,18 +64,20 @@ export function XTerm({ logsUrl, wsUrl, containerId, workerSecret }: XTermProps)
 
     // ── Режим логов (SSE) ──────────────────────────────────
     if (logsUrl) {
-      term.writeln('\x1b[2m── logs ──\x1b[0m\r\n');
+      term.writeln('\x1b[2m── build log ──\x1b[0m\r\n');
       const source = new EventSource(logsUrl);
+      let ended = false;
+
       source.onmessage = (e) => {
-        const text = JSON.parse(e.data as string) as string;
-        term.write(text);
+        term.writeln(e.data as string);
       };
       source.addEventListener('end', () => {
-        term.writeln('\r\n\x1b[2m── stream ended ──\x1b[0m');
+        ended = true;
+        term.writeln('\r\n\x1b[2;32m── done ──\x1b[0m');
         source.close();
       });
       source.onerror = () => {
-        term.writeln('\r\n\x1b[31mSSE connection lost\x1b[0m');
+        if (!ended) term.writeln('\r\n\x1b[31mSSE connection lost\x1b[0m');
         source.close();
       };
       return () => {

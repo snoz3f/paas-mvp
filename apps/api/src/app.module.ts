@@ -7,6 +7,7 @@ import { GithubModule } from './github/github.module';
 import { NodesModule } from './nodes/nodes.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { ProjectsModule } from './projects/projects.module';
+import { RedisModule } from './redis/redis.module';
 import { ServicesModule } from './services/services.module';
 import { WebhooksModule } from './webhooks/webhooks.module';
 
@@ -15,6 +16,7 @@ import { WebhooksModule } from './webhooks/webhooks.module';
     ConfigModule.forRoot({ isGlobal: true }),
     ScheduleModule.forRoot(),
     PrismaModule,
+    RedisModule,
     AuthModule,
     GithubModule,
     ProjectsModule,

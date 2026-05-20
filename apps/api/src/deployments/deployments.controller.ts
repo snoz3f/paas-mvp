@@ -4,6 +4,7 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Inject,
   Param,
   ParseUUIDPipe,
   Patch,
@@ -12,6 +13,8 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import type { Response } from 'express';
+import Redis from 'ioredis';
+import { REDIS } from '@/redis/redis.module';
 import {
   ApiBearerAuth,
   ApiCreatedResponse,
@@ -33,7 +36,10 @@ import { DeploymentsService } from './deployments.service';
 @ApiBearerAuth('access-token')
 @Controller('projects/:projectId/deployments')
 export class DeploymentsController {
-  constructor(private readonly deploymentsService: DeploymentsService) {}
+  constructor(
+    private readonly deploymentsService: DeploymentsService,
+    @Inject(REDIS) private readonly redis: Redis,
+  ) {}
 
   @Post()
   @ApiOperation({ operationId: 'createDeployment', summary: 'Trigger a new deployment' })
@@ -92,31 +98,33 @@ export class DeploymentsController {
     @Param('id', ParseUUIDPipe) id: string,
     @Res() res: Response,
   ) {
-    const { node, containerId } = await this.deploymentsService.getWorkerForDeployment(
-      user.sub, projectId, id,
-    );
+    await this.deploymentsService.findOne(user.sub, projectId, id);
 
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
     res.flushHeaders();
 
-    const workerUrl = `http://${node.ip}:4000/containers/${containerId}/logs`;
-    const response = await fetch(workerUrl, {
-      headers: { 'x-worker-secret': process.env.WORKER_SECRET ?? '' },
-    });
+    const channel = `deployment:${id}:logs`;
+    const sub = this.redis.duplicate();
 
-    if (!response.body) { res.end(); return; }
-
-    const reader = response.body.getReader();
-    const pump = async () => {
-      const { done, value } = await reader.read();
-      if (done) { res.end(); return; }
-      res.write(value);
-      void pump();
+    const cleanup = () => {
+      void sub.unsubscribe(channel);
+      sub.disconnect();
     };
-    void pump();
-    res.on('close', () => reader.cancel());
+
+    res.on('close', cleanup);
+
+    await sub.subscribe(channel);
+    sub.on('message', (_ch, line: string) => {
+      if (line === '__done__') {
+        res.write('event: end\ndata: done\n\n');
+        res.end();
+        cleanup();
+        return;
+      }
+      res.write(`data: ${line}\n\n`);
+    });
   }
 
   @Get(':id/terminal-info')
@@ -140,7 +148,7 @@ export class DeploymentsController {
 @ApiTags('internal')
 @Controller('internal/deployments')
 export class InternalDeploymentsController {
-  constructor(private readonly deploymentsService: DeploymentsService) {}
+  constructor() {}
 
   @Public()
   @UseGuards(WorkerAuthGuard)

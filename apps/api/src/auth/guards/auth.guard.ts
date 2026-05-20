@@ -39,6 +39,9 @@ export class AuthGuard implements CanActivate {
 
   private extractToken(request: Request): string | undefined {
     const [type, token] = request.headers.authorization?.split(' ') ?? [];
-    return type === 'Bearer' ? token : undefined;
+    if (type === 'Bearer') return token;
+    // SSE fallback: EventSource cannot set headers, token comes as query param
+    const queryToken = request.query['token'];
+    return typeof queryToken === 'string' ? queryToken : undefined;
   }
 }

@@ -12,6 +12,7 @@ import {
 import { Button } from '@/components/ui/Button';
 import { StatusBadge } from '@/components/ui/Badge';
 import { XTerm } from '@/components/ui/XTerm';
+import { axiosInstance } from '@/lib/axios';
 import * as s from './DeploymentPage.css';
 
 type Tab = 'logs' | 'terminal';
@@ -52,8 +53,9 @@ export function DeploymentPage() {
     setTab('terminal');
   };
 
-  const logsUrl = deployment?.status === 'RUNNING' || deployment?.status === 'BUILDING'
-    ? `/api/projects/${projectId}/deployments/${deploymentId}/logs`
+  const LIVE_STATUSES = ['QUEUED', 'BUILDING'];
+  const logsUrl = deployment && LIVE_STATUSES.includes(deployment.status)
+    ? `${axiosInstance.defaults.baseURL ?? '/api'}/projects/${projectId}/deployments/${deploymentId}/logs?token=${localStorage.getItem('token') ?? ''}`
     : undefined;
 
   if (isLoading) return null;
@@ -148,11 +150,11 @@ export function DeploymentPage() {
 
         <div className={s.termPanel}>
           {tab === 'logs' && logsUrl && (
-            <XTerm logsUrl={`${logsUrl}?token=${localStorage.getItem('token') ?? ''}`} />
+            <XTerm logsUrl={logsUrl} />
           )}
           {tab === 'logs' && !logsUrl && (
             <div className={s.errorMsg}>
-              Logs are only available for running or building deployments.
+              Logs are available while the deployment is building.
             </div>
           )}
           {tab === 'terminal' && terminalInfo && (
