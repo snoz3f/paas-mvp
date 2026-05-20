@@ -148,7 +148,7 @@ export class DeploymentsController {
 @ApiTags('internal')
 @Controller('internal/deployments')
 export class InternalDeploymentsController {
-  constructor() {}
+  constructor(private readonly deploymentsService: DeploymentsService) {}
 
   @Public()
   @UseGuards(WorkerAuthGuard)
