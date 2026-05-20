@@ -14,7 +14,7 @@ export class NodesService {
   constructor(private readonly prisma: PrismaService) {}
 
   async register(dto: RegisterNodeDto): Promise<{ nodeId: string }> {
-    const existing = await this.prisma.node.findFirst({ where: { ip: dto.ip } });
+    const existing = await this.prisma.node.findFirst({ where: { name: dto.name } });
 
     if (existing) {
       const node = await this.prisma.node.update({
