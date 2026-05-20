@@ -19,10 +19,6 @@ export function AdminNodesPage() {
   const onlineCount = nodes.filter((n) => n.status === 'ONLINE').length;
   const offlineCount = nodes.filter((n) => n.status === 'OFFLINE').length;
   const totalContainers = nodes.reduce((acc, n) => acc + n.activeContainers, 0);
-  const avgCpu =
-    nodes.length > 0
-      ? Math.round(nodes.reduce((acc, n) => acc + n.cpuUsage, 0) / nodes.length)
-      : 0;
 
   return (
     <>
