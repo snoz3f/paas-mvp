@@ -53,8 +53,7 @@ export function DeploymentPage() {
     setTab('terminal');
   };
 
-  const LIVE_STATUSES = ['QUEUED', 'BUILDING'];
-  const logsUrl = deployment && LIVE_STATUSES.includes(deployment.status)
+  const logsUrl = deployment
     ? `${axiosInstance.defaults.baseURL ?? '/api'}/projects/${projectId}/deployments/${deploymentId}/logs?token=${localStorage.getItem('token') ?? ''}`
     : undefined;
 
@@ -153,9 +152,7 @@ export function DeploymentPage() {
             <XTerm logsUrl={logsUrl} />
           )}
           {tab === 'logs' && !logsUrl && (
-            <div className={s.errorMsg}>
-              Logs are available while the deployment is building.
-            </div>
+            <div className={s.errorMsg}>No deployment selected.</div>
           )}
           {tab === 'terminal' && terminalInfo && (
             <XTerm

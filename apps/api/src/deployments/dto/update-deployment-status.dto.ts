@@ -21,4 +21,9 @@ export class UpdateDeploymentStatusDto {
   @IsString()
   @IsOptional()
   error?: string;
+
+  @ApiPropertyOptional()
+  @IsString()
+  @IsOptional()
+  logs?: string;
 }

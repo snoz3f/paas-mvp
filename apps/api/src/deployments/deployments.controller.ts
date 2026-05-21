@@ -98,14 +98,26 @@ export class DeploymentsController {
     @Param('id', ParseUUIDPipe) id: string,
     @Res() res: Response,
   ) {
-    await this.deploymentsService.findOne(user.sub, projectId, id);
+    const deployment = await this.deploymentsService.findOne(user.sub, projectId, id);
 
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
     res.flushHeaders();
 
+    // If deployment is finished, serve logs from DB and close
+    const finished = ['RUNNING', 'FAILED', 'STOPPED'].includes(deployment.status);
+    if (finished && deployment.logs) {
+      for (const line of deployment.logs.split('\n').filter(Boolean)) {
+        res.write(`data: ${line}\n\n`);
+      }
+      res.write('event: end\ndata: done\n\n');
+      res.end();
+      return;
+    }
+
     const channel = `deployment:${id}:logs`;
+    const historyKey = `deployment:${id}:log_history`;
     const sub = this.redis.duplicate();
 
     const cleanup = () => {
@@ -114,6 +126,12 @@ export class DeploymentsController {
     };
 
     res.on('close', cleanup);
+
+    // Replay Redis history for in-progress deployments
+    const history = await this.redis.lrange(historyKey, 0, -1);
+    for (const line of history) {
+      res.write(`data: ${line}\n\n`);
+    }
 
     await sub.subscribe(channel);
     sub.on('message', (_ch, line: string) => {

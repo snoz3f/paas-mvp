@@ -27,6 +27,7 @@ services:
       JWT_SECRET: 3Zpw11hNke4PlZNfqKouSV90EXC5U3pE2meeVTshjs2cp6Sj
       PORT: 5001
       API_URL: https://api.infral.dev
+      API_INTERNAL_URL: http://api:5001
       REDIS_URL: redis://redis:6379
       WORKER_SECRET: ${WORKER_SECRET}
       FRONTEND_URL: ${FRONTEND_URL}

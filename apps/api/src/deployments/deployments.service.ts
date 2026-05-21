@@ -89,7 +89,7 @@ export class DeploymentsService {
           type: 'stop',
           deploymentId: deployment.id,
           containerId: deployment.containerId,
-          callbackUrl: `${process.env.API_URL}/internal/deployments/${deployment.id}/status`,
+          callbackUrl: `${process.env.API_INTERNAL_URL ?? process.env.API_URL}/internal/deployments/${deployment.id}/status`,
         },
       );
     }
@@ -126,6 +126,7 @@ export class DeploymentsService {
         containerId: dto.containerId,
         url: dto.url,
         error: dto.error,
+        logs: dto.logs,
         startedAt: dto.status === DeploymentStatus.BUILDING ? now : undefined,
         finishedAt: isTerminal ? now : undefined,
       },
@@ -163,7 +164,7 @@ export class DeploymentsService {
         containerId: oldContainerId,
         envVars: (project.envVars ?? {}) as Record<string, string>,
         projectId: project.id,
-        callbackUrl: `${process.env.API_URL}/internal/deployments/${deploymentId}/status`,
+        callbackUrl: `${process.env.API_INTERNAL_URL ?? process.env.API_URL}/internal/deployments/${deploymentId}/status`,
       });
     } catch (err) {
       this.logger.error(`Failed to trigger deploy for ${deploymentId}`, err);
