@@ -34,7 +34,7 @@ import { DeploymentsService } from './deployments.service';
 
 @ApiTags('deployments')
 @ApiBearerAuth('access-token')
-@Controller('projects/:projectId/deployments')
+@Controller('projects/:projectId/apps/:appId/deployments')
 export class DeploymentsController {
   constructor(
     private readonly deploymentsService: DeploymentsService,
@@ -44,15 +44,23 @@ export class DeploymentsController {
   @Post()
   @ApiOperation({ operationId: 'createDeployment', summary: 'Trigger a new deployment' })
   @ApiCreatedResponse({ type: DeploymentResponseDto })
-  create(@CurrentUser() user: JwtPayload, @Param('projectId', ParseUUIDPipe) projectId: string) {
-    return this.deploymentsService.create(user.sub, projectId);
+  create(
+    @CurrentUser() user: JwtPayload,
+    @Param('projectId', ParseUUIDPipe) projectId: string,
+    @Param('appId', ParseUUIDPipe) appId: string,
+  ) {
+    return this.deploymentsService.create(user.sub, projectId, appId);
   }
 
   @Get()
-  @ApiOperation({ operationId: 'getDeployments', summary: 'List deployments for a project' })
+  @ApiOperation({ operationId: 'getDeployments', summary: 'List deployments for an app' })
   @ApiOkResponse({ type: [DeploymentResponseDto] })
-  findAll(@CurrentUser() user: JwtPayload, @Param('projectId', ParseUUIDPipe) projectId: string) {
-    return this.deploymentsService.findAll(user.sub, projectId);
+  findAll(
+    @CurrentUser() user: JwtPayload,
+    @Param('projectId', ParseUUIDPipe) projectId: string,
+    @Param('appId', ParseUUIDPipe) appId: string,
+  ) {
+    return this.deploymentsService.findAll(user.sub, projectId, appId);
   }
 
   @Get(':id')
@@ -61,9 +69,10 @@ export class DeploymentsController {
   findOne(
     @CurrentUser() user: JwtPayload,
     @Param('projectId', ParseUUIDPipe) projectId: string,
+    @Param('appId', ParseUUIDPipe) appId: string,
     @Param('id', ParseUUIDPipe) id: string,
   ) {
-    return this.deploymentsService.findOne(user.sub, projectId, id);
+    return this.deploymentsService.findOne(user.sub, projectId, appId, id);
   }
 
   @Post(':id/restart')
@@ -72,9 +81,10 @@ export class DeploymentsController {
   restart(
     @CurrentUser() user: JwtPayload,
     @Param('projectId', ParseUUIDPipe) projectId: string,
+    @Param('appId', ParseUUIDPipe) appId: string,
     @Param('id', ParseUUIDPipe) id: string,
   ) {
-    return this.deploymentsService.restart(user.sub, projectId, id);
+    return this.deploymentsService.restart(user.sub, projectId, appId, id);
   }
 
   @Post(':id/stop')
@@ -84,9 +94,10 @@ export class DeploymentsController {
   stop(
     @CurrentUser() user: JwtPayload,
     @Param('projectId', ParseUUIDPipe) projectId: string,
+    @Param('appId', ParseUUIDPipe) appId: string,
     @Param('id', ParseUUIDPipe) id: string,
   ) {
-    return this.deploymentsService.stop(user.sub, projectId, id);
+    return this.deploymentsService.stop(user.sub, projectId, appId, id);
   }
 
   @Get(':id/logs')
@@ -95,21 +106,23 @@ export class DeploymentsController {
   async streamLogs(
     @CurrentUser() user: JwtPayload,
     @Param('projectId', ParseUUIDPipe) projectId: string,
+    @Param('appId', ParseUUIDPipe) appId: string,
     @Param('id', ParseUUIDPipe) id: string,
     @Res() res: Response,
   ) {
-    const deployment = await this.deploymentsService.findOne(user.sub, projectId, id);
+    const deployment = await this.deploymentsService.findOne(user.sub, projectId, appId, id);
 
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
     res.flushHeaders();
 
-    // If deployment is finished, serve logs from DB and close
     const finished = ['RUNNING', 'FAILED', 'STOPPED'].includes(deployment.status);
-    if (finished && deployment.logs) {
-      for (const line of deployment.logs.split('\n').filter(Boolean)) {
-        res.write(`data: ${line}\n\n`);
+    if (finished) {
+      if (deployment.logs) {
+        for (const line of deployment.logs.split('\n').filter(Boolean)) {
+          res.write(`data: ${line}\n\n`);
+        }
       }
       res.write('event: end\ndata: done\n\n');
       res.end();
@@ -127,7 +140,6 @@ export class DeploymentsController {
 
     res.on('close', cleanup);
 
-    // Replay Redis history for in-progress deployments
     const history = await this.redis.lrange(historyKey, 0, -1);
     for (const line of history) {
       res.write(`data: ${line}\n\n`);
@@ -151,10 +163,11 @@ export class DeploymentsController {
   async getTerminalInfo(
     @CurrentUser() user: JwtPayload,
     @Param('projectId', ParseUUIDPipe) projectId: string,
+    @Param('appId', ParseUUIDPipe) appId: string,
     @Param('id', ParseUUIDPipe) id: string,
   ) {
     const { node, containerId } = await this.deploymentsService.getWorkerForDeployment(
-      user.sub, projectId, id,
+      user.sub, projectId, appId, id,
     );
     return {
       wsUrl: `ws://${node.ip}:4000/containers/terminal`,

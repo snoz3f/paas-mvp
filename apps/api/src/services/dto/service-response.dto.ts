@@ -19,6 +19,9 @@ export class ServiceResponseDto {
   @ApiProperty({ example: 'DATABASE_URL' })
   envKey: string;
 
+  @ApiPropertyOptional({ example: 'postgresql://forge:pass@svc-abc123:5432/forge', type: String, nullable: true })
+  connectionString: string | null;
+
   @ApiPropertyOptional({ type: String, nullable: true })
   containerId: string | null;
 

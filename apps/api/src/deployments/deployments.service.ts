@@ -15,64 +15,63 @@ export class DeploymentsService {
     private readonly workerClient: WorkerClientService,
   ) {}
 
-  async create(userId: string, projectId: string) {
-    const project = await this.prisma.project.findUnique({ where: { id: projectId } });
-    if (!project) throw new NotFoundException('Project not found');
-    if (project.userId !== userId) throw new ForbiddenException();
+  async create(userId: string, projectId: string, appId: string) {
+    await this.assertAppOwner(userId, projectId, appId);
 
     const deployment = await this.prisma.deployment.create({
-      data: { projectId, status: DeploymentStatus.QUEUED },
+      data: { appId, status: DeploymentStatus.QUEUED },
     });
 
-    void this.triggerDeploy(deployment.id, project.id);
+    void this.triggerDeploy(deployment.id, appId);
 
     return deployment;
   }
 
-  async createFromWebhook(projectId: string, commitHash?: string) {
+  async createFromWebhook(appId: string, commitHash?: string) {
     const deployment = await this.prisma.deployment.create({
-      data: { projectId, status: DeploymentStatus.QUEUED, commitHash },
+      data: { appId, status: DeploymentStatus.QUEUED, commitHash },
     });
 
-    void this.triggerDeploy(deployment.id, projectId);
+    void this.triggerDeploy(deployment.id, appId);
 
     return deployment;
   }
 
-  findAll(userId: string, projectId: string) {
+  findAll(userId: string, projectId: string, appId: string) {
     return this.prisma.deployment.findMany({
-      where: { projectId, project: { userId } },
+      where: { appId, app: { projectId, project: { userId } } },
       orderBy: { createdAt: 'desc' },
     });
   }
 
-  async findOne(userId: string, projectId: string, id: string) {
+  async findOne(userId: string, projectId: string, appId: string, id: string) {
     const deployment = await this.prisma.deployment.findUnique({
       where: { id },
-      include: { project: true },
+      include: { app: { include: { project: true } } },
     });
     if (!deployment) throw new NotFoundException('Deployment not found');
-    if (deployment.project.userId !== userId) throw new ForbiddenException();
-    if (deployment.projectId !== projectId) throw new NotFoundException('Deployment not found');
+    if (deployment.app.project.userId !== userId) throw new ForbiddenException();
+    if (deployment.app.projectId !== projectId) throw new NotFoundException('Deployment not found');
+    if (deployment.appId !== appId) throw new NotFoundException('Deployment not found');
 
-    const { gitToken, webhookSecret, ...safeProject } = deployment.project;
-    return { ...deployment, project: { ...safeProject, hasGitToken: !!gitToken } };
+    const { gitToken, webhookSecret, ...safeApp } = deployment.app;
+    return { ...deployment, app: { ...safeApp, hasGitToken: !!gitToken } };
   }
 
-  async restart(userId: string, projectId: string, id: string) {
-    const current = await this.findOne(userId, projectId, id);
+  async restart(userId: string, projectId: string, appId: string, id: string) {
+    const current = await this.findOne(userId, projectId, appId, id);
 
     const deployment = await this.prisma.deployment.create({
-      data: { projectId, status: DeploymentStatus.QUEUED },
+      data: { appId, status: DeploymentStatus.QUEUED },
     });
 
-    void this.triggerDeploy(deployment.id, current.projectId, current.containerId ?? undefined);
+    void this.triggerDeploy(deployment.id, appId, current.containerId ?? undefined);
 
     return deployment;
   }
 
-  async stop(userId: string, projectId: string, id: string) {
-    const deployment = await this.findOne(userId, projectId, id);
+  async stop(userId: string, projectId: string, appId: string, id: string) {
+    const deployment = await this.findOne(userId, projectId, appId, id);
 
     if (deployment.status !== DeploymentStatus.RUNNING) {
       throw new ForbiddenException('Only RUNNING deployments can be stopped');
@@ -100,8 +99,8 @@ export class DeploymentsService {
     });
   }
 
-  async getWorkerForDeployment(userId: string, projectId: string, id: string) {
-    const deployment = await this.findOne(userId, projectId, id);
+  async getWorkerForDeployment(userId: string, projectId: string, appId: string, id: string) {
+    const deployment = await this.findOne(userId, projectId, appId, id);
     if (!deployment.nodeId || !deployment.containerId) {
       throw new NotFoundException('No active container for this deployment');
     }
@@ -133,9 +132,12 @@ export class DeploymentsService {
     });
   }
 
-  private async triggerDeploy(deploymentId: string, projectId: string, oldContainerId?: string) {
+  private async triggerDeploy(deploymentId: string, appId: string, oldContainerId?: string) {
     try {
-      const project = await this.prisma.project.findUniqueOrThrow({ where: { id: projectId } });
+      const app = await this.prisma.app.findUniqueOrThrow({
+        where: { id: appId },
+        include: { project: true },
+      });
       const node = await this.scheduler.selectNode();
 
       if (!node) {
@@ -151,19 +153,19 @@ export class DeploymentsService {
         data: { nodeId: node.id, status: DeploymentStatus.BUILDING, startedAt: new Date() },
       });
 
-      const repoUrl = project.gitToken
-        ? this.buildAuthenticatedUrl(project.repoUrl, project.gitToken)
-        : project.repoUrl;
+      const repoUrl = app.gitToken
+        ? this.buildAuthenticatedUrl(app.repoUrl, app.gitToken)
+        : app.repoUrl;
 
       await this.workerClient.sendJob(node, {
         type: oldContainerId ? 'restart' : 'deploy',
         deploymentId,
         repoUrl,
-        port: project.port,
-        domain: project.domain ?? undefined,
+        port: app.port,
+        domain: app.domain ?? undefined,
         containerId: oldContainerId,
-        envVars: (project.envVars ?? {}) as Record<string, string>,
-        projectId: project.id,
+        envVars: (app.envVars ?? {}) as Record<string, string>,
+        projectId: app.projectId,
         callbackUrl: `${process.env.API_INTERNAL_URL ?? process.env.API_URL}/internal/deployments/${deploymentId}/status`,
       });
     } catch (err) {
@@ -174,6 +176,16 @@ export class DeploymentsService {
         data: { status: DeploymentStatus.FAILED, error: message },
       });
     }
+  }
+
+  private async assertAppOwner(userId: string, projectId: string, appId: string) {
+    const app = await this.prisma.app.findUnique({
+      where: { id: appId },
+      include: { project: true },
+    });
+    if (!app) throw new NotFoundException('App not found');
+    if (app.project.userId !== userId) throw new ForbiddenException();
+    if (app.projectId !== projectId) throw new NotFoundException('App not found');
   }
 
   private buildAuthenticatedUrl(repoUrl: string, token: string): string {

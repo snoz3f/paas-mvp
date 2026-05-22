@@ -91,15 +91,44 @@ export const metaLink = style({
   ':hover': { opacity: 0.75 },
 });
 
-// ── Deployments section ───────────────────────────────────
-export const sectionTitle = style({
-  fontFamily: vars.font.heading,
-  fontSize: vars.font.size.md,
-  fontWeight: '700',
-  letterSpacing: '-0.01em',
-  marginBottom: vars.space.md,
+// ── Tabs ──────────────────────────────────────────────────
+export const tabs = style({
+  display: 'flex',
+  gap: '2px',
+  borderBottom: `1px solid ${vars.color.border}`,
+  marginBottom: `-${vars.space.sm}`,
 });
 
+export const tab = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: vars.space.xs,
+  padding: `${vars.space.sm} ${vars.space.md}`,
+  fontSize: vars.font.size.sm,
+  color: vars.color.textMuted,
+  borderBottom: '2px solid transparent',
+  marginBottom: '-1px',
+  transition: `color ${vars.transition.fast}`,
+  ':hover': { color: vars.color.text },
+});
+
+export const tabActive = style({
+  color: vars.color.text,
+  borderBottomColor: vars.color.accent,
+});
+
+export const tabCount = style({
+  fontSize: vars.font.size.xs,
+  color: vars.color.textSubtle,
+  backgroundColor: vars.color.surface,
+  border: `1px solid ${vars.color.border}`,
+  borderRadius: vars.radius.full,
+  padding: `0 6px`,
+  lineHeight: '18px',
+  fontFamily: vars.font.mono,
+});
+
+// ── Deployments ───────────────────────────────────────────
 export const deploymentList = style({
   display: 'flex',
   flexDirection: 'column',
@@ -150,6 +179,156 @@ export const deploymentUrl = style({
   fontFamily: vars.font.mono,
   transition: `opacity ${vars.transition.fast}`,
   ':hover': { opacity: 0.75 },
+});
+
+// ── Service grid ──────────────────────────────────────────
+export const serviceGrid = style({
+  display: 'grid',
+  gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+  gap: vars.space.md,
+});
+
+export const serviceCard = style({
+  backgroundColor: vars.color.surface,
+  border: `1px solid ${vars.color.border}`,
+  borderRadius: vars.radius.lg,
+  padding: vars.space.lg,
+  display: 'flex',
+  flexDirection: 'column',
+  gap: vars.space.md,
+  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.03)',
+});
+
+export const serviceCardTitle = style({
+  fontFamily: vars.font.heading,
+  fontSize: vars.font.size.sm,
+  fontWeight: '700',
+  letterSpacing: '-0.01em',
+});
+
+export const serviceCardHeader = style({
+  display: 'flex',
+  alignItems: 'flex-start',
+  justifyContent: 'space-between',
+});
+
+export const serviceCardInfo = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: vars.space.md,
+});
+
+export const serviceCardName = style({
+  fontSize: vars.font.size.sm,
+  fontWeight: '600',
+  color: vars.color.text,
+});
+
+export const serviceCardVersion = style({
+  fontSize: vars.font.size.xs,
+  color: vars.color.textMuted,
+  fontFamily: vars.font.mono,
+  marginTop: '2px',
+});
+
+export const serviceCardRight = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: vars.space.sm,
+});
+
+export const serviceDeleteBtn = style({
+  color: vars.color.textSubtle,
+  transition: `color ${vars.transition.fast}`,
+  padding: '2px',
+  ':hover': { color: vars.color.danger },
+});
+
+export const serviceCardMeta = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '6px',
+  paddingTop: vars.space.sm,
+  borderTop: `1px solid ${vars.color.border}`,
+});
+
+export const serviceMetaRow = style({
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+});
+
+export const serviceMetaLabel = style({
+  fontSize: vars.font.size.xs,
+  color: vars.color.textMuted,
+  letterSpacing: '0.05em',
+  textTransform: 'uppercase',
+  fontWeight: '500',
+});
+
+export const serviceMetaValue = style({
+  fontSize: vars.font.size.xs,
+  color: vars.color.text,
+  fontFamily: vars.font.mono,
+});
+
+export const serviceEnvKeyRow = style({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  gap: vars.space.md,
+});
+
+export const serviceEnvKeyInput = style({
+  flex: 1,
+  padding: `6px ${vars.space.sm}`,
+  fontSize: vars.font.size.xs,
+  fontFamily: vars.font.mono,
+  color: vars.color.text,
+  backgroundColor: vars.color.bg,
+  border: `1px solid ${vars.color.border}`,
+  borderRadius: vars.radius.sm,
+  outline: 'none',
+  transition: `border-color ${vars.transition.fast}`,
+  ':focus': {
+    borderColor: vars.color.accent,
+  },
+});
+
+export const serviceCardActions = style({
+  display: 'flex',
+  justifyContent: 'flex-end',
+  gap: vars.space.sm,
+  paddingTop: vars.space.xs,
+});
+
+// ── Service type selector ─────────────────────────────────
+export const serviceTypeSelect = style({
+  display: 'flex',
+  gap: vars.space.sm,
+});
+
+export const serviceTypeBtn = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: vars.space.sm,
+  padding: `${vars.space.sm} ${vars.space.md}`,
+  fontSize: vars.font.size.sm,
+  color: vars.color.textMuted,
+  border: `1px solid ${vars.color.border}`,
+  borderRadius: vars.radius.md,
+  backgroundColor: vars.color.bg,
+  transition: `all ${vars.transition.fast}`,
+  ':hover': {
+    borderColor: vars.color.borderHover,
+    color: vars.color.text,
+  },
+});
+
+export const serviceTypeBtnActive = style({
+  borderColor: vars.color.accent,
+  color: vars.color.text,
+  backgroundColor: 'rgba(240,228,104,0.06)',
 });
 
 // ── Empty / skeleton ──────────────────────────────────────

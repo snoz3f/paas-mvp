@@ -17,12 +17,8 @@ function generatePassword(): string {
 
 function buildConnectionString(type: string, serviceId: string, password: string): string {
   const host = `svc-${serviceId.slice(0, 8)}`;
-  if (type === 'POSTGRES') {
-    return `postgresql://forge:${password}@${host}:5432/forge`;
-  }
-  if (type === 'REDIS') {
-    return `redis://${host}:6379`;
-  }
+  if (type === 'POSTGRES') return `postgresql://forge:${password}@${host}:5432/forge`;
+  if (type === 'REDIS') return `redis://${host}:6379`;
   throw new Error(`Unknown service type: ${type}`);
 }
 
@@ -48,16 +44,14 @@ export class ServicesService {
       data: { projectId, type: dto.type, version, envKey: dto.envKey },
     });
 
-    // Inject connection string into project envVars immediately
     const connectionString = buildConnectionString(dto.type, service.id, password);
-    const currentEnv = (project.envVars ?? {}) as Record<string, string>;
-    await this.prisma.project.update({
-      where: { id: projectId },
-      data: { envVars: { ...currentEnv, [dto.envKey]: connectionString } },
+    await this.prisma.service.update({
+      where: { id: service.id },
+      data: { connectionString },
     });
 
     void this.provision(service.id, projectId, dto.type, version, password);
-    return service;
+    return { ...service, connectionString };
   }
 
   findAll(userId: string, projectId: string) {
@@ -76,13 +70,6 @@ export class ServicesService {
     if (service.project.userId !== userId) throw new ForbiddenException();
     if (service.projectId !== projectId) throw new NotFoundException('Service not found');
 
-    // Remove env var from project
-    const project = await this.prisma.project.findUniqueOrThrow({ where: { id: projectId } });
-    const currentEnv = (project.envVars ?? {}) as Record<string, string>;
-    const { [service.envKey]: _, ...rest } = currentEnv;
-    await this.prisma.project.update({ where: { id: projectId }, data: { envVars: rest } });
-
-    // Dispatch removal job if container exists
     if (service.containerId && service.nodeId) {
       const node = await this.prisma.node.findUnique({ where: { id: service.nodeId } });
       if (node) {
@@ -102,10 +89,7 @@ export class ServicesService {
   async updateStatus(id: string, dto: UpdateServiceStatusDto) {
     return this.prisma.service.update({
       where: { id },
-      data: {
-        status: dto.status,
-        containerId: dto.containerId,
-      },
+      data: { status: dto.status, containerId: dto.containerId },
     });
   }
 

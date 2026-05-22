@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
+import { AppsModule } from './apps/apps.module';
 import { AuthModule } from './auth/auth.module';
 import { DeploymentsModule } from './deployments/deployments.module';
 import { GithubModule } from './github/github.module';
@@ -20,6 +21,7 @@ import { WebhooksModule } from './webhooks/webhooks.module';
     AuthModule,
     GithubModule,
     ProjectsModule,
+    AppsModule,
     DeploymentsModule,
     NodesModule,
     ServicesModule,
