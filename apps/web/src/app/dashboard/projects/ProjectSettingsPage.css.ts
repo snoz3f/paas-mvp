@@ -51,8 +51,49 @@ export const topbarTitle = style({
 // ── Two-column body ───────────────────────────────────────
 export const body = style({
   flex: 1,
+  overflowY: 'auto',
+  padding: vars.space.xl,
+});
+
+export const inner = style({
+  maxWidth: '560px',
   display: 'flex',
-  overflow: 'hidden',
+  flexDirection: 'column',
+  gap: vars.space.xl,
+});
+
+export const section = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: vars.space.md,
+});
+
+export const form = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: vars.space.md,
+});
+
+export const sectionTitleDanger = style({
+  fontFamily: vars.font.heading,
+  fontSize: vars.font.size.lg,
+  fontWeight: '700',
+  letterSpacing: '-0.03em',
+  color: vars.color.danger,
+});
+
+export const dangerRow = style({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  gap: vars.space.lg,
+});
+
+export const dangerLabel = style({
+  fontSize: vars.font.size.sm,
+  fontWeight: '600',
+  color: vars.color.text,
+  marginBottom: '4px',
 });
 
 // ── Settings nav ──────────────────────────────────────────

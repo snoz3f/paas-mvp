@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { customInstance } from '@/lib/axios';
 import { useCreateProject } from '@/api/generated/projects/projects';
+import { useCreateApp } from '@/api/generated/apps/apps';
 import * as s from './NewProjectPage.css';
 
 // ── Icons ─────────────────────────────────────────────────
@@ -80,7 +81,8 @@ export function NewProjectPage() {
   const [repoSearch, setRepoSearch] = useState('');
   const [formError, setFormError] = useState<string | null>(null);
 
-  const { mutateAsync: createProject, isPending } = useCreateProject();
+  const { mutateAsync: createProject } = useCreateProject();
+  const { mutateAsync: createApp, isPending } = useCreateApp();
 
   const { data: me } = useQuery<MeResponse>({
     queryKey: ['me'],
@@ -109,7 +111,9 @@ export function NewProjectPage() {
     }
     setFormError(null);
     try {
-      const project = await createProject({
+      const project = await createProject({ data: { name: data.name } });
+      await createApp({
+        projectId: project.id,
         data: {
           name: data.name,
           repoUrl: selectedRepo.url,

@@ -18,33 +18,33 @@ import * as s from './DeploymentPage.css';
 type Tab = 'logs' | 'terminal';
 
 export function DeploymentPage() {
-  const { id: projectId, deploymentId } = useParams<{ id: string; deploymentId: string }>();
+  const { id: projectId, appId, deploymentId } = useParams<{ id: string; appId: string; deploymentId: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [tab, setTab] = useState<Tab>('logs');
   const [terminalEnabled, setTerminalEnabled] = useState(false);
 
-  const { data: deployment, isLoading } = useGetDeploymentById(projectId!, deploymentId!);
+  const { data: deployment, isLoading } = useGetDeploymentById(projectId!, appId!, deploymentId!);
   const { mutateAsync: restart, isPending: isRestarting } = useRestartDeployment();
   const { mutateAsync: stop, isPending: isStopping } = useStopDeployment();
 
-  const { data: terminalInfo } = useGetTerminalInfo(projectId!, deploymentId!, {
+  const { data: terminalInfo } = useGetTerminalInfo(projectId!, appId!, deploymentId!, {
     query: { enabled: terminalEnabled },
   });
 
   const invalidate = async () => {
-    await queryClient.invalidateQueries({ queryKey: getGetDeploymentByIdQueryKey(projectId!, deploymentId!) });
-    await queryClient.invalidateQueries({ queryKey: getGetDeploymentsQueryKey(projectId!) });
+    await queryClient.invalidateQueries({ queryKey: getGetDeploymentByIdQueryKey(projectId!, appId!, deploymentId!) });
+    await queryClient.invalidateQueries({ queryKey: getGetDeploymentsQueryKey(projectId!, appId!) });
   };
 
   const handleRestart = async () => {
-    await restart({ projectId: projectId!, id: deploymentId! });
+    await restart({ projectId: projectId!, appId: appId!, id: deploymentId! });
     await invalidate();
-    void navigate(`/dashboard/projects/${projectId}`);
+    void navigate(`/dashboard/projects/${projectId}/apps/${appId}`);
   };
 
   const handleStop = async () => {
-    await stop({ projectId: projectId!, id: deploymentId! });
+    await stop({ projectId: projectId!, appId: appId!, id: deploymentId! });
     await invalidate();
   };
 
@@ -54,7 +54,7 @@ export function DeploymentPage() {
   };
 
   const logsUrl = deployment
-    ? `${axiosInstance.defaults.baseURL ?? '/api'}/projects/${projectId}/deployments/${deploymentId}/logs?token=${localStorage.getItem('token') ?? ''}`
+    ? `${axiosInstance.defaults.baseURL ?? '/api'}/projects/${projectId}/apps/${appId}/deployments/${deploymentId}/logs?token=${localStorage.getItem('token') ?? ''}`
     : undefined;
 
   if (isLoading) return null;
@@ -65,12 +65,12 @@ export function DeploymentPage() {
         <div className={s.topbarLeft}>
           <button
             className={s.backBtn}
-            onClick={() => void navigate(`/dashboard/projects/${projectId}`)}
+            onClick={() => void navigate(`/dashboard/projects/${projectId}/apps/${appId}`)}
           >
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
               <path d="M10 12L6 8l4-4" />
             </svg>
-            Project
+            App
           </button>
           <span className={s.topbarTitle}>#{deploymentId?.slice(0, 8)}</span>
           {deployment && <StatusBadge status={deployment.status} />}
@@ -79,17 +79,11 @@ export function DeploymentPage() {
         <div className={s.topbarActions}>
           {deployment?.status === 'RUNNING' && (
             <>
-              <Button size="sm" variant="ghost" onClick={handleOpenTerminal}>
-                Terminal
-              </Button>
-              <Button size="sm" variant="ghost" loading={isStopping} onClick={() => void handleStop()}>
-                Stop
-              </Button>
+              <Button size="sm" variant="ghost" onClick={handleOpenTerminal}>Terminal</Button>
+              <Button size="sm" variant="ghost" loading={isStopping} onClick={() => void handleStop()}>Stop</Button>
             </>
           )}
-          <Button size="sm" loading={isRestarting} onClick={() => void handleRestart()}>
-            Redeploy
-          </Button>
+          <Button size="sm" loading={isRestarting} onClick={() => void handleRestart()}>Redeploy</Button>
         </div>
       </div>
 
@@ -135,25 +129,17 @@ export function DeploymentPage() {
           <button
             className={tab === 'logs' ? `${s.tab} ${s.tabActive}` : s.tab}
             onClick={() => setTab('logs')}
-          >
-            Logs
-          </button>
+          >Logs</button>
           <button
             className={tab === 'terminal' ? `${s.tab} ${s.tabActive}` : s.tab}
             onClick={() => setTab('terminal')}
             disabled={deployment?.status !== 'RUNNING'}
-          >
-            Terminal
-          </button>
+          >Terminal</button>
         </div>
 
         <div className={s.termPanel}>
-          {tab === 'logs' && logsUrl && (
-            <XTerm logsUrl={logsUrl} />
-          )}
-          {tab === 'logs' && !logsUrl && (
-            <div className={s.errorMsg}>No deployment selected.</div>
-          )}
+          {tab === 'logs' && logsUrl && <XTerm logsUrl={logsUrl} />}
+          {tab === 'logs' && !logsUrl && <div className={s.errorMsg}>No deployment selected.</div>}
           {tab === 'terminal' && terminalInfo && (
             <XTerm
               wsUrl={terminalInfo.wsUrl}

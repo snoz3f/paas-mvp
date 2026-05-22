@@ -6,6 +6,7 @@ import { DashboardLayout } from '@/app/dashboard/DashboardLayout';
 import { ProjectsPage } from '@/app/dashboard/projects/ProjectsPage';
 import { NewProjectPage } from '@/app/dashboard/projects/NewProjectPage';
 import { ProjectPage } from '@/app/dashboard/projects/ProjectPage';
+import { AppPage } from '@/app/dashboard/projects/AppPage';
 import { DeploymentPage } from '@/app/dashboard/projects/DeploymentPage';
 import { ProjectSettingsPage } from '@/app/dashboard/projects/ProjectSettingsPage';
 import { AdminLayout } from '@/app/admin/AdminLayout';
@@ -33,7 +34,8 @@ export function App() {
         <Route index element={<ProjectsPage />} />
         <Route path="projects/new" element={<NewProjectPage />} />
         <Route path="projects/:id" element={<ProjectPage />} />
-        <Route path="projects/:id/deployments/:deploymentId" element={<DeploymentPage />} />
+        <Route path="projects/:id/apps/:appId" element={<AppPage />} />
+        <Route path="projects/:id/apps/:appId/deployments/:deploymentId" element={<DeploymentPage />} />
         <Route path="projects/:id/settings" element={<ProjectSettingsPage />} />
         <Route path="settings" element={<Placeholder title="Settings" />} />
         <Route path="billing" element={<Placeholder title="Billing" />} />

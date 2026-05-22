@@ -181,6 +181,71 @@ export const deploymentUrl = style({
   ':hover': { opacity: 0.75 },
 });
 
+// ── App grid ──────────────────────────────────────────────
+export const appGrid = style({
+  display: 'grid',
+  gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+  gap: vars.space.md,
+});
+
+export const appCard = style({
+  backgroundColor: vars.color.surface,
+  border: `1px solid ${vars.color.border}`,
+  borderRadius: vars.radius.lg,
+  padding: vars.space.lg,
+  display: 'flex',
+  flexDirection: 'column',
+  gap: vars.space.sm,
+  cursor: 'pointer',
+  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.03)',
+  transition: `border-color ${vars.transition.fast}, background-color ${vars.transition.fast}`,
+  ':hover': {
+    borderColor: vars.color.borderHover,
+    backgroundColor: vars.color.surfaceHover,
+  },
+});
+
+export const appCardHeader = style({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  gap: vars.space.sm,
+});
+
+export const appCardName = style({
+  fontFamily: vars.font.heading,
+  fontSize: vars.font.size.md,
+  fontWeight: '700',
+  letterSpacing: '-0.02em',
+});
+
+export const appCardRepo = style({
+  fontSize: vars.font.size.xs,
+  color: vars.color.textMuted,
+  fontFamily: vars.font.mono,
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+});
+
+export const appCardFramework = style({
+  fontSize: vars.font.size.xs,
+  color: vars.color.textSubtle,
+  textTransform: 'uppercase',
+  letterSpacing: '0.06em',
+  fontWeight: '500',
+});
+
+export const autoBadge = style({
+  fontSize: '10px',
+  color: vars.color.success,
+  border: `1px solid ${vars.color.success}`,
+  borderRadius: vars.radius.full,
+  padding: '1px 7px',
+  opacity: 0.8,
+  flexShrink: 0,
+});
+
 // ── Service grid ──────────────────────────────────────────
 export const serviceGrid = style({
   display: 'grid',
