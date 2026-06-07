@@ -1,18 +1,9 @@
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
-import { useQueryClient } from '@tanstack/react-query';
-import {
-  useGetDeploymentById,
-  useRestartDeployment,
-  useStopDeployment,
-  useGetTerminalInfo,
-  getGetDeploymentsQueryKey,
-  getGetDeploymentByIdQueryKey,
-} from '@/api/generated/deployments/deployments';
 import { Button } from '@/components/ui/Button';
 import { StatusBadge } from '@/components/ui/Badge';
 import { XTerm } from '@/components/ui/XTerm';
-import { axiosInstance } from '@/lib/axios';
+import { trpc } from '@/lib/trpc';
 import * as s from './DeploymentPage.css';
 
 type Tab = 'logs' | 'terminal';
@@ -20,21 +11,22 @@ type Tab = 'logs' | 'terminal';
 export function DeploymentPage() {
   const { id: projectId, appId, deploymentId } = useParams<{ id: string; appId: string; deploymentId: string }>();
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
+  const utils = trpc.useUtils();
   const [tab, setTab] = useState<Tab>('logs');
   const [terminalEnabled, setTerminalEnabled] = useState(false);
 
-  const { data: deployment, isLoading } = useGetDeploymentById(projectId!, appId!, deploymentId!);
-  const { mutateAsync: restart, isPending: isRestarting } = useRestartDeployment();
-  const { mutateAsync: stop, isPending: isStopping } = useStopDeployment();
+  const { data: deployment, isLoading } = trpc.deployments.get.useQuery({ projectId: projectId!, appId: appId!, id: deploymentId! });
+  const { mutateAsync: restart, isPending: isRestarting } = trpc.deployments.restart.useMutation();
+  const { mutateAsync: stop, isPending: isStopping } = trpc.deployments.stop.useMutation();
 
-  const { data: terminalInfo } = useGetTerminalInfo(projectId!, appId!, deploymentId!, {
-    query: { enabled: terminalEnabled },
-  });
+  const { data: terminalInfo } = trpc.deployments.getTerminalInfo.useQuery(
+    { projectId: projectId!, appId: appId!, id: deploymentId! },
+    { enabled: terminalEnabled },
+  );
 
   const invalidate = async () => {
-    await queryClient.invalidateQueries({ queryKey: getGetDeploymentByIdQueryKey(projectId!, appId!, deploymentId!) });
-    await queryClient.invalidateQueries({ queryKey: getGetDeploymentsQueryKey(projectId!, appId!) });
+    await utils.deployments.get.invalidate({ projectId: projectId!, appId: appId!, id: deploymentId! });
+    await utils.deployments.list.invalidate({ projectId: projectId!, appId: appId! });
   };
 
   const handleRestart = async () => {
@@ -54,7 +46,7 @@ export function DeploymentPage() {
   };
 
   const logsUrl = deployment
-    ? `${axiosInstance.defaults.baseURL ?? '/api'}/projects/${projectId}/apps/${appId}/deployments/${deploymentId}/logs?token=${localStorage.getItem('token') ?? ''}`
+    ? `${import.meta.env.VITE_API_URL ?? ''}/projects/${projectId}/apps/${appId}/deployments/${deploymentId}/logs?token=${localStorage.getItem('token') ?? ''}`
     : undefined;
 
   if (isLoading) return null;
@@ -94,7 +86,7 @@ export function DeploymentPage() {
               <span className={s.metaLabel}>Started</span>
               <span className={s.metaValue}>
                 {deployment.startedAt
-                  ? new Date(deployment.startedAt as unknown as string).toLocaleString('en', {
+                  ? new Date(deployment.startedAt).toLocaleString('en', {
                       month: 'short', day: 'numeric',
                       hour: '2-digit', minute: '2-digit', second: '2-digit',
                     })
@@ -105,12 +97,12 @@ export function DeploymentPage() {
               <div className={s.metaItem}>
                 <span className={s.metaLabel}>URL</span>
                 <a
-                  href={deployment.url as unknown as string}
+                  href={deployment.url}
                   target="_blank"
                   rel="noreferrer"
                   className={`${s.metaValue} ${s.metaLink}`}
                 >
-                  {(deployment.url as unknown as string).replace('https://', '')}
+                  {(deployment.url).replace('https://', '')}
                 </a>
               </div>
             )}
@@ -118,7 +110,7 @@ export function DeploymentPage() {
               <div className={s.metaItem}>
                 <span className={s.metaLabel}>Error</span>
                 <span className={`${s.metaValue} ${s.errorMsg}`}>
-                  {deployment.error as unknown as string}
+                  {deployment.error}
                 </span>
               </div>
             )}

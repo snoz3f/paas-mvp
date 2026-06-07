@@ -1,16 +1,13 @@
 import { useState } from 'react';
 import type React from 'react';
 import { siNodedotjs, siNestjs, siNextdotjs, siReact, siPython, siDocker } from 'simple-icons';
-import { useQuery } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useNavigate } from 'react-router';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
-import { customInstance } from '@/lib/axios';
-import { useCreateProject } from '@/api/generated/projects/projects';
-import { useCreateApp } from '@/api/generated/apps/apps';
+import { trpc } from '@/lib/trpc';
 import * as s from './NewProjectPage.css';
 
 // ── Icons ─────────────────────────────────────────────────
@@ -43,23 +40,6 @@ const FRAMEWORKS = [
 
 type Framework = typeof FRAMEWORKS[number]['value'];
 
-// ── API types ─────────────────────────────────────────────
-
-interface MeResponse {
-  id: string;
-  email: string;
-  githubLogin: string | null;
-}
-
-interface GithubRepo {
-  id: number;
-  fullName: string;
-  name: string;
-  private: boolean;
-  url: string;
-  defaultBranch: string;
-}
-
 // ── Form ──────────────────────────────────────────────────
 
 const schema = z.object({
@@ -77,21 +57,16 @@ type FormData = z.infer<typeof schema>;
 export function NewProjectPage() {
   const navigate = useNavigate();
   const [framework, setFramework] = useState<Framework | null>(null);
-  const [selectedRepo, setSelectedRepo] = useState<GithubRepo | null>(null);
+  const [selectedRepo, setSelectedRepo] = useState<{ id: number; fullName: string; url: string; private: boolean } | null>(null);
   const [repoSearch, setRepoSearch] = useState('');
   const [formError, setFormError] = useState<string | null>(null);
 
-  const { mutateAsync: createProject } = useCreateProject();
-  const { mutateAsync: createApp, isPending } = useCreateApp();
+  const utils = trpc.useUtils();
+  const { mutateAsync: createProject } = trpc.projects.create.useMutation();
+  const { mutateAsync: createApp, isPending } = trpc.apps.create.useMutation();
 
-  const { data: me } = useQuery<MeResponse>({
-    queryKey: ['me'],
-    queryFn: () => customInstance<MeResponse>({ url: '/auth/me', method: 'GET' }),
-  });
-
-  const { data: repos = [], isLoading: reposLoading } = useQuery<GithubRepo[]>({
-    queryKey: ['github-repos'],
-    queryFn: () => customInstance<GithubRepo[]>({ url: '/github/repos', method: 'GET' }),
+  const { data: me } = trpc.auth.getMe.useQuery();
+  const { data: repos = [], isLoading: reposLoading } = trpc.github.listRepos.useQuery(undefined, {
     enabled: !!me?.githubLogin,
   });
 
@@ -100,7 +75,7 @@ export function NewProjectPage() {
   });
 
   const handleConnectGithub = async () => {
-    const data = await customInstance<{ url: string }>({ url: '/auth/github/url', method: 'GET' });
+    const data = await utils.github.getOAuthUrl.fetch();
     window.location.href = data.url;
   };
 
@@ -111,14 +86,12 @@ export function NewProjectPage() {
     }
     setFormError(null);
     try {
-      const project = await createProject({ data: { name: data.name } });
+      const project = await createProject({ name: data.name });
       await createApp({
         projectId: project.id,
-        data: {
-          name: data.name,
-          repoUrl: selectedRepo.url,
-          framework: framework ?? undefined,
-        },
+        name: data.name,
+        repoUrl: selectedRepo.url,
+        framework: framework ?? undefined,
       });
       void navigate(`/dashboard/projects/${project.id}`);
     } catch {

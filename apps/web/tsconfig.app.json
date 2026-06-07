@@ -21,8 +21,9 @@
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true,
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@api/*": ["../../api/src/*"]
     }
   },
-  "include": ["src"]
+  "include": ["src", "../../api/src/trpc/app-router.ts"]
 }

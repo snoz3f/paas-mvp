@@ -11,6 +11,7 @@ import { ProjectsModule } from './projects/projects.module';
 import { RedisModule } from './redis/redis.module';
 import { ServicesModule } from './services/services.module';
 import { WebhooksModule } from './webhooks/webhooks.module';
+import { TrpcModule } from './trpc/trpc.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { WebhooksModule } from './webhooks/webhooks.module';
     NodesModule,
     ServicesModule,
     WebhooksModule,
+    TrpcModule,
   ],
 })
 export class AppModule {}

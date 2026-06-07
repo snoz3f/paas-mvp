@@ -3,16 +3,9 @@ import { useNavigate, useParams } from 'react-router';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useQueryClient } from '@tanstack/react-query';
-import {
-  useGetProjectById,
-  useUpdateProject,
-  useDeleteProject,
-  getGetProjectsQueryKey,
-  getGetProjectByIdQueryKey,
-} from '@/api/generated/projects/projects';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
+import { trpc } from '@/lib/trpc';
 import * as s from './ProjectSettingsPage.css';
 
 const generalSchema = z.object({
@@ -23,11 +16,11 @@ type GeneralForm = z.infer<typeof generalSchema>;
 export function ProjectSettingsPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
+  const utils = trpc.useUtils();
 
-  const { data: project } = useGetProjectById(id!);
-  const { mutateAsync: updateProject, isPending: isSaving } = useUpdateProject();
-  const { mutateAsync: deleteProject, isPending: isDeleting } = useDeleteProject();
+  const { data: project } = trpc.projects.get.useQuery({ id: id! });
+  const { mutateAsync: updateProject, isPending: isSaving } = trpc.projects.update.useMutation();
+  const { mutateAsync: deleteProject, isPending: isDeleting } = trpc.projects.delete.useMutation();
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm<GeneralForm>({
     resolver: zodResolver(generalSchema),
@@ -38,15 +31,15 @@ export function ProjectSettingsPage() {
   }, [project, reset]);
 
   const onSave = async (data: GeneralForm) => {
-    await updateProject({ id: id!, data });
-    await queryClient.invalidateQueries({ queryKey: getGetProjectByIdQueryKey(id!) });
-    await queryClient.invalidateQueries({ queryKey: getGetProjectsQueryKey() });
+    await updateProject({ id: id!, ...data });
+    await utils.projects.get.invalidate({ id: id! });
+    await utils.projects.list.invalidate();
   };
 
   const onDelete = async () => {
     if (!confirm('Delete this project and all its apps? This cannot be undone.')) return;
     await deleteProject({ id: id! });
-    await queryClient.invalidateQueries({ queryKey: getGetProjectsQueryKey() });
+    await utils.projects.list.invalidate();
     void navigate('/dashboard');
   };
 

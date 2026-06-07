@@ -1,16 +1,8 @@
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
-import { useQueryClient } from '@tanstack/react-query';
-import { useGetProjectById } from '@/api/generated/projects/projects';
-import { useGetApps } from '@/api/generated/apps/apps';
-import {
-  useGetServices,
-  useCreateService,
-  useDeleteService,
-  getGetServicesQueryKey,
-} from '@/api/generated/services/services';
 import { Button } from '@/components/ui/Button';
 import { StatusBadge } from '@/components/ui/Badge';
+import { trpc } from '@/lib/trpc';
 import { siPostgresql, siRedis } from 'simple-icons';
 import * as s from './ProjectPage.css';
 
@@ -40,27 +32,27 @@ function ServiceIcon({ type, size = 20 }: { type: string; size?: number }) {
 export function ProjectPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
+  const utils = trpc.useUtils();
   const [tab, setTab] = useState<Tab>('apps');
   const [addingService, setAddingService] = useState(false);
   const [newServiceType, setNewServiceType] = useState<ServiceType>('POSTGRES');
   const [newServiceEnvKey, setNewServiceEnvKey] = useState('DATABASE_URL');
 
-  const { data: project, isLoading: projectLoading } = useGetProjectById(id!);
-  const { data: apps, isLoading: appsLoading } = useGetApps(id!);
-  const { data: services } = useGetServices(id!);
-  const { mutateAsync: createService, isPending: isCreatingService } = useCreateService();
-  const { mutateAsync: deleteService } = useDeleteService();
+  const { data: project, isLoading: projectLoading } = trpc.projects.get.useQuery({ id: id! });
+  const { data: apps, isLoading: appsLoading } = trpc.apps.list.useQuery({ projectId: id! });
+  const { data: services } = trpc.services.list.useQuery({ projectId: id! });
+  const { mutateAsync: createService, isPending: isCreatingService } = trpc.services.create.useMutation();
+  const { mutateAsync: deleteService } = trpc.services.delete.useMutation();
 
   const handleAddService = async () => {
-    await createService({ projectId: id!, data: { type: newServiceType, version: 'latest', envKey: newServiceEnvKey } });
-    await queryClient.invalidateQueries({ queryKey: getGetServicesQueryKey(id!) });
+    await createService({ projectId: id!, type: newServiceType, version: 'latest', envKey: newServiceEnvKey });
+    await utils.services.list.invalidate({ projectId: id! });
     setAddingService(false);
   };
 
   const handleDeleteService = async (serviceId: string) => {
     await deleteService({ projectId: id!, id: serviceId });
-    await queryClient.invalidateQueries({ queryKey: getGetServicesQueryKey(id!) });
+    await utils.services.list.invalidate({ projectId: id! });
   };
 
   const handleServiceTypeChange = (type: ServiceType) => {

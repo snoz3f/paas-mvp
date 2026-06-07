@@ -9,5 +9,6 @@ import { ServicesService } from './services.service';
   imports: [PrismaModule, SchedulerModule, WorkerClientModule],
   controllers: [ServicesController, InternalServicesController],
   providers: [ServicesService],
+  exports: [ServicesService],
 })
 export class ServicesModule {}

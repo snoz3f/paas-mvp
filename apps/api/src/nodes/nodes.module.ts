@@ -5,5 +5,6 @@ import { NodesService } from './nodes.service';
 @Module({
   controllers: [NodesController, InternalNodesController],
   providers: [NodesService],
+  exports: [NodesService],
 })
 export class NodesModule {}

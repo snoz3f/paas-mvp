@@ -1,27 +1,21 @@
 import { useNavigate, useParams } from 'react-router';
-import { useQueryClient } from '@tanstack/react-query';
-import { useGetAppById } from '@/api/generated/apps/apps';
-import {
-  useGetDeployments,
-  useCreateDeployment,
-  getGetDeploymentsQueryKey,
-} from '@/api/generated/deployments/deployments';
 import { Button } from '@/components/ui/Button';
 import { StatusBadge } from '@/components/ui/Badge';
+import { trpc } from '@/lib/trpc';
 import * as s from './ProjectPage.css';
 
 export function AppPage() {
   const { id: projectId, appId } = useParams<{ id: string; appId: string }>();
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
+  const utils = trpc.useUtils();
 
-  const { data: app, isLoading: appLoading } = useGetAppById(projectId!, appId!);
-  const { data: deployments, isLoading: deploymentsLoading } = useGetDeployments(projectId!, appId!);
-  const { mutateAsync: deploy, isPending: isDeploying } = useCreateDeployment();
+  const { data: app, isLoading: appLoading } = trpc.apps.get.useQuery({ projectId: projectId!, id: appId! });
+  const { data: deployments, isLoading: deploymentsLoading } = trpc.deployments.list.useQuery({ projectId: projectId!, appId: appId! });
+  const { mutateAsync: deploy, isPending: isDeploying } = trpc.deployments.create.useMutation();
 
   const handleDeploy = async () => {
     await deploy({ projectId: projectId!, appId: appId! });
-    await queryClient.invalidateQueries({ queryKey: getGetDeploymentsQueryKey(projectId!, appId!) });
+    await utils.deployments.list.invalidate({ projectId: projectId!, appId: appId! });
   };
 
   const activeDeployment = deployments?.find(
@@ -67,12 +61,12 @@ export function AppPage() {
               <p className={s.metaLabel}>Domain</p>
               {activeDeployment?.url ? (
                 <a
-                  href={activeDeployment.url as unknown as string}
+                  href={activeDeployment.url }
                   target="_blank"
                   rel="noreferrer"
                   className={`${s.metaValue} ${s.metaLink}`}
                 >
-                  {(activeDeployment.url as unknown as string).replace('https://', '')}
+                  {(activeDeployment.url ).replace('https://', '')}
                 </a>
               ) : (
                 <span className={s.metaValue} style={{ color: 'var(--textSubtle)' }}>—</span>
@@ -80,7 +74,7 @@ export function AppPage() {
             </div>
             <div className={s.metaItem}>
               <p className={s.metaLabel}>Framework</p>
-              <span className={s.metaValue}>{app.framework ? String(app.framework) : '—'}</span>
+              <span className={s.metaValue}>{app.framework ?? '—'}</span>
             </div>
           </div>
         )}
@@ -112,13 +106,13 @@ export function AppPage() {
                 <div className={s.deploymentRight}>
                   {deployment.url && (
                     <a
-                      href={deployment.url as unknown as string}
+                      href={deployment.url }
                       target="_blank"
                       rel="noreferrer"
                       className={s.deploymentUrl}
                       onClick={(e) => e.stopPropagation()}
                     >
-                      {(deployment.url as unknown as string).replace('https://', '')}
+                      {(deployment.url ).replace('https://', '')}
                     </a>
                   )}
                   <span className={s.deploymentDate}>

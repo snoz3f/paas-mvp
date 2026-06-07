@@ -1,11 +1,11 @@
 import { useNavigate } from 'react-router';
-import { useGetProjects } from '@/api/generated/projects/projects';
+import { trpc } from '@/lib/trpc';
 import { ProjectCard } from '@/components/shared/ProjectCard';
 import * as s from './ProjectsPage.css';
 
 export function ProjectsPage() {
   const navigate = useNavigate();
-  const { data: projects, isLoading } = useGetProjects();
+  const { data: projects, isLoading } = trpc.projects.list.useQuery();
 
   return (
     <>

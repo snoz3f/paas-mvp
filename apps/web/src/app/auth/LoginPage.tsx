@@ -5,7 +5,7 @@ import { z } from 'zod';
 import { Link, useNavigate } from 'react-router';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
-import { useLogin } from '@/api/generated/auth/auth';
+import { trpc } from '@/lib/trpc';
 import { useAuthStore } from '@/stores/authStore';
 import * as s from './auth.css';
 
@@ -19,7 +19,7 @@ type LoginForm = z.infer<typeof schema>;
 export function LoginPage() {
   const navigate = useNavigate();
   const [formError, setFormError] = useState<string | null>(null);
-  const { mutateAsync: loginMutation, isPending } = useLogin();
+  const { mutateAsync: loginMutation, isPending } = trpc.auth.login.useMutation();
   const { init } = useAuthStore();
 
   const {
@@ -31,7 +31,7 @@ export function LoginPage() {
   const onSubmit = async (data: LoginForm) => {
     setFormError(null);
     try {
-      const res = await loginMutation({ data });
+      const res = await loginMutation(data);
       localStorage.setItem('token', res.accessToken);
       init();
       void navigate('/dashboard');

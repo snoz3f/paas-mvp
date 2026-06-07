@@ -1,7 +1,10 @@
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { createExpressMiddleware } from '@trpc/server/adapters/express';
+import type { Request } from 'express';
 import { AppModule } from './app.module';
+import { TrpcService } from './trpc/trpc.service';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { rawBody: true });
@@ -19,6 +22,12 @@ async function bootstrap() {
       transform: true,
     }),
   );
+
+  const trpc = app.get(TrpcService);
+  app.use('/trpc', createExpressMiddleware({
+    router: trpc.router,
+    createContext: ({ req }) => trpc.createContext({ req: req as Request }),
+  }));
 
   const config = new DocumentBuilder()
     .setTitle('PaaS MVP API')

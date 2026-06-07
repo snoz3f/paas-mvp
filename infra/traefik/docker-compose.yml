@@ -1,0 +1,51 @@
+services:
+  traefik:
+    image: traefik:v3.7
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      - CLOUDFLARE_DNS_API_TOKEN=${CF_API_TOKEN}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./acme.json:/acme.json
+    command:
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --providers.docker.network=infral
+      - --entrypoints.web.address=:80
+      - --entrypoints.websecure.address=:443
+      - --entrypoints.web.http.redirections.entrypoint.to=websecure
+      # DNS-01 via Cloudflare — for *.infral.dev wildcard cert
+      - --certificatesresolvers.letsencrypt-dns.acme.email=pe4insky@gmail.com
+      - --certificatesresolvers.letsencrypt-dns.acme.storage=/acme.json
+      - --certificatesresolvers.letsencrypt-dns.acme.dnschallenge=true
+      - --certificatesresolvers.letsencrypt-dns.acme.dnschallenge.provider=cloudflare
+      - --certificatesresolvers.letsencrypt-dns.acme.dnschallenge.resolvers=1.1.1.1:53,8.8.8.8:53
+      # TLS-ALPN-01 — for custom user domains
+      - --certificatesresolvers.letsencrypt-tls.acme.email=pe4insky@gmail.com
+      - --certificatesresolvers.letsencrypt-tls.acme.storage=/acme.json
+      - --certificatesresolvers.letsencrypt-tls.acme.tlschallenge=true
+    networks:
+      - infral
+
+  # Obtains and renews *.infral.dev wildcard cert on startup.
+  # Deployed apps reuse it from acme.json instantly — zero wait.
+  wildcard-cert:
+    image: traefik/whoami
+    restart: always
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.wildcard-cert.rule=Host(`_wildcard.infral.dev`)
+      - traefik.http.routers.wildcard-cert.entrypoints=websecure
+      - traefik.http.routers.wildcard-cert.tls.certresolver=letsencrypt-dns
+      - traefik.http.routers.wildcard-cert.tls.domains[0].main=*.infral.dev
+      - traefik.http.routers.wildcard-cert.tls.domains[0].sans=infral.dev
+      - traefik.http.services.wildcard-cert.loadbalancer.server.port=80
+    networks:
+      - infral
+
+networks:
+  infral:
+    external: true

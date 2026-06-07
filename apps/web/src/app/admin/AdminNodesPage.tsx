@@ -1,4 +1,4 @@
-import { useGetNodes } from '@/api/generated/nodes/nodes';
+import { trpc } from '@/lib/trpc';
 import * as s from './admin.css';
 
 function formatDate(val: unknown): string {
@@ -14,7 +14,7 @@ function cpuColor(val: number): string {
 }
 
 export function AdminNodesPage() {
-  const { data: nodes = [], isLoading } = useGetNodes();
+  const { data: nodes = [], isLoading } = trpc.nodes.list.useQuery();
 
   const onlineCount = nodes.filter((n) => n.status === 'ONLINE').length;
   const offlineCount = nodes.filter((n) => n.status === 'OFFLINE').length;

@@ -5,7 +5,7 @@ import { z } from 'zod';
 import { Link, useNavigate } from 'react-router';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
-import { useRegister } from '@/api/generated/auth/auth';
+import { trpc } from '@/lib/trpc';
 import * as s from './auth.css';
 
 const schema = z
@@ -24,7 +24,7 @@ type RegisterForm = z.infer<typeof schema>;
 export function RegisterPage() {
   const navigate = useNavigate();
   const [formError, setFormError] = useState<string | null>(null);
-  const { mutateAsync: registerMutation, isPending } = useRegister();
+  const { mutateAsync: registerMutation, isPending } = trpc.auth.register.useMutation();
 
   const {
     register,
@@ -35,7 +35,7 @@ export function RegisterPage() {
   const onSubmit = async (data: RegisterForm) => {
     setFormError(null);
     try {
-      await registerMutation({ data: { email: data.email, password: data.password } });
+      await registerMutation({ email: data.email, password: data.password });
       void navigate('/login');
     } catch {
       setFormError('Something went wrong. Try again.');

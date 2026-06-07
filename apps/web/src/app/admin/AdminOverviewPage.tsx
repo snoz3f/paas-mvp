@@ -1,10 +1,9 @@
-import { useGetNodes } from '@/api/generated/nodes/nodes';
-import { useGetProjects } from '@/api/generated/projects/projects';
+import { trpc } from '@/lib/trpc';
 import * as s from './admin.css';
 
 export function AdminOverviewPage() {
-  const { data: nodes = [] } = useGetNodes();
-  const { data: projects = [] } = useGetProjects();
+  const { data: nodes = [] } = trpc.nodes.list.useQuery();
+  const { data: projects = [] } = trpc.projects.list.useQuery();
 
   const onlineCount = nodes.filter((n) => n.status === 'ONLINE').length;
   const offlineCount = nodes.filter((n) => n.status === 'OFFLINE').length;
