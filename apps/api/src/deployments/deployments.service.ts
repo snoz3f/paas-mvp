@@ -166,6 +166,8 @@ export class DeploymentsService {
         containerId: oldContainerId,
         envVars: (app.envVars ?? {}) as Record<string, string>,
         projectId: app.projectId,
+        ramMb: app.ramMb,
+        cpuMilli: app.cpuMilli,
         callbackUrl: `${process.env.API_INTERNAL_URL ?? process.env.API_URL}/internal/deployments/${deploymentId}/status`,
       });
     } catch (err) {

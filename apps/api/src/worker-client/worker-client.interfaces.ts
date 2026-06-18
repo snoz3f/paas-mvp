@@ -7,6 +7,8 @@ export interface WorkerJob {
   containerId?: string;
   envVars?: Record<string, string>;
   projectId?: string;
+  ramMb?: number;
+  cpuMilli?: number;
   callbackUrl: string;
 }
 
