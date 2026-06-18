@@ -138,7 +138,7 @@ export class DeploymentsService {
         where: { id: appId },
         include: { project: true },
       });
-      const node = await this.scheduler.selectNode();
+      const node = await this.scheduler.selectNode(appId);
 
       if (!node) {
         await this.prisma.deployment.update({
