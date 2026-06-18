@@ -1,5 +1,5 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsInt, IsNumber, Max, Min } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsInt, IsNumber, IsOptional, Max, Min } from 'class-validator';
 
 export class HeartbeatDto {
   @ApiProperty({ example: 45.2, minimum: 0, maximum: 100 })
@@ -18,4 +18,14 @@ export class HeartbeatDto {
   @IsInt()
   @Min(0)
   activeContainers: number;
+
+  @ApiPropertyOptional({ example: 8192 })
+  @IsInt()
+  @IsOptional()
+  totalRamMb?: number;
+
+  @ApiPropertyOptional({ example: 80 })
+  @IsInt()
+  @IsOptional()
+  totalDiskGb?: number;
 }

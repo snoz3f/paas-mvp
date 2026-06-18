@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsOptional, IsString } from 'class-validator';
+import { IsInt, IsOptional, IsString } from 'class-validator';
 
 export class RegisterNodeDto {
   @ApiProperty({ example: 'hetzner-fsn1-1' })
@@ -19,4 +19,14 @@ export class RegisterNodeDto {
   @IsString()
   @IsOptional()
   provider?: string;
+
+  @ApiPropertyOptional({ example: 8192 })
+  @IsInt()
+  @IsOptional()
+  totalRamMb?: number;
+
+  @ApiPropertyOptional({ example: 80 })
+  @IsInt()
+  @IsOptional()
+  totalDiskGb?: number;
 }
