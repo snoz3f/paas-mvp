@@ -396,6 +396,45 @@ export const serviceTypeBtnActive = style({
   backgroundColor: 'rgba(240,228,104,0.06)',
 });
 
+// ── Resources card ────────────────────────────────────────
+export const resourcesCard = style({
+  backgroundColor: vars.color.surface,
+  border: `1px solid ${vars.color.border}`,
+  borderRadius: vars.radius.lg,
+  overflow: 'hidden',
+});
+
+export const resourcesHeader = style({
+  padding: `${vars.space.lg} ${vars.space.xl}`,
+  borderBottom: `1px solid ${vars.color.border}`,
+});
+
+export const resourcesTitle = style({
+  fontFamily: vars.font.heading,
+  fontSize: vars.font.size.md,
+  fontWeight: '700',
+  letterSpacing: '-0.01em',
+});
+
+export const resourcesBody = style({
+  padding: vars.space.xl,
+  display: 'flex',
+  flexDirection: 'column',
+  gap: vars.space.lg,
+});
+
+export const resourcesNote = style({
+  fontSize: vars.font.size.xs,
+  color: vars.color.textSubtle,
+  lineHeight: '1.5',
+});
+
+export const resourcesFooter = style({
+  display: 'flex',
+  justifyContent: 'flex-end',
+  paddingTop: vars.space.sm,
+});
+
 // ── Empty / skeleton ──────────────────────────────────────
 export const empty = style({
   display: 'flex',

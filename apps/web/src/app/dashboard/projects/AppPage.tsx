@@ -1,6 +1,9 @@
+import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { Button } from '@/components/ui/Button';
 import { StatusBadge } from '@/components/ui/Badge';
+import { ResourceSlider } from '@/components/ui/ResourceSlider';
+import { RAM_STEPS, CPU_STEPS, DISK_STEPS, formatRam, formatCpu, formatDisk } from '@/lib/resources';
 import { trpc } from '@/lib/trpc';
 import * as s from './ProjectPage.css';
 
@@ -12,10 +15,28 @@ export function AppPage() {
   const { data: app, isLoading: appLoading } = trpc.apps.get.useQuery({ projectId: projectId!, id: appId! });
   const { data: deployments, isLoading: deploymentsLoading } = trpc.deployments.list.useQuery({ projectId: projectId!, appId: appId! });
   const { mutateAsync: deploy, isPending: isDeploying } = trpc.deployments.create.useMutation();
+  const { mutateAsync: updateApp, isPending: isSavingResources } = trpc.apps.update.useMutation();
+
+  const [ramMb, setRamMb] = useState(512);
+  const [cpuMilli, setCpuMilli] = useState(500);
+  const [diskGb, setDiskGb] = useState(5);
+
+  useEffect(() => {
+    if (app) {
+      setRamMb(app.ramMb);
+      setCpuMilli(app.cpuMilli);
+      setDiskGb(app.diskGb);
+    }
+  }, [app]);
 
   const handleDeploy = async () => {
     await deploy({ projectId: projectId!, appId: appId! });
     await utils.deployments.list.invalidate({ projectId: projectId!, appId: appId! });
+  };
+
+  const handleSaveResources = async () => {
+    await updateApp({ projectId: projectId!, id: appId!, ramMb, cpuMilli, diskGb });
+    await utils.apps.get.invalidate({ projectId: projectId!, id: appId! });
   };
 
   const activeDeployment = deployments?.find(
@@ -61,20 +82,62 @@ export function AppPage() {
               <p className={s.metaLabel}>Domain</p>
               {activeDeployment?.url ? (
                 <a
-                  href={activeDeployment.url }
+                  href={activeDeployment.url}
                   target="_blank"
                   rel="noreferrer"
                   className={`${s.metaValue} ${s.metaLink}`}
                 >
-                  {(activeDeployment.url ).replace('https://', '')}
+                  {activeDeployment.url.replace('https://', '')}
                 </a>
               ) : (
-                <span className={s.metaValue} style={{ color: 'var(--textSubtle)' }}>—</span>
+                <span className={s.metaValue}>—</span>
               )}
             </div>
             <div className={s.metaItem}>
               <p className={s.metaLabel}>Framework</p>
               <span className={s.metaValue}>{app.framework ?? '—'}</span>
+            </div>
+          </div>
+        )}
+
+        {app && (
+          <div className={s.resourcesCard}>
+            <div className={s.resourcesHeader}>
+              <p className={s.resourcesTitle}>Resources</p>
+            </div>
+            <div className={s.resourcesBody}>
+              <ResourceSlider
+                label="RAM"
+                steps={RAM_STEPS}
+                value={ramMb}
+                format={formatRam}
+                onChange={setRamMb}
+                disabled={isSavingResources}
+              />
+              <ResourceSlider
+                label="CPU"
+                steps={CPU_STEPS}
+                value={cpuMilli}
+                format={formatCpu}
+                onChange={setCpuMilli}
+                disabled={isSavingResources}
+              />
+              <ResourceSlider
+                label="Disk"
+                steps={DISK_STEPS}
+                value={diskGb}
+                format={formatDisk}
+                onChange={setDiskGb}
+                disabled={isSavingResources}
+              />
+              <p className={s.resourcesNote}>
+                Disk limit is used for scheduling only — runtime enforcement coming soon.
+              </p>
+              <div className={s.resourcesFooter}>
+                <Button size="sm" width="auto" loading={isSavingResources} onClick={() => void handleSaveResources()}>
+                  Save resources
+                </Button>
+              </div>
             </div>
           </div>
         )}
@@ -106,13 +169,13 @@ export function AppPage() {
                 <div className={s.deploymentRight}>
                   {deployment.url && (
                     <a
-                      href={deployment.url }
+                      href={deployment.url}
                       target="_blank"
                       rel="noreferrer"
                       className={s.deploymentUrl}
                       onClick={(e) => e.stopPropagation()}
                     >
-                      {(deployment.url ).replace('https://', '')}
+                      {deployment.url.replace('https://', '')}
                     </a>
                   )}
                   <span className={s.deploymentDate}>

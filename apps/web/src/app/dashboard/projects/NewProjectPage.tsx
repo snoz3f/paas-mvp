@@ -7,6 +7,8 @@ import { z } from 'zod';
 import { useNavigate } from 'react-router';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
+import { ResourceSlider } from '@/components/ui/ResourceSlider';
+import { RAM_STEPS, CPU_STEPS, DISK_STEPS, formatRam, formatCpu, formatDisk } from '@/lib/resources';
 import { trpc } from '@/lib/trpc';
 import * as s from './NewProjectPage.css';
 
@@ -60,6 +62,9 @@ export function NewProjectPage() {
   const [selectedRepo, setSelectedRepo] = useState<{ id: number; fullName: string; url: string; private: boolean } | null>(null);
   const [repoSearch, setRepoSearch] = useState('');
   const [formError, setFormError] = useState<string | null>(null);
+  const [ramMb, setRamMb] = useState(512);
+  const [cpuMilli, setCpuMilli] = useState(500);
+  const [diskGb, setDiskGb] = useState(5);
 
   const utils = trpc.useUtils();
   const { mutateAsync: createProject } = trpc.projects.create.useMutation();
@@ -92,6 +97,9 @@ export function NewProjectPage() {
         name: data.name,
         repoUrl: selectedRepo.url,
         framework: framework ?? undefined,
+        ramMb,
+        cpuMilli,
+        diskGb,
       });
       void navigate(`/dashboard/projects/${project.id}`);
     } catch {
@@ -238,6 +246,37 @@ export function NewProjectPage() {
                     ))}
                   </div>
                 </div>
+              </div>
+            </div>
+
+            {/* Resources */}
+            <div className={`${s.section} ${s.sectionGit}`}>
+              <div className={s.sectionHeader}>
+                <p className={s.sectionTitle}>Resources</p>
+                <p className={s.sectionDesc}>Set initial resource limits for your app</p>
+              </div>
+              <div className={s.sectionBody}>
+                <ResourceSlider
+                  label="RAM"
+                  steps={RAM_STEPS}
+                  value={ramMb}
+                  format={formatRam}
+                  onChange={setRamMb}
+                />
+                <ResourceSlider
+                  label="CPU"
+                  steps={CPU_STEPS}
+                  value={cpuMilli}
+                  format={formatCpu}
+                  onChange={setCpuMilli}
+                />
+                <ResourceSlider
+                  label="Disk"
+                  steps={DISK_STEPS}
+                  value={diskGb}
+                  format={formatDisk}
+                  onChange={setDiskGb}
+                />
               </div>
             </div>
 
