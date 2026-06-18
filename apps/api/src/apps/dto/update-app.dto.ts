@@ -33,4 +33,22 @@ export class UpdateAppDto {
   @IsString()
   @IsOptional()
   gitToken?: string;
+
+  @ApiPropertyOptional({ example: 512, description: 'Memory limit in megabytes' })
+  @IsInt()
+  @Min(1)
+  @IsOptional()
+  ramMb?: number;
+
+  @ApiPropertyOptional({ example: 500, description: 'CPU limit in milli-CPUs' })
+  @IsInt()
+  @Min(1)
+  @IsOptional()
+  cpuMilli?: number;
+
+  @ApiPropertyOptional({ example: 5, description: 'Disk size in gigabytes' })
+  @IsInt()
+  @Min(1)
+  @IsOptional()
+  diskGb?: number;
 }

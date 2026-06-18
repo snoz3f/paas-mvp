@@ -25,6 +25,7 @@ type SafeApp = {
   id: string; projectId: string; name: string; repoUrl: string;
   domain: string | null; framework: string | null; port: number;
   envVars: unknown; createdAt: Date; hasGitToken: boolean;
+  ramMb: number; cpuMilli: number; diskGb: number;
   [key: string]: unknown;
 };
 
@@ -139,12 +140,14 @@ export class TrpcService {
     id: string; projectId: string; name: string; repoUrl: string;
     domain: string | null; framework: string | null; port: number;
     envVars: unknown; createdAt: Date; hasGitToken: boolean;
+    ramMb: number; cpuMilli: number; diskGb: number;
   }): App {
     return {
       id: a.id, projectId: a.projectId, name: a.name, repoUrl: a.repoUrl,
       domain: a.domain, framework: a.framework, port: a.port,
       envVars: a.envVars as Record<string, string> | null,
       hasGitToken: a.hasGitToken, createdAt: a.createdAt.toISOString(),
+      ramMb: a.ramMb, cpuMilli: a.cpuMilli, diskGb: a.diskGb,
     };
   }
 
@@ -178,13 +181,14 @@ export class TrpcService {
   private toNode(n: {
     id: string; name: string; ip: string; region: string | null; provider: string | null;
     status: string; cpuUsage: number; ramUsage: number; activeContainers: number;
-    lastHeartbeat: Date | null;
+    lastHeartbeat: Date | null; totalRamMb: number; totalDiskGb: number;
   }): Node {
     return {
       id: n.id, name: n.name, ip: n.ip, region: n.region, provider: n.provider,
       status: n.status, cpuUsage: n.cpuUsage, ramUsage: n.ramUsage,
       activeContainers: n.activeContainers,
       lastHeartbeat: n.lastHeartbeat?.toISOString() ?? null,
+      totalRamMb: n.totalRamMb, totalDiskGb: n.totalDiskGb,
     };
   }
 }

@@ -22,6 +22,7 @@ export interface App {
   id: string; projectId: string; name: string; repoUrl: string;
   domain: string | null; framework: string | null; port: number;
   envVars: Record<string, string> | null; hasGitToken: boolean; createdAt: string;
+  ramMb: number; cpuMilli: number; diskGb: number;
 }
 
 export interface Deployment {
@@ -41,7 +42,7 @@ export interface Service {
 export interface Node {
   id: string; name: string; ip: string; region: string | null; provider: string | null;
   status: string; cpuUsage: number; ramUsage: number; activeContainers: number;
-  lastHeartbeat: string | null;
+  lastHeartbeat: string | null; totalRamMb: number; totalDiskGb: number;
 }
 
 export interface GithubRepo {
@@ -69,10 +70,12 @@ export interface AppRouterDeps {
   createApp(userId: string, projectId: string, d: {
     name: string; repoUrl: string; framework?: string;
     port?: number; envVars?: Record<string, string>; gitToken?: string;
+    ramMb?: number; cpuMilli?: number; diskGb?: number;
   }): Promise<App>;
   updateApp(userId: string, projectId: string, id: string, d: {
     name?: string; repoUrl?: string; framework?: string | null;
     port?: number; envVars?: Record<string, string>; gitToken?: string | null;
+    ramMb?: number; cpuMilli?: number; diskGb?: number;
   }): Promise<App>;
   deleteApp(userId: string, projectId: string, id: string): Promise<void>;
 
@@ -154,6 +157,9 @@ export function buildAppRouter(deps: AppRouterDeps) {
           port: z.number().optional(),
           envVars: z.record(z.string(), z.string()).optional(),
           gitToken: z.string().optional(),
+          ramMb: z.number().int().optional(),
+          cpuMilli: z.number().int().optional(),
+          diskGb: z.number().int().optional(),
         }))
         .mutation(({ ctx, input: { projectId, ...data } }) =>
           deps.createApp(ctx.userId, projectId, data)),
@@ -168,6 +174,9 @@ export function buildAppRouter(deps: AppRouterDeps) {
           port: z.number().optional(),
           envVars: z.record(z.string(), z.string()).optional(),
           gitToken: z.string().nullable().optional(),
+          ramMb: z.number().int().optional(),
+          cpuMilli: z.number().int().optional(),
+          diskGb: z.number().int().optional(),
         }))
         .mutation(({ ctx, input: { projectId, id, ...data } }) =>
           deps.updateApp(ctx.userId, projectId, id, data)),
