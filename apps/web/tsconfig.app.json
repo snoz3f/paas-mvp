@@ -22,8 +22,8 @@
     "noFallthroughCasesInSwitch": true,
     "paths": {
       "@/*": ["./src/*"],
-      "@api/*": ["../../api/src/*"]
+      "@api/*": ["../api/src/*"]
     }
   },
-  "include": ["src", "../../api/src/trpc/app-router.ts"]
+  "include": ["src", "../api/src/trpc/app-router.ts"]
 }

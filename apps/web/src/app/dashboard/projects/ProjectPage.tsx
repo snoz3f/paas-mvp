@@ -199,7 +199,7 @@ export function ProjectPage() {
                     </div>
                   </div>
                   <div className={s.serviceCardRight}>
-                    <StatusBadge status={svc.status} />
+                    <StatusBadge status={svc.status as Parameters<typeof StatusBadge>[0]['status']} />
                     <button
                       className={s.serviceDeleteBtn}
                       onClick={() => void handleDeleteService(svc.id)}
