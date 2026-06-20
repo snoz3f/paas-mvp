@@ -32,65 +32,39 @@ export const topbarTitle = style({
 
 export const content = style({
   flex: 1,
-  overflowY: 'auto',
-  padding: vars.space.xl,
   display: 'flex',
-  justifyContent: 'center',
-});
-
-export const card = style({
-  width: '100%',
-  maxWidth: '560px',
-});
-
-export const section = style({
-  backgroundColor: vars.color.surface,
-  border: `1px solid ${vars.color.border}`,
-  borderRadius: vars.radius.lg,
   overflow: 'hidden',
 });
 
-export const sectionGit = style({
-  marginTop: vars.space.md,
-});
+// ── Two-column layout ─────────────────────────────────────
 
-export const sectionTitleRow = style({
+export const leftCol = style({
+  flex: 1,
   display: 'flex',
-  alignItems: 'center',
-  gap: vars.space.sm,
-  marginBottom: '2px',
+  flexDirection: 'column',
+  borderRight: `1px solid ${vars.color.border}`,
+  overflow: 'hidden',
 });
 
-export const optionalBadge = style({
-  fontSize: '10px',
-  fontWeight: '500',
-  letterSpacing: '0.06em',
-  textTransform: 'uppercase',
-  color: vars.color.textSubtle,
-  backgroundColor: vars.color.bg,
-  border: `1px solid ${vars.color.border}`,
-  borderRadius: vars.radius.sm,
-  padding: '2px 6px',
-});
-
-export const tokenHint = style({
+export const rightCol = style({
+  width: '320px',
+  flexShrink: 0,
   display: 'flex',
-  gap: vars.space.sm,
-  padding: vars.space.md,
-  backgroundColor: 'rgba(240, 228, 104, 0.04)',
-  border: `1px solid rgba(240, 228, 104, 0.12)`,
-  borderRadius: vars.radius.md,
-  fontSize: vars.font.size.xs,
-  color: vars.color.textMuted,
-  lineHeight: '1.6',
+  flexDirection: 'column',
+  padding: vars.space.xl,
+  gap: vars.space.lg,
+  overflowY: 'auto',
 });
 
-export const sectionHeader = style({
+// ── Left col: repo section ────────────────────────────────
+
+export const repoHeader = style({
   padding: `${vars.space.lg} ${vars.space.xl}`,
   borderBottom: `1px solid ${vars.color.border}`,
+  flexShrink: 0,
 });
 
-export const sectionTitle = style({
+export const repoTitle = style({
   fontFamily: vars.font.heading,
   fontSize: vars.font.size.md,
   fontWeight: '700',
@@ -98,98 +72,19 @@ export const sectionTitle = style({
   marginBottom: '2px',
 });
 
-export const sectionDesc = style({
+export const repoDesc = style({
   fontSize: vars.font.size.sm,
   color: vars.color.textMuted,
 });
 
-export const sectionBody = style({
+export const repoBody = style({
+  flex: 1,
+  display: 'flex',
+  flexDirection: 'column',
+  gap: vars.space.md,
   padding: vars.space.xl,
-  display: 'flex',
-  flexDirection: 'column',
-  gap: vars.space.lg,
+  overflow: 'hidden',
 });
-
-export const row = style({
-  display: 'grid',
-  gridTemplateColumns: '1fr 1fr',
-  gap: vars.space.md,
-});
-
-export const frameworkGrid = style({
-  display: 'grid',
-  gridTemplateColumns: 'repeat(3, 1fr)',
-  gap: vars.space.sm,
-});
-
-export const frameworkLabel = style({
-  fontSize: vars.font.size.xs,
-  fontWeight: '500',
-  letterSpacing: '0.08em',
-  textTransform: 'uppercase',
-  color: vars.color.textMuted,
-  marginBottom: vars.space.sm,
-  display: 'block',
-});
-
-export const frameworkOption = style({
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'center',
-  gap: vars.space.sm,
-  padding: vars.space.md,
-  backgroundColor: vars.color.bg,
-  border: `1px solid ${vars.color.border}`,
-  borderRadius: vars.radius.md,
-  cursor: 'pointer',
-  transition: `all ${vars.transition.fast}`,
-  ':hover': {
-    borderColor: vars.color.borderHover,
-    backgroundColor: vars.color.surfaceHover,
-  },
-});
-
-export const frameworkOptionActive = style({
-  borderColor: vars.color.accent,
-  backgroundColor: 'rgba(240, 228, 104, 0.05)',
-  boxShadow: `0 0 0 1px ${vars.color.accent}`,
-});
-
-export const frameworkIcon = style({
-  width: '28px',
-  height: '28px',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  flexShrink: 0,
-});
-
-export const frameworkName = style({
-  fontSize: vars.font.size.xs,
-  fontWeight: '500',
-  color: vars.color.textMuted,
-});
-
-export const frameworkNameActive = style({
-  color: vars.color.text,
-});
-
-export const footer = style({
-  display: 'flex',
-  gap: vars.space.md,
-  marginTop: vars.space.lg,
-});
-
-export const formError = style({
-  padding: `10px ${vars.space.md}`,
-  backgroundColor: 'rgba(255, 92, 92, 0.08)',
-  border: `1px solid rgba(255, 92, 92, 0.2)`,
-  borderRadius: vars.radius.md,
-  fontSize: vars.font.size.sm,
-  color: vars.color.danger,
-});
-
-// ── GitHub connect banner ─────────────────────────────────
 
 export const connectBanner = style({
   display: 'flex',
@@ -197,7 +92,7 @@ export const connectBanner = style({
   justifyContent: 'space-between',
   gap: vars.space.md,
   padding: vars.space.md,
-  backgroundColor: vars.color.bg,
+  backgroundColor: vars.color.surface,
   border: `1px solid ${vars.color.border}`,
   borderRadius: vars.radius.md,
 });
@@ -217,9 +112,8 @@ export const githubConnected = style({
   fontSize: vars.font.size.xs,
   fontWeight: '500',
   color: vars.color.success,
+  flexShrink: 0,
 });
-
-// ── Repo picker ───────────────────────────────────────────
 
 export const repoSearch = style({
   display: 'flex',
@@ -230,6 +124,7 @@ export const repoSearch = style({
   border: `1px solid ${vars.color.border}`,
   borderRadius: vars.radius.md,
   color: vars.color.textMuted,
+  flexShrink: 0,
   transition: `border-color ${vars.transition.fast}`,
   ':focus-within': {
     borderColor: vars.color.accent,
@@ -249,33 +144,35 @@ export const repoSearchInput = style({
 });
 
 export const repoList = style({
+  flex: 1,
   display: 'flex',
   flexDirection: 'column',
-  gap: '2px',
-  maxHeight: '240px',
+  gap: '1px',
   overflowY: 'auto',
   border: `1px solid ${vars.color.border}`,
   borderRadius: vars.radius.md,
-  backgroundColor: vars.color.bg,
+  backgroundColor: vars.color.border,
 });
 
 export const repoListEmpty = style({
-  padding: vars.space.lg,
+  padding: vars.space.xl,
   textAlign: 'center',
   fontSize: vars.font.size.sm,
   color: vars.color.textSubtle,
+  backgroundColor: vars.color.bg,
 });
 
 export const repoItem = style({
   display: 'flex',
   alignItems: 'center',
   gap: vars.space.sm,
-  padding: `9px ${vars.space.md}`,
+  padding: `10px ${vars.space.md}`,
   fontSize: vars.font.size.sm,
   color: vars.color.textMuted,
   cursor: 'pointer',
   transition: `background-color ${vars.transition.fast}`,
   textAlign: 'left',
+  backgroundColor: vars.color.bg,
   ':hover': {
     backgroundColor: vars.color.surfaceHover,
     color: vars.color.text,
@@ -305,4 +202,42 @@ export const repoPrivateBadge = style({
   borderRadius: vars.radius.sm,
   padding: '2px 6px',
   flexShrink: 0,
+});
+
+// ── Right col: project details ────────────────────────────
+
+export const rightTitle = style({
+  fontFamily: vars.font.heading,
+  fontSize: vars.font.size.md,
+  fontWeight: '700',
+  letterSpacing: '-0.01em',
+});
+
+export const selectedRepoHint = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: vars.space.xs,
+  padding: `8px ${vars.space.md}`,
+  backgroundColor: 'rgba(240,228,104,0.04)',
+  border: `1px solid rgba(240,228,104,0.12)`,
+  borderRadius: vars.radius.md,
+  fontFamily: vars.font.mono,
+  fontSize: '12px',
+  color: vars.color.accent,
+});
+
+export const formError = style({
+  padding: `10px ${vars.space.md}`,
+  backgroundColor: 'rgba(255, 92, 92, 0.08)',
+  border: `1px solid rgba(255, 92, 92, 0.2)`,
+  borderRadius: vars.radius.md,
+  fontSize: vars.font.size.sm,
+  color: vars.color.danger,
+});
+
+export const footer = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: vars.space.sm,
+  marginTop: 'auto',
 });
