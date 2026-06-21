@@ -47,7 +47,7 @@ export const leftCol = style({
 });
 
 export const rightCol = style({
-  width: '320px',
+  width: '420px',
   flexShrink: 0,
   display: 'flex',
   flexDirection: 'column',
@@ -152,6 +152,21 @@ export const repoList = style({
   border: `1px solid ${vars.color.border}`,
   borderRadius: vars.radius.md,
   backgroundColor: vars.color.border,
+  selectors: {
+    '&::-webkit-scrollbar': {
+      width: '4px',
+    },
+    '&::-webkit-scrollbar-track': {
+      background: 'transparent',
+    },
+    '&::-webkit-scrollbar-thumb': {
+      background: vars.color.border,
+      borderRadius: vars.radius.full,
+    },
+    '&::-webkit-scrollbar-thumb:hover': {
+      background: vars.color.borderHover,
+    },
+  },
 });
 
 export const repoListEmpty = style({
@@ -233,6 +248,20 @@ export const formError = style({
   borderRadius: vars.radius.md,
   fontSize: vars.font.size.sm,
   color: vars.color.danger,
+});
+
+export const resourcesSection = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: vars.space.md,
+});
+
+export const resourcesLabel = style({
+  fontSize: vars.font.size.xs,
+  fontWeight: '500',
+  letterSpacing: '0.08em',
+  textTransform: 'uppercase',
+  color: vars.color.textMuted,
 });
 
 export const footer = style({

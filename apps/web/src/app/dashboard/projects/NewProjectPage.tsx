@@ -5,6 +5,8 @@ import { z } from 'zod';
 import { useNavigate } from 'react-router';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
+import { ResourceSlider } from '@/components/ui/ResourceSlider';
+import { RAM_STEPS, CPU_STEPS, DISK_STEPS, formatRam, formatCpu, formatDisk } from '@/lib/resources';
 import { trpc } from '@/lib/trpc';
 import * as s from './NewProjectPage.css';
 
@@ -23,6 +25,9 @@ export function NewProjectPage() {
   const [selectedRepo, setSelectedRepo] = useState<{ id: number; fullName: string; url: string; private: boolean } | null>(null);
   const [repoSearch, setRepoSearch] = useState('');
   const [formError, setFormError] = useState<string | null>(null);
+  const [ramMb, setRamMb] = useState(512);
+  const [cpuMilli, setCpuMilli] = useState(500);
+  const [diskGb, setDiskGb] = useState(5);
 
   const utils = trpc.useUtils();
   const { mutateAsync: createProject } = trpc.projects.create.useMutation();
@@ -62,6 +67,9 @@ export function NewProjectPage() {
         projectId: project.id,
         name: data.name,
         repoUrl: selectedRepo.url,
+        ramMb,
+        cpuMilli,
+        diskGb,
       });
       void navigate(`/dashboard/projects/${project.id}`);
     } catch {
@@ -179,6 +187,13 @@ export function NewProjectPage() {
             error={errors.name?.message}
             {...register('name')}
           />
+
+          <div className={s.resourcesSection}>
+            <span className={s.resourcesLabel}>Resources</span>
+            <ResourceSlider label="RAM" steps={RAM_STEPS} value={ramMb} format={formatRam} onChange={setRamMb} />
+            <ResourceSlider label="CPU" steps={CPU_STEPS} value={cpuMilli} format={formatCpu} onChange={setCpuMilli} />
+            <ResourceSlider label="Disk" steps={DISK_STEPS} value={diskGb} format={formatDisk} onChange={setDiskGb} />
+          </div>
 
           {formError && <div className={s.formError}>{formError}</div>}
 
