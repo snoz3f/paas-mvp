@@ -172,13 +172,13 @@ export const content = style({
   padding: vars.space.xl,
   display: 'flex',
   flexDirection: 'column',
-  alignItems: 'flex-start',
 });
 
 // ── Card ──────────────────────────────────────────────────
 export const card = style({
   width: '100%',
   maxWidth: '520px',
+  alignSelf: 'flex-start',
   backgroundColor: vars.color.surface,
   border: `1px solid ${vars.color.border}`,
   borderRadius: vars.radius.lg,
@@ -380,8 +380,6 @@ export const metaCard = style({
   border: `1px solid ${vars.color.border}`,
   borderRadius: vars.radius.lg,
   overflow: 'hidden',
-  width: '100%',
-  maxWidth: '520px',
 });
 
 // ── Resources card (used by AppPage) ─────────────────────
@@ -390,8 +388,6 @@ export const resourcesCard = style({
   border: `1px solid ${vars.color.border}`,
   borderRadius: vars.radius.lg,
   overflow: 'hidden',
-  width: '100%',
-  maxWidth: '520px',
 });
 
 export const resourcesHeader = style({
@@ -434,8 +430,6 @@ export const deploymentList = style({
   border: `1px solid ${vars.color.border}`,
   borderRadius: vars.radius.lg,
   overflow: 'hidden',
-  width: '100%',
-  maxWidth: '520px',
 });
 
 export const deploymentRow = style({
