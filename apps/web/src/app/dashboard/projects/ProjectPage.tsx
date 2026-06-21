@@ -6,20 +6,19 @@ import { trpc } from '@/lib/trpc';
 import { siPostgresql, siRedis } from 'simple-icons';
 import * as s from './ProjectPage.css';
 
-type Tab = 'apps' | 'infrastructure';
 type ServiceType = 'POSTGRES' | 'REDIS';
 
-const SERVICE_META: Record<ServiceType, { label: string; icon: { path: string; hex: string } }> = {
+const SERVICE_META = {
   POSTGRES: { label: 'PostgreSQL', icon: siPostgresql },
   REDIS:    { label: 'Redis',      icon: siRedis },
-};
+} as const;
 
 const DEFAULT_ENV_KEYS: Record<ServiceType, string> = {
   POSTGRES: 'DATABASE_URL',
-  REDIS: 'REDIS_URL',
+  REDIS:    'REDIS_URL',
 };
 
-function ServiceIcon({ type, size = 20 }: { type: string; size?: number }) {
+function ServiceIcon({ type, size = 18 }: { type: string; size?: number }) {
   const meta = SERVICE_META[type as ServiceType];
   if (!meta) return null;
   return (
@@ -33,19 +32,21 @@ export function ProjectPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const utils = trpc.useUtils();
-  const [tab, setTab] = useState<Tab>('apps');
+  const [selectedServiceId, setSelectedServiceId] = useState<string | null>(null);
   const [addingService, setAddingService] = useState(false);
   const [newServiceType, setNewServiceType] = useState<ServiceType>('POSTGRES');
-  const [newServiceEnvKey, setNewServiceEnvKey] = useState('DATABASE_URL');
+  const [newEnvKey, setNewEnvKey] = useState('DATABASE_URL');
 
   const { data: project, isLoading: projectLoading } = trpc.projects.get.useQuery({ id: id! });
-  const { data: apps, isLoading: appsLoading } = trpc.apps.list.useQuery({ projectId: id! });
+  const { data: apps } = trpc.apps.list.useQuery({ projectId: id! });
   const { data: services } = trpc.services.list.useQuery({ projectId: id! });
   const { mutateAsync: createService, isPending: isCreatingService } = trpc.services.create.useMutation();
   const { mutateAsync: deleteService } = trpc.services.delete.useMutation();
 
+  const selected = services?.find((svc) => svc.id === selectedServiceId) ?? null;
+
   const handleAddService = async () => {
-    await createService({ projectId: id!, type: newServiceType, version: 'latest', envKey: newServiceEnvKey });
+    await createService({ projectId: id!, type: newServiceType, version: 'latest', envKey: newEnvKey });
     await utils.services.list.invalidate({ projectId: id! });
     setAddingService(false);
   };
@@ -53,187 +54,197 @@ export function ProjectPage() {
   const handleDeleteService = async (serviceId: string) => {
     await deleteService({ projectId: id!, id: serviceId });
     await utils.services.list.invalidate({ projectId: id! });
+    if (selectedServiceId === serviceId) setSelectedServiceId(null);
   };
 
   const handleServiceTypeChange = (type: ServiceType) => {
     setNewServiceType(type);
-    setNewServiceEnvKey(DEFAULT_ENV_KEYS[type]);
+    setNewEnvKey(DEFAULT_ENV_KEYS[type]);
+  };
+
+  const openAddService = () => {
+    setAddingService(true);
+    setSelectedServiceId(null);
   };
 
   return (
-    <>
-      <div className={s.topbar}>
+    <div className={s.root}>
+      {/* Topbar */}
+      <header className={s.topbar}>
         <div className={s.topbarLeft}>
           <button className={s.backBtn} onClick={() => void navigate('/dashboard')}>
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
               <path d="M10 12L6 8l4-4" />
             </svg>
             Projects
           </button>
+          <span className={s.sep}>/</span>
           <span className={s.topbarTitle}>
-            {projectLoading ? '...' : project?.name}
+            {projectLoading ? <span className={s.shimmer} style={{ width: 80 }} /> : project?.name}
           </span>
         </div>
+        <Button size="sm" variant="ghost" onClick={() => void navigate(`/dashboard/projects/${id}/settings`)}>
+          Settings
+        </Button>
+      </header>
 
-        <div className={s.topbarActions}>
-          <Button size="sm" variant="ghost" onClick={() => void navigate(`/dashboard/projects/${id}/settings`)}>
-            Settings
-          </Button>
-          {tab === 'apps' && (
-            <Button size="sm" onClick={() => void navigate(`/dashboard/projects/${id}/apps/new`)}>
-              Add app
-            </Button>
-          )}
-          {tab === 'infrastructure' && (
-            <Button size="sm" onClick={() => setAddingService(true)}>
-              Add service
-            </Button>
-          )}
-        </div>
-      </div>
+      <div className={s.body}>
+        {/* Project sidebar */}
+        <nav className={s.sidebar}>
+          {/* Apps */}
+          <div className={s.section}>
+            <div className={s.sectionHead}>
+              <span className={s.sectionLabel}>Apps</span>
+              <button
+                className={s.addBtn}
+                onClick={() => void navigate(`/dashboard/projects/${id}/apps/new`)}
+                title="Add app"
+              >
+                <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.8">
+                  <path d="M6 1v10M1 6h10" />
+                </svg>
+              </button>
+            </div>
 
-      <div className={s.content}>
-        <div className={s.tabs}>
-          <button
-            className={tab === 'apps' ? `${s.tab} ${s.tabActive}` : s.tab}
-            onClick={() => setTab('apps')}
-          >
-            Apps
-            {apps && apps.length > 0 && <span className={s.tabCount}>{apps.length}</span>}
-          </button>
-          <button
-            className={tab === 'infrastructure' ? `${s.tab} ${s.tabActive}` : s.tab}
-            onClick={() => setTab('infrastructure')}
-          >
-            Infrastructure
-            {services && services.length > 0 && <span className={s.tabCount}>{services.length}</span>}
-          </button>
-        </div>
-
-        {/* Apps tab */}
-        {tab === 'apps' && (
-          <div>
-            {appsLoading && (
-              <div className={s.deploymentList}>
-                {Array.from({ length: 2 }).map((_, i) => <div key={i} className={s.skeleton} />)}
-              </div>
+            {apps?.length === 0 && (
+              <span className={s.sectionEmpty}>No apps</span>
             )}
+            {apps?.map((app) => (
+              <button
+                key={app.id}
+                className={s.navItem}
+                onClick={() => void navigate(`/dashboard/projects/${id}/apps/${app.id}`)}
+              >
+                <span className={s.appDot} />
+                <span className={s.navLabel}>{app.name}</span>
+                {app.hasGitToken && <span className={s.autoBadge}>auto</span>}
+              </button>
+            ))}
+          </div>
 
-            {!appsLoading && (!apps || apps.length === 0) && (
-              <div className={s.empty}>
-                <p className={s.emptyText}>No apps yet. Add your first app to get started.</p>
-                <Button size="sm" onClick={() => void navigate(`/dashboard/projects/${id}/apps/new`)}>
-                  Add app
-                </Button>
-              </div>
+          {/* Infra */}
+          <div className={s.section}>
+            <div className={s.sectionHead}>
+              <span className={s.sectionLabel}>Infra</span>
+              <button className={s.addBtn} onClick={openAddService} title="Add service">
+                <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.8">
+                  <path d="M6 1v10M1 6h10" />
+                </svg>
+              </button>
+            </div>
+
+            {services?.length === 0 && !addingService && (
+              <span className={s.sectionEmpty}>No services</span>
             )}
+            {services?.map((svc) => (
+              <button
+                key={svc.id}
+                className={selectedServiceId === svc.id ? `${s.navItem} ${s.navItemActive}` : s.navItem}
+                onClick={() => { setSelectedServiceId(svc.id); setAddingService(false); }}
+              >
+                <ServiceIcon type={svc.type} size={13} />
+                <span className={s.navLabel}>{SERVICE_META[svc.type as ServiceType]?.label ?? svc.type}</span>
+              </button>
+            ))}
+          </div>
+        </nav>
 
-            {!appsLoading && apps && apps.length > 0 && (
-              <div className={s.appGrid}>
-                {apps.map((app) => (
-                  <div
-                    key={app.id}
-                    className={s.appCard}
-                    onClick={() => void navigate(`/dashboard/projects/${id}/apps/${app.id}`)}
-                  >
-                    <div className={s.appCardHeader}>
-                      <span className={s.appCardName}>{app.name}</span>
-                      {app.hasGitToken && <span className={s.autoBadge}>↑ Auto-deploy</span>}
-                    </div>
-                    <span className={s.appCardRepo}>
-                      {app.repoUrl.replace('https://github.com/', '').replace('https://gitlab.com/', '')}
-                    </span>
-                    {app.framework && (
-                      <span className={s.appCardFramework}>{String(app.framework)}</span>
-                    )}
+        {/* Content */}
+        <main className={s.content}>
+          {/* Service detail */}
+          {selected && !addingService && (
+            <div className={s.card}>
+              <div className={s.cardHeader}>
+                <div className={s.cardHeaderLeft}>
+                  <ServiceIcon type={selected.type} size={28} />
+                  <div>
+                    <p className={s.cardName}>
+                      {SERVICE_META[selected.type as ServiceType]?.label ?? selected.type}
+                    </p>
+                    <p className={s.cardSub}>{selected.version}</p>
                   </div>
+                </div>
+                <div className={s.cardHeaderRight}>
+                  <StatusBadge status={selected.status as Parameters<typeof StatusBadge>[0]['status']} />
+                  <button
+                    className={s.deleteBtn}
+                    onClick={() => void handleDeleteService(selected.id)}
+                    title="Remove service"
+                  >
+                    <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5">
+                      <path d="M2 2l10 10M12 2L2 12" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              <div className={s.metaTable}>
+                <div className={s.metaItem}>
+                  <span className={s.metaLabel}>Env key</span>
+                  <code className={s.metaValue}>{selected.envKey}</code>
+                </div>
+                {selected.connectionString && (
+                  <div className={s.metaItem}>
+                    <span className={s.metaLabel}>Connection</span>
+                    <code className={s.metaValue}>{selected.connectionString}</code>
+                  </div>
+                )}
+                <div className={s.metaItem}>
+                  <span className={s.metaLabel}>Status</span>
+                  <StatusBadge status={selected.status as Parameters<typeof StatusBadge>[0]['status']} />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Add service form */}
+          {addingService && (
+            <div className={s.card}>
+              <p className={s.cardName} style={{ marginBottom: 16 }}>Add service</p>
+              <div className={s.typeRow}>
+                {(['POSTGRES', 'REDIS'] as ServiceType[]).map((type) => (
+                  <button
+                    key={type}
+                    className={newServiceType === type ? `${s.typeBtn} ${s.typeBtnActive}` : s.typeBtn}
+                    onClick={() => handleServiceTypeChange(type)}
+                  >
+                    <ServiceIcon type={type} size={15} />
+                    {SERVICE_META[type].label}
+                  </button>
                 ))}
               </div>
-            )}
-          </div>
-        )}
-
-        {/* Infrastructure tab */}
-        {tab === 'infrastructure' && (
-          <div className={s.serviceGrid}>
-            {addingService && (
-              <div className={s.serviceCard}>
-                <p className={s.serviceCardTitle}>New service</p>
-                <div className={s.serviceTypeSelect}>
-                  {(['POSTGRES', 'REDIS'] as ServiceType[]).map((type) => (
-                    <button
-                      key={type}
-                      className={newServiceType === type ? `${s.serviceTypeBtn} ${s.serviceTypeBtnActive}` : s.serviceTypeBtn}
-                      onClick={() => handleServiceTypeChange(type)}
-                    >
-                      <ServiceIcon type={type} size={18} />
-                      {SERVICE_META[type].label}
-                    </button>
-                  ))}
-                </div>
-                <div className={s.serviceEnvKeyRow}>
-                  <span className={s.serviceMetaLabel}>Env key</span>
-                  <input
-                    className={s.serviceEnvKeyInput}
-                    value={newServiceEnvKey}
-                    onChange={(e) => setNewServiceEnvKey(e.target.value.toUpperCase())}
-                    placeholder="DATABASE_URL"
-                    spellCheck={false}
-                  />
-                </div>
-                <div className={s.serviceCardActions}>
-                  <Button size="sm" variant="ghost" width="auto" onClick={() => setAddingService(false)}>Cancel</Button>
-                  <Button size="sm" width="auto" loading={isCreatingService} onClick={() => void handleAddService()}>Provision</Button>
-                </div>
+              <div className={s.metaItem} style={{ marginTop: 8 }}>
+                <span className={s.metaLabel}>Env key</span>
+                <input
+                  className={s.envInput}
+                  value={newEnvKey}
+                  onChange={(e) => setNewEnvKey(e.target.value.toUpperCase())}
+                  placeholder="DATABASE_URL"
+                  spellCheck={false}
+                />
               </div>
-            )}
-
-            {services?.map((svc) => (
-              <div key={svc.id} className={s.serviceCard}>
-                <div className={s.serviceCardHeader}>
-                  <div className={s.serviceCardInfo}>
-                    <ServiceIcon type={svc.type} size={22} />
-                    <div>
-                      <p className={s.serviceCardName}>{SERVICE_META[svc.type as ServiceType]?.label ?? svc.type}</p>
-                      <p className={s.serviceCardVersion}>{svc.version}</p>
-                    </div>
-                  </div>
-                  <div className={s.serviceCardRight}>
-                    <StatusBadge status={svc.status as Parameters<typeof StatusBadge>[0]['status']} />
-                    <button
-                      className={s.serviceDeleteBtn}
-                      onClick={() => void handleDeleteService(svc.id)}
-                      title="Remove service"
-                    >
-                      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5">
-                        <path d="M2 2l10 10M12 2L2 12" />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-                <div className={s.serviceCardMeta}>
-                  <div className={s.serviceMetaRow}>
-                    <span className={s.serviceMetaLabel}>Env key</span>
-                    <span className={s.serviceMetaValue}>{svc.envKey}</span>
-                  </div>
-                  {svc.connectionString && (
-                    <div className={s.serviceMetaRow}>
-                      <span className={s.serviceMetaLabel}>Connection</span>
-                      <span className={s.serviceMetaValue}>{svc.connectionString}</span>
-                    </div>
-                  )}
-                </div>
+              <div className={s.formActions}>
+                <Button size="sm" variant="ghost" width="auto" onClick={() => setAddingService(false)}>
+                  Cancel
+                </Button>
+                <Button size="sm" width="auto" loading={isCreatingService} onClick={() => void handleAddService()}>
+                  Provision
+                </Button>
               </div>
-            ))}
+            </div>
+          )}
 
-            {!addingService && (!services || services.length === 0) && (
-              <div className={s.empty}>
-                <p className={s.emptyText}>No services yet. Add Postgres or Redis to your project.</p>
-              </div>
-            )}
-          </div>
-        )}
+          {/* Empty state */}
+          {!selected && !addingService && (
+            <div className={s.emptyState}>
+              <p className={s.emptyTitle}>{project?.name ?? ''}</p>
+              <p className={s.emptyHint}>
+                Select an app or service from the sidebar, or add a new one with <kbd className={s.kbd}>+</kbd>
+              </p>
+            </div>
+          )}
+        </main>
       </div>
-    </>
+    </div>
   );
 }
