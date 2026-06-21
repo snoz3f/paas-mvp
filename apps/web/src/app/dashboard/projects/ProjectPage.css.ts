@@ -172,6 +172,8 @@ export const content = style({
   padding: vars.space.xl,
   display: 'flex',
   flexDirection: 'column',
+  gap: vars.space.lg,
+  maxWidth: '900px',
 });
 
 // ── Card ──────────────────────────────────────────────────
