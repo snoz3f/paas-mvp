@@ -21,6 +21,10 @@ export class GithubService {
     private readonly jwt: JwtService,
   ) {}
 
+  get isMock(): boolean {
+    return process.env.GITHUB_MOCK === 'true';
+  }
+
   // ── OAuth ─────────────────────────────────────────────────
 
   async getOAuthUrl(userId: string): Promise<string> {
@@ -28,6 +32,9 @@ export class GithubService {
       { sub: userId, purpose: 'github-oauth' },
       { expiresIn: '10m' },
     );
+    if (this.isMock) {
+      return `${process.env.API_URL ?? 'http://localhost:5001'}/auth/github/mock-connect?state=${state}`;
+    }
     const params = new URLSearchParams({
       client_id: process.env.GH_CLIENT_ID ?? '',
       redirect_uri: process.env.GH_CALLBACK_URL ?? '',
@@ -78,9 +85,26 @@ export class GithubService {
     this.logger.log(`GitHub connected for user ${userId} as @${login}`);
   }
 
+  async handleCallbackWithMock(state: string): Promise<void> {
+    const payload = await this.jwt.verifyAsync<{ sub: string; purpose: string }>(state);
+    if (payload.purpose !== 'github-oauth') throw new UnauthorizedException('Invalid state');
+    await this.mockConnect(payload.sub);
+  }
+
+  async mockConnect(userId: string): Promise<void> {
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { githubAccessToken: 'mock', githubLogin: 'dev-user' },
+    });
+  }
+
   async getRepos(userId: string): Promise<GithubRepo[]> {
     const user = await this.prisma.user.findUniqueOrThrow({ where: { id: userId } });
     if (!user.githubAccessToken) throw new UnauthorizedException('GitHub not connected');
+
+    if (user.githubAccessToken === 'mock') {
+      return MOCK_REPOS;
+    }
 
     const res = await fetch(
       'https://api.github.com/user/repos?sort=updated&per_page=100&affiliation=owner,collaborator',
@@ -129,6 +153,7 @@ export class GithubService {
   }
 
   async registerWebhook(repoUrl: string, token: string, webhookSecret: string, callbackUrl: string): Promise<number | null> {
+    if (token === 'mock') return null;
     const match = repoUrl.match(/github\.com[/:]([^/]+)\/([^/.]+)/);
     if (!match) return null;
 
@@ -166,6 +191,7 @@ export class GithubService {
   }
 
   async deleteWebhook(repoUrl: string, token: string, hookId: number): Promise<void> {
+    if (token === 'mock') return;
     const match = repoUrl.match(/github\.com[/:]([^/]+)\/([^/.]+)/);
     if (!match) return;
 
@@ -182,3 +208,11 @@ export class GithubService {
     }).catch(() => undefined);
   }
 }
+
+const MOCK_REPOS: GithubRepo[] = [
+  { id: 1, fullName: 'dev-user/node-api',        name: 'node-api',        private: false, url: 'https://github.com/dev-user/node-api.git',        defaultBranch: 'main' },
+  { id: 2, fullName: 'dev-user/react-frontend',  name: 'react-frontend',  private: false, url: 'https://github.com/dev-user/react-frontend.git',  defaultBranch: 'main' },
+  { id: 3, fullName: 'dev-user/python-worker',   name: 'python-worker',   private: true,  url: 'https://github.com/dev-user/python-worker.git',   defaultBranch: 'main' },
+  { id: 4, fullName: 'dev-user/postgres-migrations', name: 'postgres-migrations', private: true, url: 'https://github.com/dev-user/postgres-migrations.git', defaultBranch: 'main' },
+  { id: 5, fullName: 'dev-user/go-gateway',      name: 'go-gateway',      private: false, url: 'https://github.com/dev-user/go-gateway.git',      defaultBranch: 'main' },
+];

@@ -31,6 +31,21 @@ export class GithubController {
     res.redirect(`${process.env.FRONTEND_URL ?? 'https://infral.dev'}/dashboard/projects/new?github=connected`);
   }
 
+  @Public()
+  @Get('auth/github/mock-connect')
+  @ApiOperation({ operationId: 'githubMockConnect', summary: 'Instantly connect GitHub (dev mock only)' })
+  async mockConnect(
+    @Query('state') state: string,
+    @Res() res: Response,
+  ): Promise<void> {
+    if (!this.github.isMock) {
+      res.status(404).send('Not found');
+      return;
+    }
+    await this.github.handleCallbackWithMock(state);
+    res.redirect(`${process.env.FRONTEND_URL ?? 'http://localhost:5173'}/dashboard/projects/new?github=connected`);
+  }
+
   @Get('github/repos')
   @ApiOperation({ operationId: 'listGithubRepos', summary: 'List GitHub repositories for current user' })
   @ApiOkResponse({ schema: { type: 'array', items: { properties: { id: { type: 'number' }, fullName: { type: 'string' }, name: { type: 'string' }, private: { type: 'boolean' }, url: { type: 'string' }, defaultBranch: { type: 'string' } } } } })

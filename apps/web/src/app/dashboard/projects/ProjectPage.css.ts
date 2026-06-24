@@ -247,7 +247,14 @@ export const metaTable = style({
   borderTop: `1px solid ${vars.color.border}`,
 });
 
+// metaItem = grid cell used by AppPage (label stacked above value)
 export const metaItem = style({
+  backgroundColor: vars.color.surface,
+  padding: `${vars.space.lg} ${vars.space.xl}`,
+});
+
+// metaRow = horizontal label→value row used by ProjectPage service detail
+export const metaRow = style({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'space-between',

@@ -179,17 +179,17 @@ export function ProjectPage() {
               </div>
 
               <div className={s.metaTable}>
-                <div className={s.metaItem}>
+                <div className={s.metaRow}>
                   <span className={s.metaLabel}>Env key</span>
                   <code className={s.metaValue}>{selected.envKey}</code>
                 </div>
                 {selected.connectionString && (
-                  <div className={s.metaItem}>
+                  <div className={s.metaRow}>
                     <span className={s.metaLabel}>Connection</span>
                     <code className={s.metaValue}>{selected.connectionString}</code>
                   </div>
                 )}
-                <div className={s.metaItem}>
+                <div className={s.metaRow}>
                   <span className={s.metaLabel}>Status</span>
                   <StatusBadge status={selected.status as Parameters<typeof StatusBadge>[0]['status']} />
                 </div>
@@ -213,7 +213,7 @@ export function ProjectPage() {
                   </button>
                 ))}
               </div>
-              <div className={s.metaItem} style={{ marginTop: 8 }}>
+              <div className={s.metaRow} style={{ marginTop: 8 }}>
                 <span className={s.metaLabel}>Env key</span>
                 <input
                   className={s.envInput}

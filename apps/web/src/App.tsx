@@ -8,6 +8,7 @@ import { NewProjectPage } from '@/app/dashboard/projects/NewProjectPage';
 import { ProjectPage } from '@/app/dashboard/projects/ProjectPage';
 import { AppPage } from '@/app/dashboard/projects/AppPage';
 import { DeploymentPage } from '@/app/dashboard/projects/DeploymentPage';
+import { NewAppPage } from '@/app/dashboard/projects/NewAppPage';
 import { ProjectSettingsPage } from '@/app/dashboard/projects/ProjectSettingsPage';
 import { AdminLayout } from '@/app/admin/AdminLayout';
 import { AdminOverviewPage } from '@/app/admin/AdminOverviewPage';
@@ -34,7 +35,7 @@ export function App() {
         <Route index element={<ProjectsPage />} />
         <Route path="projects/new" element={<NewProjectPage />} />
         <Route path="projects/:id" element={<ProjectPage />} />
-        <Route path="projects/:id/apps/new" element={<Navigate to="/dashboard/projects/new" replace />} />
+        <Route path="projects/:id/apps/new" element={<NewAppPage />} />
         <Route path="projects/:id/apps/:appId" element={<AppPage />} />
         <Route path="projects/:id/apps/:appId/deployments/:deploymentId" element={<DeploymentPage />} />
         <Route path="projects/:id/settings" element={<ProjectSettingsPage />} />
