@@ -108,7 +108,7 @@ export const main = style({
   flex: 1,
   display: 'flex',
   flexDirection: 'column',
-  overflow: 'hidden',
+  overflowY: 'auto',
 });
 
 export const topbar = style({

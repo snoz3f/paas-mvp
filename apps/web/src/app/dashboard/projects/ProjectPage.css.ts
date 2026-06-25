@@ -5,24 +5,26 @@ import { vars } from '@/styles/tokens.css';
 export const root = style({
   display: 'flex',
   flexDirection: 'column',
-  height: '100%',
-  overflow: 'hidden',
+  minHeight: '100%',
 });
 
 export const body = style({
   display: 'flex',
   flex: 1,
-  overflow: 'hidden',
 });
 
 // ── Topbar ────────────────────────────────────────────────
 export const topbar = style({
+  position: 'sticky',
+  top: 0,
+  zIndex: 10,
   height: '56px',
   flexShrink: 0,
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'space-between',
   padding: `0 ${vars.space.xl}`,
+  backgroundColor: vars.color.bg,
   borderBottom: `1px solid ${vars.color.border}`,
 });
 
@@ -168,7 +170,6 @@ export const autoBadge = style({
 // ── Content area ──────────────────────────────────────────
 export const content = style({
   flex: 1,
-  overflowY: 'auto',
   padding: vars.space.xl,
   display: 'flex',
   flexDirection: 'column',
