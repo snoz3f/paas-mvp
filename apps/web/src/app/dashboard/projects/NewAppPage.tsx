@@ -25,6 +25,7 @@ export function NewAppPage() {
   const navigate = useNavigate();
   const [selectedRepo, setSelectedRepo] = useState<{ id: number; fullName: string; url: string; private: boolean } | null>(null);
   const [repoSearch, setRepoSearch] = useState('');
+  const [rootDir, setRootDir] = useState('.');
   const [formError, setFormError] = useState<string | null>(null);
   const [ramMb, setRamMb] = useState(512);
   const [cpuMilli, setCpuMilli] = useState(500);
@@ -66,6 +67,7 @@ export function NewAppPage() {
         projectId: projectId!,
         name: data.name,
         repoUrl: selectedRepo.url,
+        rootDir: rootDir || '.',
         ramMb,
         cpuMilli,
         diskGb,
@@ -185,6 +187,13 @@ export function NewAppPage() {
             placeholder="my-backend"
             error={errors.name?.message}
             {...register('name')}
+          />
+
+          <Input
+            label="Root directory"
+            placeholder="."
+            value={rootDir}
+            onChange={(e) => setRootDir(e.target.value)}
           />
 
           <div className={s.resourcesSection}>

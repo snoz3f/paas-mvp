@@ -19,7 +19,7 @@ export interface Project {
 }
 
 export interface App {
-  id: string; projectId: string; name: string; repoUrl: string;
+  id: string; projectId: string; name: string; repoUrl: string; rootDir: string;
   domain: string | null; framework: string | null; port: number;
   envVars: Record<string, string> | null; hasGitToken: boolean; createdAt: string;
   ramMb: number; cpuMilli: number; diskGb: number;
@@ -68,12 +68,12 @@ export interface AppRouterDeps {
   listApps(userId: string, projectId: string): Promise<App[]>;
   getApp(userId: string, projectId: string, id: string): Promise<App>;
   createApp(userId: string, projectId: string, d: {
-    name: string; repoUrl: string; framework?: string;
+    name: string; repoUrl: string; rootDir?: string; framework?: string;
     port?: number; envVars?: Record<string, string>; gitToken?: string;
     ramMb?: number; cpuMilli?: number; diskGb?: number;
   }): Promise<App>;
   updateApp(userId: string, projectId: string, id: string, d: {
-    name?: string; repoUrl?: string; framework?: string | null;
+    name?: string; repoUrl?: string; rootDir?: string; framework?: string | null;
     port?: number; envVars?: Record<string, string>; gitToken?: string | null;
     ramMb?: number; cpuMilli?: number; diskGb?: number;
   }): Promise<App>;
@@ -153,6 +153,7 @@ export function buildAppRouter(deps: AppRouterDeps) {
           projectId: z.string(),
           name: z.string().min(1),
           repoUrl: z.string().url(),
+          rootDir: z.string().optional(),
           framework: z.string().optional(),
           port: z.number().optional(),
           envVars: z.record(z.string(), z.string()).optional(),
@@ -170,6 +171,7 @@ export function buildAppRouter(deps: AppRouterDeps) {
           id: z.string(),
           name: z.string().optional(),
           repoUrl: z.string().url().optional(),
+          rootDir: z.string().optional(),
           framework: z.string().nullable().optional(),
           port: z.number().optional(),
           envVars: z.record(z.string(), z.string()).optional(),

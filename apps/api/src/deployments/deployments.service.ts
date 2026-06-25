@@ -161,6 +161,7 @@ export class DeploymentsService {
         type: oldContainerId ? 'restart' : 'deploy',
         deploymentId,
         repoUrl,
+        rootDir: app.rootDir,
         port: app.port,
         domain: app.domain ?? undefined,
         containerId: oldContainerId,

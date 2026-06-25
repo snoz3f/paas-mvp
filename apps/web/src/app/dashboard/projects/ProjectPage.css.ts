@@ -172,9 +172,9 @@ export const content = style({
   flex: 1,
   padding: vars.space.xl,
   display: 'flex',
-  flexDirection: 'column',
+  flexWrap: 'wrap',
   gap: vars.space.lg,
-  maxWidth: '900px',
+  alignContent: 'flex-start',
 });
 
 // ── Card ──────────────────────────────────────────────────
@@ -392,6 +392,7 @@ export const kbd = style({
 
 // ── Meta card (used by AppPage) ───────────────────────────
 export const metaCard = style({
+  width: '100%',
   display: 'flex',
   flexDirection: 'column',
   backgroundColor: vars.color.surface,
@@ -402,26 +403,26 @@ export const metaCard = style({
 
 // ── App panel (used by AppPage nested inside ProjectPage) ─
 export const appPanelHeader = style({
+  width: '100%',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'space-between',
   paddingBottom: vars.space.lg,
   borderBottom: `1px solid ${vars.color.border}`,
-  flexShrink: 0,
 });
 
 export const appPanelContent = style({
-  display: 'flex',
-  flexDirection: 'column',
-  gap: vars.space.lg,
+  display: 'contents',
 });
 
 // ── Resources card (used by AppPage) ─────────────────────
 export const resourcesCard = style({
+  flex: '0 0 300px',
   backgroundColor: vars.color.surface,
   border: `1px solid ${vars.color.border}`,
   borderRadius: vars.radius.lg,
   overflow: 'hidden',
+  alignSelf: 'flex-start',
 });
 
 export const resourcesHeader = style({
@@ -457,6 +458,7 @@ export const resourcesFooter = style({
 
 // ── Deployments (used by AppPage) ─────────────────────────
 export const deploymentList = style({
+  flex: '1 1 360px',
   display: 'flex',
   flexDirection: 'column',
   gap: '1px',
@@ -464,6 +466,7 @@ export const deploymentList = style({
   border: `1px solid ${vars.color.border}`,
   borderRadius: vars.radius.lg,
   overflow: 'hidden',
+  alignSelf: 'flex-start',
 });
 
 export const deploymentRow = style({

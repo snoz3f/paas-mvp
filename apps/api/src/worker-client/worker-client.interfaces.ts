@@ -2,6 +2,7 @@ export interface WorkerJob {
   type: 'deploy' | 'restart' | 'stop';
   deploymentId: string;
   repoUrl?: string;
+  rootDir?: string;
   port?: number;
   domain?: string;
   containerId?: string;

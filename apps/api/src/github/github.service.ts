@@ -25,8 +25,6 @@ export class GithubService {
     return process.env.GITHUB_MOCK === 'true';
   }
 
-  // ── OAuth ─────────────────────────────────────────────────
-
   async getOAuthUrl(userId: string): Promise<string> {
     const state = await this.jwt.signAsync(
       { sub: userId, purpose: 'github-oauth' },
@@ -140,8 +138,6 @@ export class GithubService {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     return user?.githubAccessToken ?? null;
   }
-
-  // ── Webhooks ──────────────────────────────────────────────
 
   generateWebhookSecret(): string {
     return randomBytes(32).toString('hex');

@@ -22,7 +22,7 @@ import {
 } from './app-router';
 
 type SafeApp = {
-  id: string; projectId: string; name: string; repoUrl: string;
+  id: string; projectId: string; name: string; repoUrl: string; rootDir: string;
   domain: string | null; framework: string | null; port: number;
   envVars: unknown; createdAt: Date; hasGitToken: boolean;
   ramMb: number; cpuMilli: number; diskGb: number;
@@ -137,13 +137,13 @@ export class TrpcService {
   }
 
   private toApp(a: {
-    id: string; projectId: string; name: string; repoUrl: string;
+    id: string; projectId: string; name: string; repoUrl: string; rootDir: string;
     domain: string | null; framework: string | null; port: number;
     envVars: unknown; createdAt: Date; hasGitToken: boolean;
     ramMb: number; cpuMilli: number; diskGb: number;
   }): App {
     return {
-      id: a.id, projectId: a.projectId, name: a.name, repoUrl: a.repoUrl,
+      id: a.id, projectId: a.projectId, name: a.name, repoUrl: a.repoUrl, rootDir: a.rootDir,
       domain: a.domain, framework: a.framework, port: a.port,
       envVars: a.envVars as Record<string, string> | null,
       hasGitToken: a.hasGitToken, createdAt: a.createdAt.toISOString(),

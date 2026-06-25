@@ -34,6 +34,7 @@ model App {
   projectId     String   @db.Uuid
   name          String
   repoUrl       String
+  rootDir       String   @default(".")
   domain        String?  @unique
   framework     String?
   port          Int      @default(3000)
