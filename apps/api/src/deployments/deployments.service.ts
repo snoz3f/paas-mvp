@@ -1,4 +1,5 @@
 import { ForbiddenException, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Cron } from '@nestjs/schedule';
 import { PrismaService } from '@/prisma/prisma.service';
 import { SchedulerService } from '@/scheduler/scheduler.service';
 import { WorkerClientService } from '@/worker-client/worker-client.service';
@@ -189,6 +190,20 @@ export class DeploymentsService {
     if (!app) throw new NotFoundException('App not found');
     if (app.project.userId !== userId) throw new ForbiddenException();
     if (app.projectId !== projectId) throw new NotFoundException('App not found');
+  }
+
+  // ponytail: marks BUILDING/QUEUED deployments older than 15min as FAILED
+  @Cron('*/5 * * * *')
+  async reapStaleDeployments(): Promise<void> {
+    const cutoff = new Date(Date.now() - 15 * 60 * 1000);
+    const { count } = await this.prisma.deployment.updateMany({
+      where: {
+        status: { in: [DeploymentStatus.BUILDING, DeploymentStatus.QUEUED] },
+        startedAt: { lt: cutoff },
+      },
+      data: { status: DeploymentStatus.FAILED, error: 'Timed out', finishedAt: new Date() },
+    });
+    if (count > 0) this.logger.warn(`Reaped ${count} stale deployment(s)`);
   }
 
   private buildAuthenticatedUrl(repoUrl: string, token: string): string {
