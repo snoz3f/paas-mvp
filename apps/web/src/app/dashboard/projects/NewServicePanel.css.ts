@@ -155,15 +155,48 @@ export const soonBadge = style({
   padding: '2px 6px',
 });
 
-export const configPanel = style({
+export const modalOverlay = style({
+  position: 'fixed',
+  inset: 0,
+  backgroundColor: 'rgba(0,0,0,0.6)',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  zIndex: 100,
+});
+
+export const modal = style({
+  width: '100%',
+  maxWidth: '400px',
   display: 'flex',
   flexDirection: 'column',
-  gap: vars.space.md,
+  gap: vars.space.lg,
   padding: vars.space.xl,
   backgroundColor: vars.color.surface,
   border: `1px solid ${vars.color.border}`,
   borderRadius: vars.radius.lg,
-  marginTop: vars.space.sm,
+  boxShadow: '0 24px 64px rgba(0,0,0,0.5)',
+});
+
+export const modalHeader = style({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+});
+
+export const modalClose = style({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  width: 28,
+  height: 28,
+  borderRadius: vars.radius.sm,
+  color: vars.color.textMuted,
+  transition: `all ${vars.transition.fast}`,
+  ':hover': {
+    color: vars.color.text,
+    backgroundColor: vars.color.surfaceHover,
+  },
 });
 
 export const configHeader = style({

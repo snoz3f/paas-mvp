@@ -38,17 +38,21 @@ interface Props {
 
 export function NewServicePanel({ projectId, onClose, onCreated }: Props) {
   const [search, setSearch] = useState('');
+  const [activeCategory] = useState<string | null>(null);
   const [selected, setSelected] = useState<ServiceDef | null>(null);
   const [envKey, setEnvKey] = useState('');
   const { mutateAsync: createService, isPending } = trpc.services.create.useMutation();
 
   const query = search.toLowerCase();
-  const filtered = CATALOG.map((cat) => ({
-    ...cat,
-    items: cat.items.filter(
-      (item) => item.name.toLowerCase().includes(query) || item.desc.toLowerCase().includes(query),
-    ),
-  })).filter((cat) => cat.items.length > 0);
+  const filtered = CATALOG
+    .filter((cat) => !activeCategory || cat.category === activeCategory)
+    .map((cat) => ({
+      ...cat,
+      items: cat.items.filter(
+        (item) => !query || item.name.toLowerCase().includes(query) || item.desc.toLowerCase().includes(query),
+      ),
+    }))
+    .filter((cat) => cat.items.length > 0);
 
   const handleSelect = (item: ServiceDef) => {
     if (!item.available) return;
@@ -117,27 +121,37 @@ export function NewServicePanel({ projectId, onClose, onCreated }: Props) {
       </div>
 
       {selected && (
-        <div className={s.configPanel}>
-          <div className={s.configHeader}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill={`#${selected.icon.hex}`}>
-              <path d={selected.icon.path} />
-            </svg>
-            <span className={s.configName}>{selected.name}</span>
-          </div>
-          <div className={s.configRow}>
-            <span className={s.configLabel}>Env key</span>
-            <input
-              className={s.configInput}
-              value={envKey}
-              onChange={(e) => setEnvKey(e.target.value.toUpperCase())}
-              spellCheck={false}
-            />
-          </div>
-          <div className={s.configActions}>
-            <Button size="sm" variant="ghost" width="auto" onClick={() => setSelected(null)}>Cancel</Button>
-            <Button size="sm" width="auto" loading={isPending} onClick={() => void handleProvision()}>
-              Provision
-            </Button>
+        <div className={s.modalOverlay} onClick={() => setSelected(null)}>
+          <div className={s.modal} onClick={(e) => e.stopPropagation()}>
+            <div className={s.modalHeader}>
+              <div className={s.configHeader}>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill={`#${selected.icon.hex}`}>
+                  <path d={selected.icon.path} />
+                </svg>
+                <span className={s.configName}>{selected.name}</span>
+              </div>
+              <button className={s.modalClose} onClick={() => setSelected(null)}>
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5">
+                  <path d="M2 2l10 10M12 2L2 12" />
+                </svg>
+              </button>
+            </div>
+            <div className={s.configRow}>
+              <span className={s.configLabel}>Env key</span>
+              <input
+                className={s.configInput}
+                value={envKey}
+                onChange={(e) => setEnvKey(e.target.value.toUpperCase())}
+                spellCheck={false}
+                autoFocus
+              />
+            </div>
+            <div className={s.configActions}>
+              <Button size="sm" variant="ghost" width="auto" onClick={() => setSelected(null)}>Cancel</Button>
+              <Button size="sm" width="auto" loading={isPending} onClick={() => void handleProvision()}>
+                Provision
+              </Button>
+            </div>
           </div>
         </div>
       )}
