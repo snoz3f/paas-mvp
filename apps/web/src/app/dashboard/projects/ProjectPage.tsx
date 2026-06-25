@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/Button';
 import { StatusBadge } from '@/components/ui/Badge';
 import { trpc } from '@/lib/trpc';
 import { siPostgresql, siRedis } from 'simple-icons';
+import { NewServicePanel } from './NewServicePanel';
 import * as s from './ProjectPage.css';
 
 type ServiceType = 'POSTGRES' | 'REDIS';
@@ -12,11 +13,6 @@ const SERVICE_META = {
   POSTGRES: { label: 'PostgreSQL', icon: siPostgresql },
   REDIS:    { label: 'Redis',      icon: siRedis },
 } as const;
-
-const DEFAULT_ENV_KEYS: Record<ServiceType, string> = {
-  POSTGRES: 'DATABASE_URL',
-  REDIS:    'REDIS_URL',
-};
 
 function ServiceIcon({ type, size = 18 }: { type: string; size?: number }) {
   const meta = SERVICE_META[type as ServiceType];
@@ -34,33 +30,19 @@ export function ProjectPage() {
   const utils = trpc.useUtils();
   const [selectedServiceId, setSelectedServiceId] = useState<string | null>(null);
   const [addingService, setAddingService] = useState(false);
-  const [newServiceType, setNewServiceType] = useState<ServiceType>('POSTGRES');
-  const [newEnvKey, setNewEnvKey] = useState('DATABASE_URL');
 
   const outlet = useOutlet();
   const { data: project, isLoading: projectLoading } = trpc.projects.get.useQuery({ id: id! });
   const { data: apps } = trpc.apps.list.useQuery({ projectId: id! });
   const { data: services } = trpc.services.list.useQuery({ projectId: id! });
-  const { mutateAsync: createService, isPending: isCreatingService } = trpc.services.create.useMutation();
   const { mutateAsync: deleteService } = trpc.services.delete.useMutation();
 
   const selected = services?.find((svc) => svc.id === selectedServiceId) ?? null;
-
-  const handleAddService = async () => {
-    await createService({ projectId: id!, type: newServiceType, version: 'latest', envKey: newEnvKey });
-    await utils.services.list.invalidate({ projectId: id! });
-    setAddingService(false);
-  };
 
   const handleDeleteService = async (serviceId: string) => {
     await deleteService({ projectId: id!, id: serviceId });
     await utils.services.list.invalidate({ projectId: id! });
     if (selectedServiceId === serviceId) setSelectedServiceId(null);
-  };
-
-  const handleServiceTypeChange = (type: ServiceType) => {
-    setNewServiceType(type);
-    setNewEnvKey(DEFAULT_ENV_KEYS[type]);
   };
 
   const openAddService = () => {
@@ -152,7 +134,7 @@ export function ProjectPage() {
 
         {/* Content */}
         <main className={s.content}>
-          {outlet}
+          {!addingService && outlet}
 
           {/* Service detail */}
           {!outlet && selected && !addingService && (
@@ -200,41 +182,13 @@ export function ProjectPage() {
             </div>
           )}
 
-          {/* Add service form */}
-          {!outlet && addingService && (
-            <div className={s.card}>
-              <p className={s.cardName} style={{ marginBottom: 16 }}>Add service</p>
-              <div className={s.typeRow}>
-                {(['POSTGRES', 'REDIS'] as ServiceType[]).map((type) => (
-                  <button
-                    key={type}
-                    className={newServiceType === type ? `${s.typeBtn} ${s.typeBtnActive}` : s.typeBtn}
-                    onClick={() => handleServiceTypeChange(type)}
-                  >
-                    <ServiceIcon type={type} size={15} />
-                    {SERVICE_META[type].label}
-                  </button>
-                ))}
-              </div>
-              <div className={s.metaRow} style={{ marginTop: 8 }}>
-                <span className={s.metaLabel}>Env key</span>
-                <input
-                  className={s.envInput}
-                  value={newEnvKey}
-                  onChange={(e) => setNewEnvKey(e.target.value.toUpperCase())}
-                  placeholder="DATABASE_URL"
-                  spellCheck={false}
-                />
-              </div>
-              <div className={s.formActions}>
-                <Button size="sm" variant="ghost" width="auto" onClick={() => setAddingService(false)}>
-                  Cancel
-                </Button>
-                <Button size="sm" width="auto" loading={isCreatingService} onClick={() => void handleAddService()}>
-                  Provision
-                </Button>
-              </div>
-            </div>
+          {/* Add service catalog */}
+          {addingService && (
+            <NewServicePanel
+              projectId={id!}
+              onClose={() => setAddingService(false)}
+              onCreated={() => void utils.services.list.invalidate({ projectId: id! })}
+            />
           )}
 
           {/* Empty state */}
