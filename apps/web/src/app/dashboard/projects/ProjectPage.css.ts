@@ -399,6 +399,22 @@ export const metaCard = style({
   overflow: 'hidden',
 });
 
+// ── App panel (used by AppPage nested inside ProjectPage) ─
+export const appPanelHeader = style({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  paddingBottom: vars.space.lg,
+  borderBottom: `1px solid ${vars.color.border}`,
+  flexShrink: 0,
+});
+
+export const appPanelContent = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: vars.space.lg,
+});
+
 // ── Resources card (used by AppPage) ─────────────────────
 export const resourcesCard = style({
   backgroundColor: vars.color.surface,

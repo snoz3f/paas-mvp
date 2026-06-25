@@ -34,9 +34,10 @@ export function App() {
       >
         <Route index element={<ProjectsPage />} />
         <Route path="projects/new" element={<NewProjectPage />} />
-        <Route path="projects/:id" element={<ProjectPage />} />
-        <Route path="projects/:id/apps/new" element={<NewAppPage />} />
-        <Route path="projects/:id/apps/:appId" element={<AppPage />} />
+        <Route path="projects/:id" element={<ProjectPage />}>
+          <Route path="apps/new" element={<NewAppPage />} />
+          <Route path="apps/:appId" element={<AppPage />} />
+        </Route>
         <Route path="projects/:id/apps/:appId/deployments/:deploymentId" element={<DeploymentPage />} />
         <Route path="projects/:id/settings" element={<ProjectSettingsPage />} />
         <Route path="settings" element={<Placeholder title="Settings" />} />

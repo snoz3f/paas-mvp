@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate, useParams } from 'react-router';
+import { useNavigate, useOutlet, useParams } from 'react-router';
 import { Button } from '@/components/ui/Button';
 import { StatusBadge } from '@/components/ui/Badge';
 import { trpc } from '@/lib/trpc';
@@ -37,6 +37,7 @@ export function ProjectPage() {
   const [newServiceType, setNewServiceType] = useState<ServiceType>('POSTGRES');
   const [newEnvKey, setNewEnvKey] = useState('DATABASE_URL');
 
+  const outlet = useOutlet();
   const { data: project, isLoading: projectLoading } = trpc.projects.get.useQuery({ id: id! });
   const { data: apps } = trpc.apps.list.useQuery({ projectId: id! });
   const { data: services } = trpc.services.list.useQuery({ projectId: id! });
@@ -151,8 +152,10 @@ export function ProjectPage() {
 
         {/* Content */}
         <main className={s.content}>
+          {outlet}
+
           {/* Service detail */}
-          {selected && !addingService && (
+          {!outlet && selected && !addingService && (
             <div className={s.card}>
               <div className={s.cardHeader}>
                 <div className={s.cardHeaderLeft}>
@@ -198,7 +201,7 @@ export function ProjectPage() {
           )}
 
           {/* Add service form */}
-          {addingService && (
+          {!outlet && addingService && (
             <div className={s.card}>
               <p className={s.cardName} style={{ marginBottom: 16 }}>Add service</p>
               <div className={s.typeRow}>
@@ -235,7 +238,7 @@ export function ProjectPage() {
           )}
 
           {/* Empty state */}
-          {!selected && !addingService && (
+          {!outlet && !selected && !addingService && (
             <div className={s.emptyState}>
               <p className={s.emptyTitle}>{project?.name ?? ''}</p>
               <p className={s.emptyHint}>

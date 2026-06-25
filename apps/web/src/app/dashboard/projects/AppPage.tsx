@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router';
+
 import { Button } from '@/components/ui/Button';
 import { StatusBadge } from '@/components/ui/Badge';
 import { ResourceSlider } from '@/components/ui/ResourceSlider';
@@ -45,26 +46,17 @@ export function AppPage() {
 
   return (
     <>
-      <div className={s.topbar}>
+      <div className={s.appPanelHeader}>
         <div className={s.topbarLeft}>
-          <button className={s.backBtn} onClick={() => void navigate(`/dashboard/projects/${projectId}`)}>
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
-              <path d="M10 12L6 8l4-4" />
-            </svg>
-            Project
-          </button>
           <span className={s.topbarTitle}>{appLoading ? '...' : app?.name}</span>
           {activeDeployment && <StatusBadge status={activeDeployment.status} />}
         </div>
-
-        <div className={s.topbarActions}>
-          <Button size="sm" loading={isDeploying} onClick={() => void handleDeploy()}>
-            Deploy
-          </Button>
-        </div>
+        <Button size="sm" loading={isDeploying} onClick={() => void handleDeploy()}>
+          Deploy
+        </Button>
       </div>
 
-      <div className={s.content}>
+      <div className={s.appPanelContent}>
         {app && (
           <div className={s.metaCard}>
             <div className={s.metaItem}>
