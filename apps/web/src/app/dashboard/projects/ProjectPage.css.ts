@@ -247,10 +247,18 @@ export const metaTable = style({
   borderTop: `1px solid ${vars.color.border}`,
 });
 
-// metaItem = grid cell used by AppPage (label stacked above value)
+// metaItem = horizontal row: label left, value right
 export const metaItem = style({
-  backgroundColor: vars.color.surface,
-  padding: `${vars.space.lg} ${vars.space.xl}`,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  gap: vars.space.md,
+  padding: `${vars.space.md} ${vars.space.xl}`,
+  selectors: {
+    '&:not(:last-child)': {
+      borderBottom: `1px solid ${vars.color.border}`,
+    },
+  },
 });
 
 // metaRow = horizontal label→value row used by ProjectPage service detail
@@ -268,6 +276,7 @@ export const metaLabel = style({
   letterSpacing: '0.06em',
   textTransform: 'uppercase',
   flexShrink: 0,
+  margin: 0,
 });
 
 export const metaValue = style({
@@ -277,7 +286,7 @@ export const metaValue = style({
   overflow: 'hidden',
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
-  maxWidth: '320px',
+  maxWidth: '55%',
   textAlign: 'right',
 });
 
@@ -382,10 +391,9 @@ export const kbd = style({
 
 // ── Meta card (used by AppPage) ───────────────────────────
 export const metaCard = style({
-  display: 'grid',
-  gridTemplateColumns: 'repeat(3, 1fr)',
-  gap: '1px',
-  backgroundColor: vars.color.border,
+  display: 'flex',
+  flexDirection: 'column',
+  backgroundColor: vars.color.surface,
   border: `1px solid ${vars.color.border}`,
   borderRadius: vars.radius.lg,
   overflow: 'hidden',
