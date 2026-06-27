@@ -5,6 +5,7 @@ import { StatusBadge } from '@/components/ui/Badge';
 import { trpc } from '@/lib/trpc';
 import { siPostgresql, siRedis } from 'simple-icons';
 import { NewServicePanel } from './NewServicePanel';
+import { ProjectSettingsModal } from './ProjectSettingsModal';
 import * as s from './ProjectPage.css';
 
 type ServiceType = 'POSTGRES' | 'REDIS';
@@ -30,6 +31,7 @@ export function ProjectPage() {
   const utils = trpc.useUtils();
   const [selectedServiceId, setSelectedServiceId] = useState<string | null>(null);
   const [addingService, setAddingService] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   const outlet = useOutlet();
   const { data: project, isLoading: projectLoading } = trpc.projects.get.useQuery({ id: id! });
@@ -66,7 +68,7 @@ export function ProjectPage() {
             {projectLoading ? <span className={s.shimmer} style={{ width: 80 }} /> : project?.name}
           </span>
         </div>
-        <Button size="sm" variant="ghost" onClick={() => void navigate(`/dashboard/projects/${id}/settings`)}>
+        <Button size="sm" variant="ghost" onClick={() => setSettingsOpen(true)}>
           Settings
         </Button>
       </header>
@@ -202,6 +204,10 @@ export function ProjectPage() {
           )}
         </main>
       </div>
+
+      {settingsOpen && (
+        <ProjectSettingsModal projectId={id!} onClose={() => setSettingsOpen(false)} />
+      )}
     </div>
   );
 }
