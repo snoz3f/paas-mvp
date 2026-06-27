@@ -11,6 +11,11 @@ export class CreateAppDto {
   @IsUrl()
   repoUrl: string;
 
+  @ApiPropertyOptional({ example: '.', description: 'Root directory within the repo' })
+  @IsString()
+  @IsOptional()
+  rootDir?: string;
+
   @ApiPropertyOptional({ example: 'nestjs' })
   @IsString()
   @IsOptional()

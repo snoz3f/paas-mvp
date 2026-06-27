@@ -12,6 +12,11 @@ export class UpdateAppDto {
   @IsOptional()
   repoUrl?: string;
 
+  @ApiPropertyOptional({ example: '.', description: 'Root directory within the repo' })
+  @IsString()
+  @IsOptional()
+  rootDir?: string;
+
   @ApiPropertyOptional()
   @IsString()
   @IsOptional()
