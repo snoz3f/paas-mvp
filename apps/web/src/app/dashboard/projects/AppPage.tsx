@@ -6,6 +6,7 @@ import { StatusBadge } from '@/components/ui/Badge';
 import { ResourceSlider } from '@/components/ui/ResourceSlider';
 import { RAM_STEPS, CPU_STEPS, DISK_STEPS, formatRam, formatCpu, formatDisk } from '@/lib/resources';
 import { trpc } from '@/lib/trpc';
+import { AppSettingsModal } from './AppSettingsModal';
 import * as s from './ProjectPage.css';
 
 export function AppPage() {
@@ -21,6 +22,7 @@ export function AppPage() {
   const [ramMb, setRamMb] = useState(512);
   const [cpuMilli, setCpuMilli] = useState(500);
   const [diskGb, setDiskGb] = useState(5);
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   useEffect(() => {
     if (app) {
@@ -51,10 +53,19 @@ export function AppPage() {
           <span className={s.topbarTitle}>{appLoading ? '...' : app?.name}</span>
           {activeDeployment && <StatusBadge status={activeDeployment.status} />}
         </div>
-        <Button size="sm" loading={isDeploying} onClick={() => void handleDeploy()}>
-          Deploy
-        </Button>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <Button size="sm" variant="ghost" onClick={() => setSettingsOpen(true)}>Settings</Button>
+          <Button size="sm" loading={isDeploying} onClick={() => void handleDeploy()}>Deploy</Button>
+        </div>
       </div>
+
+      {settingsOpen && (
+        <AppSettingsModal
+          projectId={projectId!}
+          appId={appId!}
+          onClose={() => setSettingsOpen(false)}
+        />
+      )}
 
       <div className={s.appPanelContent}>
         {app && (
