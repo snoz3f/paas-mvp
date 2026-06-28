@@ -1,7 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { Terminal } from '@xterm/xterm';
 import { FitAddon } from '@xterm/addon-fit';
-import { AttachAddon } from '@xterm/addon-attach';
 import '@xterm/xterm/css/xterm.css';
 import * as s from './XTerm.css';
 
@@ -94,16 +93,29 @@ export function XTerm({ logsUrl, wsUrl, containerId, token }: XTermProps) {
 
       ws.onopen = () => {
         ws.send(JSON.stringify({ event: 'attach', data: { containerId, token } }));
-        const attachAddon = new AttachAddon(ws, { bidirectional: true });
-        term.loadAddon(attachAddon);
         term.writeln('\x1b[2m── connected ──\x1b[0m\r\n');
 
-        // Отправляем resize при изменении размера
+        term.onData((data) => {
+          if (ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify({ event: 'input', data }));
+          }
+        });
+
         term.onResize(({ cols, rows }) => {
           if (ws.readyState === WebSocket.OPEN) {
             ws.send(JSON.stringify({ event: 'resize', data: { cols, rows } }));
           }
         });
+      };
+
+      ws.onmessage = (e) => {
+        if (e.data instanceof ArrayBuffer) {
+          term.write(new Uint8Array(e.data));
+        } else if (e.data instanceof Blob) {
+          void e.data.arrayBuffer().then((buf) => term.write(new Uint8Array(buf)));
+        } else {
+          term.write(e.data as string);
+        }
       };
 
       ws.onclose = () => term.writeln('\r\n\x1b[31mConnection closed\x1b[0m');
