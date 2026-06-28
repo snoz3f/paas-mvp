@@ -14,6 +14,7 @@ services:
       PORT: 4000
       CONTROL_PLANE_URL: http://api:5001
       WORKER_SECRET: EECI3dzKyckju5qLXL9bZ9fXemgDb4iT
+      JWT_SECRET: 3Zpw11hNke4PlZNfqKouSV90EXC5U3pE2meeVTshjs2cp6Sj
       NODE_NAME: worker-01
       NODE_IP: host.docker.internal
       NODE_REGION: de-frankfurt-1
@@ -30,6 +31,14 @@ services:
       - buildkit
     networks:
       - infral
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.worker-terminal.rule=Host(`worker.infral.dev`)
+      - traefik.http.routers.worker-terminal.entrypoints=websecure
+      - traefik.http.routers.worker-terminal.tls.certresolver=letsencrypt-dns
+      - traefik.http.routers.worker-terminal.tls.domains[0].main=*.infral.dev
+      - traefik.http.routers.worker-terminal.tls.domains[0].sans=infral.dev
+      - traefik.http.services.worker-terminal.loadbalancer.server.port=4000
 
 networks:
   infral:

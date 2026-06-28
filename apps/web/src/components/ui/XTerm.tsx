@@ -34,10 +34,10 @@ interface XTermProps {
   /** WebSocket URL для интерактивного терминала */
   wsUrl?: string;
   containerId?: string;
-  workerSecret?: string;
+  token?: string;
 }
 
-export function XTerm({ logsUrl, wsUrl, containerId, workerSecret }: XTermProps) {
+export function XTerm({ logsUrl, wsUrl, containerId, token }: XTermProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const termRef = useRef<Terminal | null>(null);
 
@@ -88,12 +88,12 @@ export function XTerm({ logsUrl, wsUrl, containerId, workerSecret }: XTermProps)
     }
 
     // ── Режим терминала (WebSocket) ────────────────────────
-    if (wsUrl && containerId && workerSecret) {
+    if (wsUrl && containerId && token) {
       term.writeln('\x1b[2m── connecting… ──\x1b[0m\r\n');
       const ws = new WebSocket(wsUrl);
 
       ws.onopen = () => {
-        ws.send(JSON.stringify({ event: 'attach', data: { containerId, secret: workerSecret } }));
+        ws.send(JSON.stringify({ event: 'attach', data: { containerId, token } }));
         const attachAddon = new AttachAddon(ws, { bidirectional: true });
         term.loadAddon(attachAddon);
         term.writeln('\x1b[2m── connected ──\x1b[0m\r\n');
@@ -120,7 +120,7 @@ export function XTerm({ logsUrl, wsUrl, containerId, workerSecret }: XTermProps)
       observer.disconnect();
       term.dispose();
     };
-  }, [logsUrl, wsUrl, containerId, workerSecret]);
+  }, [logsUrl, wsUrl, containerId, token]);
 
   return <div ref={containerRef} className={s.wrapper} />;
 }

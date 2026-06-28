@@ -84,7 +84,7 @@ export interface AppRouterDeps {
   createDeployment(userId: string, projectId: string, appId: string): Promise<Deployment>;
   restartDeployment(userId: string, projectId: string, appId: string, id: string): Promise<Deployment>;
   stopDeployment(userId: string, projectId: string, appId: string, id: string): Promise<Deployment>;
-  getTerminalInfo(userId: string, projectId: string, appId: string, id: string): Promise<{ wsUrl: string; containerId: string }>;
+  getTerminalInfo(userId: string, projectId: string, appId: string, id: string): Promise<{ wsUrl: string; containerId: string; token: string }>;
 
   listServices(userId: string, projectId: string): Promise<Service[]>;
   createService(userId: string, projectId: string, d: { type: string; version: string; envKey: string }): Promise<Service>;

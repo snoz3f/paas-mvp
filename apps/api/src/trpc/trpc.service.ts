@@ -95,10 +95,15 @@ export class TrpcService {
       stopDeployment: async (userId, projectId, appId, id) =>
         this.toDeployment(await this.deployments.stop(userId, projectId, appId, id)),
       getTerminalInfo: async (userId, projectId, appId, id) => {
-        const { node, containerId } = await this.deployments.getWorkerForDeployment(
+        const { containerId } = await this.deployments.getWorkerForDeployment(
           userId, projectId, appId, id,
         );
-        return { wsUrl: `ws://${node.ip}:4000/containers/terminal`, containerId };
+        const token = await this.jwt.signAsync(
+          { containerId, purpose: 'terminal' },
+          { expiresIn: '5m' },
+        );
+        const base = process.env.WORKER_PUBLIC_URL ?? 'wss://worker.infral.dev';
+        return { wsUrl: `${base}/containers/terminal`, containerId, token };
       },
 
       listServices: async (userId, projectId) => {

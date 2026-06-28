@@ -30,6 +30,7 @@ services:
       API_INTERNAL_URL: http://api:5001
       REDIS_URL: redis://redis:6379
       WORKER_SECRET: ${WORKER_SECRET}
+      WORKER_PUBLIC_URL: wss://worker.infral.dev
       FRONTEND_URL: ${FRONTEND_URL}
       GH_CLIENT_ID: ${GH_CLIENT_ID}
       GH_CLIENT_SECRET: ${GH_CLIENT_SECRET}

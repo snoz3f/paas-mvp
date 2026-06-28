@@ -13,15 +13,25 @@ export function DeploymentPage() {
   const navigate = useNavigate();
   const utils = trpc.useUtils();
   const [tab, setTab] = useState<Tab>('logs');
-  const [terminalEnabled, setTerminalEnabled] = useState(false);
 
-  const { data: deployment, isLoading } = trpc.deployments.get.useQuery({ projectId: projectId!, appId: appId!, id: deploymentId! });
+  const { data: deployment, isLoading } = trpc.deployments.get.useQuery(
+    { projectId: projectId!, appId: appId!, id: deploymentId! },
+    {
+      refetchInterval: (query) => {
+        const status = query.state.data?.status;
+        return status === 'BUILDING' || status === 'QUEUED' ? 2000 : false;
+      },
+    },
+  );
+
   const { mutateAsync: restart, isPending: isRestarting } = trpc.deployments.restart.useMutation();
   const { mutateAsync: stop, isPending: isStopping } = trpc.deployments.stop.useMutation();
 
+  const isRunning = deployment?.status === 'RUNNING';
+
   const { data: terminalInfo } = trpc.deployments.getTerminalInfo.useQuery(
     { projectId: projectId!, appId: appId!, id: deploymentId! },
-    { enabled: terminalEnabled },
+    { enabled: tab === 'terminal' && isRunning },
   );
 
   const invalidate = async () => {
@@ -38,11 +48,6 @@ export function DeploymentPage() {
   const handleStop = async () => {
     await stop({ projectId: projectId!, appId: appId!, id: deploymentId! });
     await invalidate();
-  };
-
-  const handleOpenTerminal = () => {
-    setTerminalEnabled(true);
-    setTab('terminal');
   };
 
   const logsUrl = deployment
@@ -69,11 +74,8 @@ export function DeploymentPage() {
         </div>
 
         <div className={s.topbarActions}>
-          {deployment?.status === 'RUNNING' && (
-            <>
-              <Button size="sm" variant="ghost" onClick={handleOpenTerminal}>Terminal</Button>
-              <Button size="sm" variant="ghost" loading={isStopping} onClick={() => void handleStop()}>Stop</Button>
-            </>
+          {isRunning && (
+            <Button size="sm" variant="ghost" loading={isStopping} onClick={() => void handleStop()}>Stop</Button>
           )}
           <Button size="sm" loading={isRestarting} onClick={() => void handleRestart()}>Redeploy</Button>
         </div>
@@ -102,16 +104,14 @@ export function DeploymentPage() {
                   rel="noreferrer"
                   className={`${s.metaValue} ${s.metaLink}`}
                 >
-                  {(deployment.url).replace('https://', '')}
+                  {deployment.url.replace('https://', '')}
                 </a>
               </div>
             )}
             {deployment.error && (
               <div className={s.metaItem}>
                 <span className={s.metaLabel}>Error</span>
-                <span className={`${s.metaValue} ${s.errorMsg}`}>
-                  {deployment.error}
-                </span>
+                <span className={`${s.metaValue} ${s.errorMsg}`}>{deployment.error}</span>
               </div>
             )}
           </div>
@@ -121,26 +121,34 @@ export function DeploymentPage() {
           <button
             className={tab === 'logs' ? `${s.tab} ${s.tabActive}` : s.tab}
             onClick={() => setTab('logs')}
-          >Logs</button>
+          >
+            Logs
+          </button>
           <button
             className={tab === 'terminal' ? `${s.tab} ${s.tabActive}` : s.tab}
-            onClick={() => setTab('terminal')}
-            disabled={deployment?.status !== 'RUNNING'}
-          >Terminal</button>
+            onClick={() => { if (isRunning) setTab('terminal'); }}
+            disabled={!isRunning}
+            title={!isRunning ? 'Available when deployment is running' : undefined}
+          >
+            Terminal
+          </button>
         </div>
 
         <div className={s.termPanel}>
           {tab === 'logs' && logsUrl && <XTerm logsUrl={logsUrl} />}
           {tab === 'logs' && !logsUrl && <div className={s.errorMsg}>No deployment selected.</div>}
-          {tab === 'terminal' && terminalInfo && (
+          {tab === 'terminal' && isRunning && terminalInfo && (
             <XTerm
               wsUrl={terminalInfo.wsUrl}
               containerId={terminalInfo.containerId}
-              workerSecret={localStorage.getItem('token') ?? ''}
+              token={terminalInfo.token}
             />
           )}
-          {tab === 'terminal' && !terminalInfo && (
-            <div className={s.errorMsg}>Click "Terminal" button to open a shell.</div>
+          {tab === 'terminal' && isRunning && !terminalInfo && (
+            <div className={s.errorMsg}>Connecting...</div>
+          )}
+          {tab === 'terminal' && !isRunning && (
+            <div className={s.errorMsg}>Terminal is only available for running deployments.</div>
           )}
         </div>
       </div>
