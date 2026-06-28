@@ -117,7 +117,34 @@ export class DeploymentsController {
     res.setHeader('Connection', 'keep-alive');
     res.flushHeaders();
 
-    const finished = ['RUNNING', 'FAILED', 'STOPPED'].includes(deployment.status);
+    if (deployment.status === 'RUNNING' && deployment.containerId && deployment.nodeId) {
+      const { node } = await this.deploymentsService.getWorkerForDeployment(
+        user.sub, projectId, appId, id,
+      );
+      const workerUrl = `http://${node.ip}:4000/containers/${deployment.containerId}/logs`;
+      const upstream = await fetch(workerUrl, {
+        headers: { 'x-worker-secret': process.env.WORKER_SECRET ?? '' },
+      });
+      if (!upstream.ok || !upstream.body) {
+        res.write('data: [failed to connect to worker]\n\n');
+        res.write('event: end\ndata: done\n\n');
+        res.end();
+        return;
+      }
+      const reader = upstream.body.getReader();
+      const decoder = new TextDecoder();
+      res.on('close', () => reader.cancel());
+      (async () => {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) { res.end(); break; }
+          res.write(decoder.decode(value, { stream: true }));
+        }
+      })();
+      return;
+    }
+
+    const finished = ['FAILED', 'STOPPED'].includes(deployment.status);
     if (finished) {
       if (deployment.logs) {
         for (const line of deployment.logs.split('\n').filter(Boolean)) {
