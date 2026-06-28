@@ -10,6 +10,7 @@ import * as s from './ProjectSettingsModal.css';
 const schema = z.object({
   name: z.string().min(1, 'Required'),
   rootDir: z.string().min(1, 'Required'),
+  domain: z.string().optional(),
 });
 type Form = z.infer<typeof schema>;
 
@@ -18,11 +19,12 @@ interface Props {
   appId: string;
   appName: string;
   appRootDir: string;
+  appDomain: string | null;
   appEnvVars: Record<string, string> | null;
   onClose: () => void;
 }
 
-export function AppSettingsModal({ projectId, appId, appName, appRootDir, appEnvVars, onClose }: Props) {
+export function AppSettingsModal({ projectId, appId, appName, appRootDir, appDomain, appEnvVars, onClose }: Props) {
   const utils = trpc.useUtils();
   const { mutateAsync: updateApp, isPending: isSaving } = trpc.apps.update.useMutation();
 
@@ -30,10 +32,11 @@ export function AppSettingsModal({ projectId, appId, appName, appRootDir, appEnv
     Object.entries(appEnvVars ?? {}).map(([key, value]) => ({ key, value })),
   );
 
-  const { register, handleSubmit, formState: { errors } } = useForm<Form>({
+  const { register, handleSubmit, watch, formState: { errors } } = useForm<Form>({
     resolver: zodResolver(schema),
-    defaultValues: { name: appName, rootDir: appRootDir },
+    defaultValues: { name: appName, rootDir: appRootDir, domain: appDomain ?? '' },
   });
+  const domainValue = watch('domain');
 
   const addRow = () => setEnvPairs((p) => [...p, { key: '', value: '' }]);
   const removeRow = (i: number) => setEnvPairs((p) => p.filter((_, idx) => idx !== i));
@@ -44,7 +47,7 @@ export function AppSettingsModal({ projectId, appId, appName, appRootDir, appEnv
     const envVars = Object.fromEntries(
       envPairs.filter((p) => p.key.trim()).map((p) => [p.key.trim(), p.value]),
     );
-    await updateApp({ projectId, id: appId, ...data, envVars });
+    await updateApp({ projectId, id: appId, ...data, domain: data.domain || null, envVars });
     await utils.apps.get.invalidate({ projectId, id: appId });
     onClose();
   };
@@ -73,6 +76,29 @@ export function AppSettingsModal({ projectId, appId, appName, appRootDir, appEnv
             placeholder="e.g. apps/client"
             {...register('rootDir')}
           />
+
+          <div>
+            <Input
+              label="Custom domain"
+              placeholder="myapp.example.com"
+              {...register('domain')}
+            />
+            {domainValue && (
+              <div style={{ marginTop: 8, padding: '10px 12px', background: 'rgba(240,228,104,0.06)', border: '1px solid rgba(240,228,104,0.2)', borderRadius: 6, fontSize: 12, color: '#aaa', lineHeight: 1.6 }}>
+                Add a CNAME record in your DNS:
+                <br />
+                <span style={{ fontFamily: 'Martian Mono, monospace', color: '#f0e468' }}>
+                  {domainValue}
+                </span>
+                {' → '}
+                <span style={{ fontFamily: 'Martian Mono, monospace', color: '#f0e468' }}>
+                  infral.dev
+                </span>
+                <br />
+                TLS certificate will be issued automatically on next deploy.
+              </div>
+            )}
+          </div>
 
           <div className={s.envSection}>
             <span className={s.envLabel}>Environment variables</span>

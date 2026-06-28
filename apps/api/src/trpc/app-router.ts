@@ -172,6 +172,7 @@ export function buildAppRouter(deps: AppRouterDeps) {
           name: z.string().optional(),
           repoUrl: z.string().url().optional(),
           rootDir: z.string().optional(),
+          domain: z.string().nullable().optional(),
           framework: z.string().nullable().optional(),
           port: z.number().optional(),
           envVars: z.record(z.string(), z.string()).optional(),

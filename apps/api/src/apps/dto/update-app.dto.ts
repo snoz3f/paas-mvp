@@ -20,6 +20,11 @@ export class UpdateAppDto {
   @ApiPropertyOptional()
   @IsString()
   @IsOptional()
+  domain?: string;
+
+  @ApiPropertyOptional()
+  @IsString()
+  @IsOptional()
   framework?: string;
 
   @ApiPropertyOptional()
