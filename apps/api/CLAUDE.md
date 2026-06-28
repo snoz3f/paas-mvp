@@ -1,52 +1,55 @@
-# CLAUDE.md
+# API — NestJS Control Plane
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+See root `CLAUDE.md` for full architecture. This file covers API-specific commands and patterns.
 
 ## Commands
 
 ```bash
-# Install dependencies
-pnpm install
+pnpm run start:dev     # watch mode
+pnpm run build         # SWC compile → dist/
+pnpm run lint          # eslint --fix
+pnpm run test          # jest unit tests
+pnpm run test:e2e      # e2e (needs DB)
 
-# Development (watch mode)
-pnpm run start:dev
+# Prisma
+npx prisma migrate dev                    # create + apply migration (needs local PG)
+npx prisma generate                       # regenerate client (no DB needed)
+npx prisma migrate deploy                 # apply pending migrations in prod
 
-# Build
-pnpm run build
-
-# Production
-pnpm run start:prod
-
-# Lint (auto-fix)
-pnpm run lint
-
-# Format
-pnpm run format
-
-# Unit tests
-pnpm run test
-
-# Run a single test file
-pnpm run test -- --testPathPattern=app.controller
-
-# Unit tests in watch mode
-pnpm run test:watch
-
-# E2E tests
-pnpm run test:e2e
-
-# Test coverage
-pnpm run test:cov
+# Prod migration (no local DB):
+# 1. Write SQL manually in prisma/migrations/<timestamp>_<name>/migration.sql
+# 2. On server: docker exec api-api-1 npx prisma migrate deploy
 ```
 
-## Architecture
+## Module structure
 
-This is a NestJS application (MVP stage) using the standard NestJS module architecture:
+```
+src/
+  app.module.ts         ← root module, imports everything
+  main.ts               ← bootstrap: port 5001, ValidationPipe, raw body for webhooks
+  trpc/
+    app-router.ts       ← pure TS router + all return type interfaces (no NestJS deps)
+    trpc.service.ts     ← wires real services into router deps, maps to plain types
+    trpc.module.ts
+  auth/                 ← JWT login/register, AuthGuard, @Public() decorator
+  github/               ← OAuth flow, repo listing, webhook registration
+  apps/                 ← CRUD for App model, GitHub webhook auto-register on create
+  projects/             ← CRUD for Project model
+  deployments/          ← deploy/restart/stop, worker callback, stale reaper cron
+  services/             ← Postgres/Redis provisioning via worker
+  nodes/                ← worker node registration + heartbeat
+  webhooks/             ← GitHub push webhook → auto-deploy
+  scheduler/            ← resource-aware node selection
+  worker-client/        ← sends jobs to worker via HTTP POST :4000/job
+  prisma/               ← PrismaService singleton
+  redis/                ← ioredis module (pub/sub for deployment logs)
+  scheduler/            ← SchedulerService: picks ONLINE node with enough RAM+disk
+```
 
-- **`src/main.ts`** — Bootstrap entry point; listens on `PORT` env var or `3000`
-- **`src/app.module.ts`** — Root module; imports all feature modules
-- **Controllers** handle HTTP routing; **Services** contain business logic; **Modules** wire them together
+## Key conventions
 
-NestJS uses dependency injection via decorators (`@Injectable`, `@Controller`, `@Module`). New features should follow the module pattern: create a dedicated module directory with `*.module.ts`, `*.controller.ts`, and `*.service.ts` files, then import the module into `AppModule`.
-
-Unit test files (`*.spec.ts`) live alongside source files in `src/`. E2E tests are in `test/` and use a separate Jest config (`test/jest-e2e.json`).
+- **DTOs** use `class-validator` decorators; `ValidationPipe` is global with `whitelist: true`
+- **Auth**: JWT Bearer in `Authorization` header; `AuthGuard` is default; use `@Public()` to skip
+- **Worker callback**: `PATCH /internal/deployments/:id/status` authenticated via `x-worker-secret` header
+- **Prisma client** lives in `src/generated/prisma/` (custom output path)
+- **Env vars**: `DATABASE_URL`, `JWT_SECRET`, `WORKER_SECRET`, `API_URL`, `API_INTERNAL_URL`, `GH_CLIENT_ID`, `GH_CLIENT_SECRET`, `GH_CALLBACK_URL`, `REDIS_URL`

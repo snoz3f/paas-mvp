@@ -82,3 +82,58 @@ export const dangerDesc = style({
   fontSize: vars.font.size.xs,
   color: vars.color.textMuted,
 });
+
+export const envSection = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: vars.space.sm,
+});
+
+export const envLabel = style({
+  fontSize: vars.font.size.sm,
+  fontWeight: '500',
+  color: vars.color.textMuted,
+});
+
+export const envRow = style({
+  display: 'grid',
+  gridTemplateColumns: '1fr 1fr auto',
+  gap: vars.space.sm,
+  alignItems: 'center',
+});
+
+export const envInput = style({
+  width: '100%',
+  padding: '6px 10px',
+  fontSize: vars.font.size.sm,
+  fontFamily: vars.font.mono,
+  backgroundColor: vars.color.bg,
+  border: `1px solid ${vars.color.border}`,
+  borderRadius: vars.radius.sm,
+  color: vars.color.text,
+  outline: 'none',
+  ':focus': { borderColor: vars.color.accent },
+  '::placeholder': { color: vars.color.textSubtle },
+});
+
+export const envRemoveBtn = style({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  width: 24,
+  height: 24,
+  borderRadius: vars.radius.sm,
+  color: vars.color.textMuted,
+  flexShrink: 0,
+  ':hover': { color: vars.color.danger, backgroundColor: 'rgba(255,92,92,0.08)' },
+});
+
+export const envAddBtn = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: vars.space.xs,
+  fontSize: vars.font.size.sm,
+  color: vars.color.textMuted,
+  padding: `6px 0`,
+  ':hover': { color: vars.color.text },
+});
