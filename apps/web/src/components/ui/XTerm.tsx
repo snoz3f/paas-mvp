@@ -90,6 +90,7 @@ export function XTerm({ logsUrl, wsUrl, containerId, token }: XTermProps) {
     if (wsUrl && containerId && token) {
       term.writeln('\x1b[2m── connecting… ──\x1b[0m\r\n');
       const ws = new WebSocket(wsUrl);
+      ws.binaryType = 'arraybuffer';
 
       ws.onopen = () => {
         ws.send(JSON.stringify({ event: 'attach', data: { containerId, token } }));
@@ -111,10 +112,8 @@ export function XTerm({ logsUrl, wsUrl, containerId, token }: XTermProps) {
       ws.onmessage = (e) => {
         if (e.data instanceof ArrayBuffer) {
           term.write(new Uint8Array(e.data));
-        } else if (e.data instanceof Blob) {
-          void e.data.arrayBuffer().then((buf) => term.write(new Uint8Array(buf)));
-        } else {
-          term.write(e.data as string);
+        } else if (typeof e.data === 'string') {
+          term.write(e.data);
         }
       };
 
