@@ -59,10 +59,12 @@ export function AppPage() {
         </div>
       </div>
 
-      {settingsOpen && (
+      {settingsOpen && app && (
         <AppSettingsModal
           projectId={projectId!}
           appId={appId!}
+          appName={app.name}
+          appRootDir={app.rootDir}
           onClose={() => setSettingsOpen(false)}
         />
       )}

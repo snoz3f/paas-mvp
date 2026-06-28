@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -16,21 +15,19 @@ type Form = z.infer<typeof schema>;
 interface Props {
   projectId: string;
   appId: string;
+  appName: string;
+  appRootDir: string;
   onClose: () => void;
 }
 
-export function AppSettingsModal({ projectId, appId, onClose }: Props) {
+export function AppSettingsModal({ projectId, appId, appName, appRootDir, onClose }: Props) {
   const utils = trpc.useUtils();
-  const { data: app } = trpc.apps.get.useQuery({ projectId, id: appId });
   const { mutateAsync: updateApp, isPending: isSaving } = trpc.apps.update.useMutation();
 
-  const { register, handleSubmit, reset, formState: { errors } } = useForm<Form>({
+  const { register, handleSubmit, formState: { errors } } = useForm<Form>({
     resolver: zodResolver(schema),
+    defaultValues: { name: appName, rootDir: appRootDir },
   });
-
-  useEffect(() => {
-    if (app) reset({ name: app.name, rootDir: app.rootDir });
-  }, [app, reset]);
 
   const onSave = async (data: Form) => {
     await updateApp({ projectId, id: appId, ...data });
