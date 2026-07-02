@@ -73,7 +73,7 @@ export interface AppRouterDeps {
     ramMb?: number; cpuMilli?: number; diskGb?: number;
   }): Promise<App>;
   updateApp(userId: string, projectId: string, id: string, d: {
-    name?: string; repoUrl?: string; rootDir?: string; framework?: string | null;
+    name?: string; repoUrl?: string; rootDir?: string; domain?: string | null; framework?: string | null;
     port?: number; envVars?: Record<string, string>; gitToken?: string | null;
     ramMb?: number; cpuMilli?: number; diskGb?: number;
   }): Promise<App>;

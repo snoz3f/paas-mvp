@@ -19,11 +19,15 @@ export class DeploymentsService {
   async create(userId: string, projectId: string, appId: string) {
     await this.assertAppOwner(userId, projectId, appId);
 
+    const running = await this.prisma.deployment.findFirst({
+      where: { appId, status: DeploymentStatus.RUNNING },
+    });
+
     const deployment = await this.prisma.deployment.create({
       data: { appId, status: DeploymentStatus.QUEUED },
     });
 
-    void this.triggerDeploy(deployment.id, appId);
+    void this.triggerDeploy(deployment.id, appId, running?.containerId ?? undefined);
 
     return deployment;
   }
