@@ -4,6 +4,7 @@ import { useNavigate, useParams } from 'react-router';
 import { Button } from '@/components/ui/Button';
 import { StatusBadge } from '@/components/ui/Badge';
 import { ResourceSlider } from '@/components/ui/ResourceSlider';
+import { frameworkLabel } from '@/lib/frameworks';
 import { RAM_STEPS, CPU_STEPS, DISK_STEPS, formatRam, formatCpu, formatDisk } from '@/lib/resources';
 import { trpc } from '@/lib/trpc';
 import { AppSettingsModal } from './AppSettingsModal';
@@ -101,7 +102,7 @@ export function AppPage() {
             </div>
             <div className={s.metaItem}>
               <p className={s.metaLabel}>Framework</p>
-              <span className={s.metaValue}>{app.framework ?? '—'}</span>
+              <span className={s.metaValue}>{frameworkLabel(app.framework)}</span>
             </div>
           </div>
         )}

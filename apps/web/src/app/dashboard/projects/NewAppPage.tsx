@@ -3,9 +3,11 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useNavigate, useParams } from 'react-router';
+import { siNodedotjs, siPython } from 'simple-icons';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { ResourceSlider } from '@/components/ui/ResourceSlider';
+import { FRAMEWORK_OPTIONS } from '@/lib/frameworks';
 import { RAM_STEPS, CPU_STEPS, DISK_STEPS, formatRam, formatCpu, formatDisk } from '@/lib/resources';
 import { trpc } from '@/lib/trpc';
 import * as s from './NewProjectPage.css';
@@ -16,6 +18,7 @@ const schema = z.object({
     .min(2, 'At least 2 characters')
     .max(32, 'Max 32 characters')
     .regex(/^[a-z0-9-]+$/, 'Only lowercase letters, numbers and hyphens'),
+  framework: z.enum(['static', 'node', 'python']),
 });
 
 type FormData = z.infer<typeof schema>;
@@ -39,9 +42,10 @@ export function NewAppPage() {
     enabled: !!me?.githubLogin,
   });
 
-  const { register, handleSubmit, setValue, formState: { errors } } = useForm<FormData>({
+  const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
   });
+  const selectedFramework = watch('framework');
 
   const handleConnectGithub = async () => {
     const data = await utils.github.getOAuthUrl.fetch();
@@ -68,6 +72,7 @@ export function NewAppPage() {
         name: data.name,
         repoUrl: selectedRepo.url,
         rootDir: rootDir || '.',
+        framework: data.framework,
         ramMb,
         cpuMilli,
         diskGb,
@@ -195,6 +200,39 @@ export function NewAppPage() {
             value={rootDir}
             onChange={(e) => setRootDir(e.target.value)}
           />
+
+          <div className={s.stackSection}>
+            <span className={s.stackLabel}>Stack</span>
+            <div className={s.stackGrid}>
+              {FRAMEWORK_OPTIONS.map((opt) => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  className={selectedFramework === opt.value ? `${s.stackOption} ${s.stackOptionActive}` : s.stackOption}
+                  onClick={() => setValue('framework', opt.value, { shouldValidate: true, shouldDirty: true })}
+                >
+                  {opt.value === 'node' && (
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill={`#${siNodedotjs.hex}`} role="img">
+                      <path d={siNodedotjs.path} />
+                    </svg>
+                  )}
+                  {opt.value === 'python' && (
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill={`#${siPython.hex}`} role="img">
+                      <path d={siPython.path} />
+                    </svg>
+                  )}
+                  {opt.value === 'static' && (
+                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.5">
+                      <rect x="2" y="3" width="14" height="12" rx="2" />
+                      <path d="M2 7h14" />
+                    </svg>
+                  )}
+                  <span className={s.stackOptionLabel}>{opt.label}</span>
+                </button>
+              ))}
+            </div>
+            {errors.framework && <div className={s.formError}>{errors.framework.message ?? 'Select a stack'}</div>}
+          </div>
 
           <div className={s.resourcesSection}>
             <span className={s.resourcesLabel}>Resources</span>

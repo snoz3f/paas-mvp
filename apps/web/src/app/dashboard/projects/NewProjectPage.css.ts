@@ -270,3 +270,54 @@ export const footer = style({
   gap: vars.space.sm,
   marginTop: 'auto',
 });
+
+export const stackSection = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: vars.space.sm,
+});
+
+export const stackLabel = style({
+  fontSize: vars.font.size.xs,
+  fontWeight: '500',
+  letterSpacing: '0.08em',
+  textTransform: 'uppercase',
+  color: vars.color.textMuted,
+});
+
+export const stackGrid = style({
+  display: 'grid',
+  gridTemplateColumns: 'repeat(3, 1fr)',
+  gap: vars.space.sm,
+});
+
+export const stackOption = style({
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  gap: vars.space.xs,
+  padding: `${vars.space.md} ${vars.space.sm}`,
+  backgroundColor: vars.color.bg,
+  border: `1px solid ${vars.color.border}`,
+  borderRadius: vars.radius.md,
+  color: vars.color.textMuted,
+  cursor: 'pointer',
+  transition: `all ${vars.transition.fast}`,
+  ':hover': {
+    borderColor: vars.color.borderHover,
+    color: vars.color.text,
+    backgroundColor: vars.color.surfaceHover,
+  },
+});
+
+export const stackOptionActive = style({
+  borderColor: vars.color.accent,
+  color: vars.color.text,
+  backgroundColor: 'rgba(240,228,104,0.06)',
+  boxShadow: `inset 0 0 0 1px ${vars.color.accent}`,
+});
+
+export const stackOptionLabel = style({
+  fontSize: vars.font.size.sm,
+  fontWeight: '600',
+});
