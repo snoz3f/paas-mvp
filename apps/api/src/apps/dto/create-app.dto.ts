@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsInt, IsObject, IsOptional, IsString, IsUrl, Max, Min, MinLength } from 'class-validator';
+import { IsIn, IsInt, IsObject, IsOptional, IsString, IsUrl, Max, Min, MinLength } from 'class-validator';
 
 export class CreateAppDto {
   @ApiProperty({ example: 'backend' })
@@ -16,10 +16,9 @@ export class CreateAppDto {
   @IsOptional()
   rootDir?: string;
 
-  @ApiPropertyOptional({ example: 'nestjs' })
-  @IsString()
-  @IsOptional()
-  framework?: string;
+  @ApiProperty({ enum: ['static', 'node', 'python'], example: 'node' })
+  @IsIn(['static', 'node', 'python'])
+  framework: 'static' | 'node' | 'python';
 
   @ApiPropertyOptional({ example: 3000 })
   @IsInt()

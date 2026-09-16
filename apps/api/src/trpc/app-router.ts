@@ -12,6 +12,44 @@ const protectedProcedure = t.procedure.use(({ ctx, next }) => {
   return next({ ctx: { userId: ctx.userId as string } });
 });
 
+export const APP_FRAMEWORKS = ['static', 'node', 'python'] as const;
+export type AppFramework = (typeof APP_FRAMEWORKS)[number];
+export const appFrameworkSchema = z.enum(APP_FRAMEWORKS);
+
+export function parseAppFramework(value: string | null | undefined): AppFramework | null {
+  if (value === 'static' || value === 'node' || value === 'python') return value;
+  return null;
+}
+
+export const createAppInput = z.object({
+  projectId: z.string(),
+  name: z.string().min(1),
+  repoUrl: z.string().url(),
+  rootDir: z.string().optional(),
+  framework: appFrameworkSchema,
+  port: z.number().optional(),
+  envVars: z.record(z.string(), z.string()).optional(),
+  gitToken: z.string().optional(),
+  ramMb: z.number().int().optional(),
+  cpuMilli: z.number().int().optional(),
+  diskGb: z.number().int().optional(),
+});
+
+export const updateAppInput = z.object({
+  projectId: z.string(),
+  id: z.string(),
+  name: z.string().optional(),
+  repoUrl: z.string().url().optional(),
+  rootDir: z.string().optional(),
+  domain: z.string().nullable().optional(),
+  port: z.number().optional(),
+  envVars: z.record(z.string(), z.string()).optional(),
+  gitToken: z.string().nullable().optional(),
+  ramMb: z.number().int().optional(),
+  cpuMilli: z.number().int().optional(),
+  diskGb: z.number().int().optional(),
+});
+
 // ── Return types (plain TS, no NestJS/Prisma deps) ────────
 
 export interface Project {
@@ -20,7 +58,7 @@ export interface Project {
 
 export interface App {
   id: string; projectId: string; name: string; repoUrl: string; rootDir: string;
-  domain: string | null; framework: string | null; port: number;
+  domain: string | null; framework: AppFramework | null; port: number;
   envVars: Record<string, string> | null; hasGitToken: boolean; createdAt: string;
   ramMb: number; cpuMilli: number; diskGb: number;
 }
@@ -68,12 +106,12 @@ export interface AppRouterDeps {
   listApps(userId: string, projectId: string): Promise<App[]>;
   getApp(userId: string, projectId: string, id: string): Promise<App>;
   createApp(userId: string, projectId: string, d: {
-    name: string; repoUrl: string; rootDir?: string; framework?: string;
+    name: string; repoUrl: string; rootDir?: string; framework: AppFramework;
     port?: number; envVars?: Record<string, string>; gitToken?: string;
     ramMb?: number; cpuMilli?: number; diskGb?: number;
   }): Promise<App>;
   updateApp(userId: string, projectId: string, id: string, d: {
-    name?: string; repoUrl?: string; rootDir?: string; domain?: string | null; framework?: string | null;
+    name?: string; repoUrl?: string; rootDir?: string; domain?: string | null;
     port?: number; envVars?: Record<string, string>; gitToken?: string | null;
     ramMb?: number; cpuMilli?: number; diskGb?: number;
   }): Promise<App>;
@@ -149,38 +187,12 @@ export function buildAppRouter(deps: AppRouterDeps) {
         .query(({ ctx, input }) => deps.getApp(ctx.userId, input.projectId, input.id)),
 
       create: protectedProcedure
-        .input(z.object({
-          projectId: z.string(),
-          name: z.string().min(1),
-          repoUrl: z.string().url(),
-          rootDir: z.string().optional(),
-          framework: z.string().optional(),
-          port: z.number().optional(),
-          envVars: z.record(z.string(), z.string()).optional(),
-          gitToken: z.string().optional(),
-          ramMb: z.number().int().optional(),
-          cpuMilli: z.number().int().optional(),
-          diskGb: z.number().int().optional(),
-        }))
+        .input(createAppInput)
         .mutation(({ ctx, input: { projectId, ...data } }) =>
           deps.createApp(ctx.userId, projectId, data)),
 
       update: protectedProcedure
-        .input(z.object({
-          projectId: z.string(),
-          id: z.string(),
-          name: z.string().optional(),
-          repoUrl: z.string().url().optional(),
-          rootDir: z.string().optional(),
-          domain: z.string().nullable().optional(),
-          framework: z.string().nullable().optional(),
-          port: z.number().optional(),
-          envVars: z.record(z.string(), z.string()).optional(),
-          gitToken: z.string().nullable().optional(),
-          ramMb: z.number().int().optional(),
-          cpuMilli: z.number().int().optional(),
-          diskGb: z.number().int().optional(),
-        }))
+        .input(updateAppInput)
         .mutation(({ ctx, input: { projectId, id, ...data } }) =>
           deps.updateApp(ctx.userId, projectId, id, data)),
 

@@ -23,11 +23,6 @@ export class UpdateAppDto {
   domain?: string;
 
   @ApiPropertyOptional()
-  @IsString()
-  @IsOptional()
-  framework?: string;
-
-  @ApiPropertyOptional()
   @IsInt()
   @Min(1)
   @Max(65535)

@@ -12,6 +12,8 @@ import { ServiceTypeDto } from '@/services/dto/create-service.dto';
 import { NodesService } from '@/nodes/nodes.service';
 import {
   buildAppRouter,
+  parseAppFramework,
+  type AppFramework,
   type AppRouter,
   type App,
   type Deployment,
@@ -76,7 +78,6 @@ export class TrpcService {
         this.toApp(await this.apps.update(userId, projectId, id, {
           ...d,
           domain: d.domain ?? undefined,
-          framework: d.framework ?? undefined,
           gitToken: d.gitToken ?? undefined,
         }) as SafeApp),
       deleteApp: async (userId, projectId, id) => {
@@ -150,7 +151,7 @@ export class TrpcService {
   }): App {
     return {
       id: a.id, projectId: a.projectId, name: a.name, repoUrl: a.repoUrl, rootDir: a.rootDir,
-      domain: a.domain, framework: a.framework, port: a.port,
+      domain: a.domain, framework: parseAppFramework(a.framework), port: a.port,
       envVars: a.envVars as Record<string, string> | null,
       hasGitToken: a.hasGitToken, createdAt: a.createdAt.toISOString(),
       ramMb: a.ramMb, cpuMilli: a.cpuMilli, diskGb: a.diskGb,
