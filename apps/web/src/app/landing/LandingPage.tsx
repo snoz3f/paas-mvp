@@ -10,17 +10,18 @@ const FEATURES = [
       </svg>
     ),
     title: 'Git push → deploy',
-    desc: 'Подключи репо, и каждый пуш автоматически триггерит билд и деплой. Zero config.',
+    desc: 'Подключи репо, и каждый пуш собирает образ через Railpack или Dockerfile и выкатывает контейнер.',
   },
   {
     icon: (
       <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.5">
-        <path d="M9 2v4M9 12v4M2 9h4M12 9h4" />
-        <circle cx="9" cy="9" r="2.5" />
+        <rect x="3" y="3" width="5" height="5" rx="1" />
+        <rect x="10" y="3" width="5" height="5" rx="1" />
+        <rect x="3" y="10" width="5" height="5" rx="1" />
       </svg>
     ),
-    title: 'Docker под капотом',
-    desc: 'Каждый деплой — изолированный контейнер. Собираем через Dockerfile или автодетект.',
+    title: 'Static, Node, Python',
+    desc: 'Три стека. Без YAML и без кластера — выбрал репо, указал стек, получил URL.',
   },
   {
     icon: (
@@ -29,27 +30,7 @@ const FEATURES = [
       </svg>
     ),
     title: 'Лог-стриминг в реальном времени',
-    desc: 'Видишь вывод билда и рантайма прямо в браузере — без SSH, без tail -f.',
-  },
-  {
-    icon: (
-      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.5">
-        <rect x="2" y="4" width="14" height="10" rx="2" />
-        <path d="M6 9l1.5 1.5L10 8" />
-      </svg>
-    ),
-    title: 'Веб-терминал',
-    desc: 'Зайди в работающий контейнер прямо из дашборда. Полноценный интерактивный шелл.',
-  },
-  {
-    icon: (
-      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.5">
-        <path d="M9 2C5.13 2 2 5.13 2 9s3.13 7 7 7 7-3.13 7-7-3.13-7-7-7z" />
-        <path d="M9 6v3l2 2" />
-      </svg>
-    ),
-    title: 'История деплоев',
-    desc: 'Полный список деплоев с таймстампами и статусами. Редеплой одной кнопкой.',
+    desc: 'Видишь вывод билда прямо в браузере — без SSH, без tail -f.',
   },
   {
     icon: (
@@ -59,61 +40,27 @@ const FEATURES = [
       </svg>
     ),
     title: 'Env Variables',
-    desc: 'Храни секреты и конфиги в зашифрованном хранилище. Доступны в рантайме контейнера.',
-  },
-];
-
-const PRICING = [
-  {
-    name: 'Hobby',
-    amount: 'Бесплатно',
-    amountAccent: false,
-    desc: 'Для пет-проектов и экспериментов.',
-    features: [
-      '1 проект',
-      '512 MB RAM',
-      '1 деплой одновременно',
-      'Логи 24ч',
-      'Сообщество в TG',
-    ],
-    cta: 'Начать бесплатно',
-    ctaPrimary: false,
-    featured: false,
+    desc: 'Секреты и конфиги в приложении. Доступны в рантайме контейнера.',
   },
   {
-    name: 'Pro',
-    amount: '$12',
-    amountAccent: true,
-    desc: 'Для фрилансеров и небольших команд.',
-    features: [
-      '10 проектов',
-      '2 GB RAM на проект',
-      'Параллельные деплои',
-      'Логи 30 дней',
-      'Кастомные домены',
-      'Приоритетная поддержка',
-    ],
-    cta: 'Начать',
-    ctaPrimary: true,
-    featured: true,
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.5">
+        <ellipse cx="9" cy="5" rx="6" ry="2.5" />
+        <path d="M3 5v8c0 1.4 2.7 2.5 6 2.5s6-1.1 6-2.5V5" />
+      </svg>
+    ),
+    title: 'Postgres и Redis',
+    desc: 'Managed-сервисы в сети проекта. Connection string копируешь в env приложения.',
   },
   {
-    name: 'Team',
-    amount: '$39',
-    amountAccent: false,
-    desc: 'Для продакшн-проектов и команд.',
-    features: [
-      'Неограниченно проектов',
-      '8 GB RAM на проект',
-      'Параллельные деплои',
-      'Логи 90 дней',
-      'Кастомные домены',
-      'SLA 99.9%',
-      'Выделенный канал поддержки',
-    ],
-    cta: 'Написать нам',
-    ctaPrimary: false,
-    featured: false,
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.5">
+        <path d="M9 2C5.13 2 2 5.13 2 9s3.13 7 7 7 7-3.13 7-7-3.13-7-7-7z" />
+        <path d="M9 6v3l2 2" />
+      </svg>
+    ),
+    title: 'История деплоев',
+    desc: 'Список деплоев со статусами. Редеплой одной кнопкой.',
   },
 ];
 
@@ -132,7 +79,6 @@ export function LandingPage() {
 
         <div className={s.navLinks}>
           <a href="#features" className={s.navLink}>Возможности</a>
-          <a href="#pricing" className={s.navLink}>Цены</a>
         </div>
 
         <div className={s.navActions}>
@@ -154,7 +100,7 @@ export function LandingPage() {
         </h1>
 
         <p className={s.heroSub}>
-          PaaS-платформа для СНГ-разработчиков. Push в git — приложение в продакшне.
+          PaaS для Static, Node и Python. Push в git — живой URL на *.infral.dev.
           Никаких YAML, никаких кластеров.
         </p>
 
@@ -197,50 +143,6 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* Pricing */}
-      <div className={s.divider} />
-      <section className={s.section} id="pricing">
-        <p className={s.sectionLabel}>Цены</p>
-        <h2 className={s.sectionTitle}>Просто и честно</h2>
-        <p className={s.sectionSub}>
-          Платишь только за то, что используешь. Никаких скрытых комиссий.
-        </p>
-        <div className={s.pricingGrid}>
-          {PRICING.map((plan) => (
-            <div
-              key={plan.name}
-              className={plan.featured ? s.pricingCardFeatured : s.pricingCard}
-            >
-              {plan.featured && <span className={s.pricingBadge}>Популярный</span>}
-              <p className={s.pricingName}>{plan.name}</p>
-              <div className={s.pricingPrice}>
-                <span className={plan.amountAccent ? s.pricingAmountAccent : s.pricingAmount}>
-                  {plan.amount}
-                </span>
-                {plan.amountAccent && <span className={s.pricingPeriod}>/мес</span>}
-              </div>
-              <p className={s.pricingDesc}>{plan.desc}</p>
-              <ul className={s.pricingFeatures}>
-                {plan.features.map((f) => (
-                  <li key={f} className={s.pricingFeatureRow}>
-                    <svg className={s.pricingCheck} width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M2 7l3.5 3.5L12 3" />
-                    </svg>
-                    {f}
-                  </li>
-                ))}
-              </ul>
-              <Link
-                to="/register"
-                className={plan.ctaPrimary ? s.pricingBtnPrimary : s.pricingBtn}
-              >
-                {plan.cta}
-              </Link>
-            </div>
-          ))}
-        </div>
-      </section>
-
       {/* CTA */}
       <div className={s.ctaSection}>
         <div className={s.ctaCard}>
@@ -263,7 +165,6 @@ export function LandingPage() {
           <span className={s.footerBrand}>INFRAL_</span>
           <div className={s.footerLinks}>
             <a href="#features" className={s.footerLink}>Возможности</a>
-            <a href="#pricing" className={s.footerLink}>Цены</a>
             <a href="https://t.me/infraldev" className={s.footerLink}>Telegram</a>
           </div>
           <span className={s.footerCopy}>© 2026 INFRAL</span>
