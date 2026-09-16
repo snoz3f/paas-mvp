@@ -27,18 +27,6 @@ const NAV_ITEMS = [
       </svg>
     ),
   },
-  {
-    to: '/dashboard/billing',
-    end: false,
-    label: 'Billing',
-    icon: (
-      <svg className={s.navIcon} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
-        <rect x="1" y="3" width="14" height="10" rx="1.5" />
-        <path d="M1 6h14" />
-        <path d="M4 10h2M9 10h3" />
-      </svg>
-    ),
-  },
 ];
 
 export function DashboardLayout() {

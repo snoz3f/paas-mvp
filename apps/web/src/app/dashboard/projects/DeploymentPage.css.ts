@@ -82,30 +82,6 @@ export const metaLink = style({
   transition: `opacity ${vars.transition.fast}`,
 });
 
-// ── Tabs ──────────────────────────────────────────────────
-export const tabs = style({
-  display: 'flex',
-  gap: '2px',
-  borderBottom: `1px solid ${vars.color.border}`,
-  flexShrink: 0,
-});
-
-export const tab = style({
-  padding: `8px ${vars.space.lg}`,
-  fontSize: vars.font.size.sm,
-  fontWeight: '500',
-  color: vars.color.textMuted,
-  borderBottom: '2px solid transparent',
-  marginBottom: '-1px',
-  transition: `all ${vars.transition.fast}`,
-  ':hover': { color: vars.color.text },
-});
-
-export const tabActive = style({
-  color: vars.color.text,
-  borderBottomColor: vars.color.accent,
-});
-
 // ── Terminal panel ────────────────────────────────────────
 export const termPanel = style({
   flex: 1,

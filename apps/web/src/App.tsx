@@ -40,7 +40,7 @@ export function App() {
         <Route path="projects/:id/apps/:appId/deployments/:deploymentId" element={<DeploymentPage />} />
         <Route path="projects/:id/settings" element={<Navigate to=".." relative="path" replace />} />
         <Route path="settings" element={<Placeholder title="Settings" />} />
-        <Route path="billing" element={<Placeholder title="Billing" />} />
+        <Route path="billing" element={<Navigate to="/dashboard" replace />} />
       </Route>
       <Route
         path="/admin"

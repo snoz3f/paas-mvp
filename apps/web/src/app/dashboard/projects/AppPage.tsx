@@ -65,7 +65,6 @@ export function AppPage() {
           appId={appId!}
           appName={app.name}
           appRootDir={app.rootDir}
-          appDomain={app.domain}
           appEnvVars={app.envVars}
           onClose={() => setSettingsOpen(false)}
         />

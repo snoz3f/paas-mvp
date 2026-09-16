@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { Button } from '@/components/ui/Button';
 import { StatusBadge } from '@/components/ui/Badge';
@@ -6,13 +5,10 @@ import { XTerm } from '@/components/ui/XTerm';
 import { trpc } from '@/lib/trpc';
 import * as s from './DeploymentPage.css';
 
-type Tab = 'logs' | 'terminal';
-
 export function DeploymentPage() {
   const { id: projectId, appId, deploymentId } = useParams<{ id: string; appId: string; deploymentId: string }>();
   const navigate = useNavigate();
   const utils = trpc.useUtils();
-  const [tab, setTab] = useState<Tab>('logs');
 
   const { data: deployment, isLoading } = trpc.deployments.get.useQuery(
     { projectId: projectId!, appId: appId!, id: deploymentId! },
@@ -28,11 +24,6 @@ export function DeploymentPage() {
   const { mutateAsync: stop, isPending: isStopping } = trpc.deployments.stop.useMutation();
 
   const isRunning = deployment?.status === 'RUNNING';
-
-  const { data: terminalInfo } = trpc.deployments.getTerminalInfo.useQuery(
-    { projectId: projectId!, appId: appId!, id: deploymentId! },
-    { enabled: tab === 'terminal' && isRunning },
-  );
 
   const invalidate = async () => {
     await utils.deployments.get.invalidate({ projectId: projectId!, appId: appId!, id: deploymentId! });
@@ -117,39 +108,8 @@ export function DeploymentPage() {
           </div>
         )}
 
-        <div className={s.tabs}>
-          <button
-            className={tab === 'logs' ? `${s.tab} ${s.tabActive}` : s.tab}
-            onClick={() => setTab('logs')}
-          >
-            Logs
-          </button>
-          <button
-            className={tab === 'terminal' ? `${s.tab} ${s.tabActive}` : s.tab}
-            onClick={() => { if (isRunning) setTab('terminal'); }}
-            disabled={!isRunning}
-            title={!isRunning ? 'Available when deployment is running' : undefined}
-          >
-            Terminal
-          </button>
-        </div>
-
         <div className={s.termPanel}>
-          {tab === 'logs' && logsUrl && <XTerm logsUrl={logsUrl} />}
-          {tab === 'logs' && !logsUrl && <div className={s.errorMsg}>No deployment selected.</div>}
-          {tab === 'terminal' && isRunning && terminalInfo && (
-            <XTerm
-              wsUrl={terminalInfo.wsUrl}
-              containerId={terminalInfo.containerId}
-              token={terminalInfo.token}
-            />
-          )}
-          {tab === 'terminal' && isRunning && !terminalInfo && (
-            <div className={s.errorMsg}>Connecting...</div>
-          )}
-          {tab === 'terminal' && !isRunning && (
-            <div className={s.errorMsg}>Terminal is only available for running deployments.</div>
-          )}
+          {logsUrl ? <XTerm logsUrl={logsUrl} /> : <div className={s.errorMsg}>No deployment selected.</div>}
         </div>
       </div>
     </>
