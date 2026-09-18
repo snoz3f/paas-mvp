@@ -13,7 +13,7 @@ services:
     environment:
       POSTGRES_DB: infral
       POSTGRES_USER: infral
-      POSTGRES_PASSWORD: YXqmjGPt00TG1T7Pw5OZoZrw
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
@@ -23,14 +23,17 @@ services:
     image: ghcr.io/snoz3f/paas-mvp/api:latest
     restart: always
     environment:
-      DATABASE_URL: postgresql://infral:YXqmjGPt00TG1T7Pw5OZoZrw@postgres:5432/infral
-      JWT_SECRET: 3Zpw11hNke4PlZNfqKouSV90EXC5U3pE2meeVTshjs2cp6Sj
+      DATABASE_URL: postgresql://infral:${POSTGRES_PASSWORD}@postgres:5432/infral
+      JWT_SECRET: ${JWT_SECRET}
       PORT: 5001
       API_URL: https://api.infral.dev
       API_INTERNAL_URL: http://api:5001
       REDIS_URL: redis://redis:6379
       WORKER_SECRET: ${WORKER_SECRET}
-      WORKER_PUBLIC_URL: wss://worker.infral.dev
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY}
+      ADMIN_EMAILS: ${ADMIN_EMAILS}
+      ALLOWED_NODE_NAMES: ${ALLOWED_NODE_NAMES:-worker-01}
+      WORKER_PUBLIC_URL: ${WORKER_PUBLIC_URL:-wss://worker.infral.dev}
       FRONTEND_URL: ${FRONTEND_URL}
       GH_CLIENT_ID: ${GH_CLIENT_ID}
       GH_CLIENT_SECRET: ${GH_CLIENT_SECRET}

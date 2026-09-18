@@ -26,6 +26,7 @@ Thumbs.db
 .env.*
 !.env.example
 !.env.production
+infra/**/.env
 
 # temp
 .temp

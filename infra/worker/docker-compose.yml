@@ -13,8 +13,8 @@ services:
     environment:
       PORT: 4000
       CONTROL_PLANE_URL: http://api:5001
-      WORKER_SECRET: EECI3dzKyckju5qLXL9bZ9fXemgDb4iT
-      JWT_SECRET: 3Zpw11hNke4PlZNfqKouSV90EXC5U3pE2meeVTshjs2cp6Sj
+      WORKER_SECRET: ${WORKER_SECRET}
+      JWT_SECRET: ${JWT_SECRET}
       NODE_NAME: worker-01
       NODE_IP: host.docker.internal
       NODE_REGION: de-frankfurt-1

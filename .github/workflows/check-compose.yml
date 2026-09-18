@@ -1,0 +1,17 @@
+name: Check Compose Secrets
+
+on:
+  pull_request:
+    paths:
+      - 'infra/**'
+      - 'scripts/check-compose-secrets.sh'
+
+jobs:
+  check-compose:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Lint compose for secret literals
+        run: bash scripts/check-compose-secrets.sh infra/api/docker-compose.yml infra/worker/docker-compose.yml
