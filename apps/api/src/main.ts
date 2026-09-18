@@ -10,6 +10,7 @@ import { TrpcService } from './trpc/trpc.service';
 async function bootstrap() {
   requireEnv('JWT_SECRET');
   requireEnv('WORKER_SECRET');
+  requireEnv('ENCRYPTION_KEY');
 
   const app = await NestFactory.create(AppModule, { rawBody: true });
 

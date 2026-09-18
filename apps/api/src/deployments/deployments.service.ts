@@ -1,9 +1,10 @@
 import { ForbiddenException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
+import { CryptoService } from '@/crypto/crypto.service';
 import { PrismaService } from '@/prisma/prisma.service';
 import { SchedulerService } from '@/scheduler/scheduler.service';
 import { WorkerClientService } from '@/worker-client/worker-client.service';
-import { DeploymentStatus } from '@/generated/prisma/client.js';
+import { DeploymentStatus } from '@/generated/prisma/enums';
 import type { UpdateDeploymentStatusDto } from './dto/update-deployment-status.dto';
 
 @Injectable()
@@ -14,6 +15,7 @@ export class DeploymentsService {
     private readonly prisma: PrismaService,
     private readonly scheduler: SchedulerService,
     private readonly workerClient: WorkerClientService,
+    private readonly crypto: CryptoService,
   ) {}
 
   async create(userId: string, projectId: string, appId: string) {
@@ -158,8 +160,9 @@ export class DeploymentsService {
         data: { nodeId: node.id, status: DeploymentStatus.BUILDING, startedAt: new Date() },
       });
 
-      const repoUrl = app.gitToken
-        ? this.buildAuthenticatedUrl(app.repoUrl, app.gitToken)
+      const gitToken = this.crypto.decrypt(app.gitToken);
+      const repoUrl = gitToken
+        ? this.buildAuthenticatedUrl(app.repoUrl, gitToken)
         : app.repoUrl;
 
       await this.workerClient.sendJob(node, {

@@ -1,4 +1,5 @@
 import { ForbiddenException, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { CryptoService } from '@/crypto/crypto.service';
 import { PrismaService } from '@/prisma/prisma.service';
 import { GithubService } from '@/github/github.service';
 import type { CreateAppDto } from './dto/create-app.dto';
@@ -11,6 +12,7 @@ export class AppsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly github: GithubService,
+    private readonly crypto: CryptoService,
   ) {}
 
   async create(userId: string, projectId: string, dto: CreateAppDto) {
@@ -19,7 +21,7 @@ export class AppsService {
     const gitToken = dto.gitToken ?? await this.github.getTokenForUser(userId);
 
     const app = await this.prisma.app.create({
-      data: { ...dto, projectId, gitToken: gitToken ?? undefined },
+      data: { ...dto, projectId, gitToken: gitToken ? this.crypto.encrypt(gitToken) : undefined },
     });
 
     if (gitToken && app.repoUrl.includes('github.com')) {
@@ -28,7 +30,10 @@ export class AppsService {
       const hookId = await this.github.registerWebhook(app.repoUrl, gitToken, webhookSecret, callbackUrl);
 
       if (hookId) {
-        await this.prisma.app.update({ where: { id: app.id }, data: { webhookSecret } });
+        await this.prisma.app.update({
+          where: { id: app.id },
+          data: { webhookSecret: this.crypto.encrypt(webhookSecret) },
+        });
         this.logger.log(`Registered GitHub webhook ${hookId} for app ${app.id}`);
       }
     }
@@ -59,7 +64,14 @@ export class AppsService {
 
   async update(userId: string, projectId: string, id: string, dto: UpdateAppDto) {
     await this.findOne(userId, projectId, id);
-    const updated = await this.prisma.app.update({ where: { id }, data: dto });
+    const { gitToken, ...rest } = dto;
+    const data = {
+      ...rest,
+      ...(gitToken !== undefined
+        ? { gitToken: gitToken ? this.crypto.encrypt(gitToken) : gitToken }
+        : {}),
+    };
+    const updated = await this.prisma.app.update({ where: { id }, data });
     return this.toSafe(updated);
   }
 

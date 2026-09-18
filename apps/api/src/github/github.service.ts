@@ -2,6 +2,7 @@ import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { randomBytes, createHmac } from 'crypto';
 import { secretsEqual } from '@/common/secrets-equal';
+import { CryptoService } from '@/crypto/crypto.service';
 import { PrismaService } from '@/prisma/prisma.service';
 
 export interface GithubRepo {
@@ -20,6 +21,7 @@ export class GithubService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwt: JwtService,
+    private readonly crypto: CryptoService,
   ) {}
 
   get isMock(): boolean {
@@ -78,7 +80,7 @@ export class GithubService {
 
     await this.prisma.user.update({
       where: { id: userId },
-      data: { githubAccessToken: access_token, githubLogin: login },
+      data: { githubAccessToken: this.crypto.encrypt(access_token), githubLogin: login },
     });
 
     this.logger.log(`GitHub connected for user ${userId} as @${login}`);
@@ -93,15 +95,16 @@ export class GithubService {
   async mockConnect(userId: string): Promise<void> {
     await this.prisma.user.update({
       where: { id: userId },
-      data: { githubAccessToken: 'mock', githubLogin: 'dev-user' },
+      data: { githubAccessToken: this.crypto.encrypt('mock'), githubLogin: 'dev-user' },
     });
   }
 
   async getRepos(userId: string): Promise<GithubRepo[]> {
     const user = await this.prisma.user.findUniqueOrThrow({ where: { id: userId } });
-    if (!user.githubAccessToken) throw new UnauthorizedException('GitHub not connected');
+    const token = this.crypto.decrypt(user.githubAccessToken);
+    if (!token) throw new UnauthorizedException('GitHub not connected');
 
-    if (user.githubAccessToken === 'mock') {
+    if (token === 'mock') {
       return MOCK_REPOS;
     }
 
@@ -109,7 +112,7 @@ export class GithubService {
       'https://api.github.com/user/repos?sort=updated&per_page=100&affiliation=owner,collaborator',
       {
         headers: {
-          Authorization: `Bearer ${user.githubAccessToken}`,
+          Authorization: `Bearer ${token}`,
           Accept: 'application/vnd.github+json',
           'X-GitHub-Api-Version': '2022-11-28',
         },
@@ -137,7 +140,7 @@ export class GithubService {
 
   async getTokenForUser(userId: string): Promise<string | null> {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
-    return user?.githubAccessToken ?? null;
+    return this.crypto.decrypt(user?.githubAccessToken ?? null);
   }
 
   generateWebhookSecret(): string {

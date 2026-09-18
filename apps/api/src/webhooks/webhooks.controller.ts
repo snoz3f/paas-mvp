@@ -12,6 +12,7 @@ import {
 import { ApiExcludeController } from '@nestjs/swagger';
 import type { RawBodyRequest } from '@nestjs/common';
 import type { Request } from 'express';
+import { CryptoService } from '@/crypto/crypto.service';
 import { GithubService } from '@/github/github.service';
 import { PrismaService } from '@/prisma/prisma.service';
 import { DeploymentsService } from '@/deployments/deployments.service';
@@ -31,6 +32,7 @@ export class WebhooksController {
     private readonly github: GithubService,
     private readonly prisma: PrismaService,
     private readonly deployments: DeploymentsService,
+    private readonly crypto: CryptoService,
   ) {}
 
   @Post('github/:appId')
@@ -48,7 +50,9 @@ export class WebhooksController {
     const rawBody = req.rawBody;
     if (!rawBody) throw new BadRequestException('No raw body');
 
-    const valid = this.github.verifySignature(app.webhookSecret, rawBody, signature);
+    const webhookSecret = this.crypto.decrypt(app.webhookSecret);
+    if (!webhookSecret) throw new BadRequestException('App has no webhook configured');
+    const valid = this.github.verifySignature(webhookSecret, rawBody, signature);
     if (!valid) throw new UnauthorizedException('Invalid signature');
 
     if (event !== 'push') return { ignored: true };
