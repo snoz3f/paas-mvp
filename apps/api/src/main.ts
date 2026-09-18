@@ -4,9 +4,13 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { createExpressMiddleware } from '@trpc/server/adapters/express';
 import type { Request } from 'express';
 import { AppModule } from './app.module';
+import { requireEnv } from './common/require-env';
 import { TrpcService } from './trpc/trpc.service';
 
 async function bootstrap() {
+  requireEnv('JWT_SECRET');
+  requireEnv('WORKER_SECRET');
+
   const app = await NestFactory.create(AppModule, { rawBody: true });
 
   app.enableCors({

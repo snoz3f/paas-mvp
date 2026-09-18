@@ -1,6 +1,7 @@
 import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { randomBytes, createHmac } from 'crypto';
+import { secretsEqual } from '@/common/secrets-equal';
 import { PrismaService } from '@/prisma/prisma.service';
 
 export interface GithubRepo {
@@ -145,7 +146,7 @@ export class GithubService {
 
   verifySignature(secret: string, payload: Buffer, signature: string): boolean {
     const expected = `sha256=${createHmac('sha256', secret).update(payload).digest('hex')}`;
-    return expected === signature;
+    return secretsEqual(signature, expected);
   }
 
   async registerWebhook(repoUrl: string, token: string, webhookSecret: string, callbackUrl: string): Promise<number | null> {

@@ -1,4 +1,5 @@
 import { ForbiddenException, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { internalCallbackUrl } from '@/common/internal-url';
 import { PrismaService } from '@/prisma/prisma.service';
 import { SchedulerService } from '@/scheduler/scheduler.service';
 import { WorkerClientService } from '@/worker-client/worker-client.service';
@@ -78,7 +79,7 @@ export class ServicesService {
           serviceId: service.id,
           containerId: service.containerId,
           projectId,
-          callbackUrl: `${process.env.API_URL}/internal/services/${service.id}/status`,
+          callbackUrl: internalCallbackUrl(`/internal/services/${service.id}/status`),
         });
       }
     }
@@ -122,7 +123,7 @@ export class ServicesService {
         serviceType: type,
         version,
         password,
-        callbackUrl: `${process.env.API_URL}/internal/services/${serviceId}/status`,
+        callbackUrl: internalCallbackUrl(`/internal/services/${serviceId}/status`),
       });
     } catch (err) {
       this.logger.error(`Failed to provision service ${serviceId}`, err);

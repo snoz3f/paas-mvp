@@ -5,6 +5,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import type { Request } from 'express';
+import { secretsEqual } from '@/common/secrets-equal';
 
 @Injectable()
 export class WorkerAuthGuard implements CanActivate {
@@ -12,7 +13,7 @@ export class WorkerAuthGuard implements CanActivate {
     const request = context.switchToHttp().getRequest<Request>();
     const secret = request.headers['x-worker-secret'];
 
-    if (!secret || secret !== process.env.WORKER_SECRET) {
+    if (!secretsEqual(secret, process.env.WORKER_SECRET)) {
       throw new UnauthorizedException();
     }
 
