@@ -5,7 +5,7 @@ services:
     privileged: true
     container_name: buildkit
     networks:
-      - infral
+      - infral-build
 
   worker:
     image: ghcr.io/snoz3f/paas-worker:latest
@@ -14,32 +14,26 @@ services:
       PORT: 4000
       CONTROL_PLANE_URL: http://api:5001
       WORKER_SECRET: ${WORKER_SECRET}
-      JWT_SECRET: ${JWT_SECRET}
       NODE_NAME: worker-01
-      NODE_IP: host.docker.internal
+      NODE_IP: worker
       NODE_REGION: de-frankfurt-1
       NODE_PROVIDER: contabo
       BASE_DOMAIN: infral.dev
       BUILDKIT_HOST: docker-container://buildkit
-      REDIS_URL: redis://redis:6379
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
       TRAEFIK_NETWORK: infral
-    ports:
-      - "4000:4000"
+      TERMINAL_ENABLED: "false"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     depends_on:
       - buildkit
     networks:
-      - infral
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.worker-terminal.rule=Host(`worker.infral.dev`)
-      - traefik.http.routers.worker-terminal.entrypoints=websecure
-      - traefik.http.routers.worker-terminal.tls.certresolver=letsencrypt-dns
-      - traefik.http.routers.worker-terminal.tls.domains[0].main=*.infral.dev
-      - traefik.http.routers.worker-terminal.tls.domains[0].sans=infral.dev
-      - traefik.http.services.worker-terminal.loadbalancer.server.port=4000
+      infral-control:
+        aliases:
+          - worker
 
 networks:
-  infral:
+  infral-control:
+    external: true
+  infral-build:
     external: true
