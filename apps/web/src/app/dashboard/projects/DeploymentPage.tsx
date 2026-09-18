@@ -42,7 +42,7 @@ export function DeploymentPage() {
   };
 
   const logsUrl = deployment
-    ? `${import.meta.env.VITE_API_URL ?? ''}/projects/${projectId}/apps/${appId}/deployments/${deploymentId}/logs?token=${localStorage.getItem('token') ?? ''}`
+    ? `${import.meta.env.VITE_API_URL ?? ''}/projects/${projectId}/apps/${appId}/deployments/${deploymentId}/logs`
     : undefined;
 
   if (isLoading) return null;

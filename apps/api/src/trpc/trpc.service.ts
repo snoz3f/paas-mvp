@@ -1,5 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { TRPCError } from '@trpc/server';
 import type { Request } from 'express';
 import type { JwtPayload } from '@/auth/auth.service';
 import { AuthService } from '@/auth/auth.service';
@@ -46,8 +47,26 @@ export class TrpcService {
     private readonly jwt: JwtService,
   ) {
     this.router = buildAppRouter({
-      login: (d) => this.auth.login(d),
-      register: (d) => this.auth.register(d),
+      login: async (d, ip) => {
+        try {
+          return await this.auth.login(d, ip);
+        } catch (e) {
+          if (e instanceof HttpException && e.getStatus() === 429) {
+            throw new TRPCError({ code: 'TOO_MANY_REQUESTS', message: 'Too many requests' });
+          }
+          throw e;
+        }
+      },
+      register: async (d, ip) => {
+        try {
+          return await this.auth.register(d, ip);
+        } catch (e) {
+          if (e instanceof HttpException && e.getStatus() === 429) {
+            throw new TRPCError({ code: 'TOO_MANY_REQUESTS', message: 'Too many requests' });
+          }
+          throw e;
+        }
+      },
       getMe: (userId) => this.auth.getMe(userId),
       getGithubOAuthUrl: (userId) => this.github.getOAuthUrl(userId),
       listGithubRepos: (userId) => this.github.getRepos(userId),
@@ -128,7 +147,7 @@ export class TrpcService {
   }
 
   async createContext({ req }: { req: Request }): Promise<TRPCContext> {
-    const ip = req.ip || 'unknown';
+    const ip = req.ip || req.socket.remoteAddress || 'unknown';
     const [type, token] = req.headers.authorization?.split(' ') ?? [];
     if (type !== 'Bearer' || !token) return { userId: null, email: null, ip };
     try {

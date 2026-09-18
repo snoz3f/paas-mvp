@@ -10,7 +10,7 @@ import { AuthGuard } from './guards/auth.guard';
     JwtModule.registerAsync({
       useFactory: () => ({
         secret: process.env.JWT_SECRET,
-        signOptions: { expiresIn: '7d' },
+        signOptions: { expiresIn: '24h' },
       }),
     }),
   ],

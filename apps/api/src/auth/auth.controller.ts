@@ -1,5 +1,6 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Post } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Post, Req } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import type { Request } from 'express';
 import { AuthService } from './auth.service';
 import { CurrentUser } from './decorators/current-user.decorator';
 import { Public } from './decorators/public.decorator';
@@ -17,8 +18,8 @@ export class AuthController {
   @Post('register')
   @ApiOperation({ operationId: 'register', summary: 'Register a new user' })
   @ApiOkResponse({ type: TokenResponseDto })
-  register(@Body() dto: RegisterDto) {
-    return this.authService.register(dto);
+  register(@Body() dto: RegisterDto, @Req() req: Request) {
+    return this.authService.register(dto, req.ip || req.socket.remoteAddress || 'unknown');
   }
 
   @Public()
@@ -26,8 +27,8 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ operationId: 'login', summary: 'Login with email and password' })
   @ApiOkResponse({ type: TokenResponseDto })
-  login(@Body() dto: LoginDto) {
-    return this.authService.login(dto);
+  login(@Body() dto: LoginDto, @Req() req: Request) {
+    return this.authService.login(dto, req.ip || req.socket.remoteAddress || 'unknown');
   }
 
   @Get('me')

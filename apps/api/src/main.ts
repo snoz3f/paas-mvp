@@ -1,5 +1,6 @@
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
+import type { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { createExpressMiddleware } from '@trpc/server/adapters/express';
 import type { Request } from 'express';
@@ -12,7 +13,9 @@ async function bootstrap() {
   requireEnv('WORKER_SECRET');
   requireEnv('ENCRYPTION_KEY');
 
-  const app = await NestFactory.create(AppModule, { rawBody: true });
+  const hops = Number(process.env.TRUST_PROXY_HOPS ?? '1');
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, { rawBody: true });
+  app.set('trust proxy', hops);
 
   app.enableCors({
     origin: process.env.CORS_ORIGIN ?? '*',

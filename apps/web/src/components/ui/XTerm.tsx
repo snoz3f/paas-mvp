@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { Terminal } from '@xterm/xterm';
 import { FitAddon } from '@xterm/addon-fit';
 import '@xterm/xterm/css/xterm.css';
+import { consumeSse } from './parse-sse';
 import * as s from './XTerm.css';
 
 const THEME = {
@@ -64,23 +65,48 @@ export function XTerm({ logsUrl, wsUrl, containerId, token }: XTermProps) {
     // ── Режим логов (SSE) ──────────────────────────────────
     if (logsUrl) {
       term.writeln('\x1b[2m── build log ──\x1b[0m\r\n');
-      const source = new EventSource(logsUrl);
+      const ac = new AbortController();
       let ended = false;
 
-      source.onmessage = (e) => {
-        term.writeln(e.data as string);
-      };
-      source.addEventListener('end', () => {
-        ended = true;
-        term.writeln('\r\n\x1b[2;32m── done ──\x1b[0m');
-        source.close();
-      });
-      source.onerror = () => {
-        if (!ended) term.writeln('\r\n\x1b[31mSSE connection lost\x1b[0m');
-        source.close();
-      };
+      void (async () => {
+        try {
+          const res = await fetch(logsUrl, {
+            headers: { Authorization: `Bearer ${localStorage.getItem('token') ?? ''}` },
+            signal: ac.signal,
+          });
+          if (!res.ok || !res.body) {
+            if (!ended) term.writeln('\r\n\x1b[31mSSE connection lost\x1b[0m');
+            return;
+          }
+          const reader = res.body.getReader();
+          const decoder = new TextDecoder();
+          let buffer = '';
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            buffer += decoder.decode(value, { stream: true });
+            const { rest, events } = consumeSse(buffer);
+            buffer = rest;
+            for (const ev of events) {
+              if (ev.event === 'end') {
+                ended = true;
+                term.writeln('\r\n\x1b[2;32m── done ──\x1b[0m');
+                ac.abort();
+                return;
+              }
+              if (ev.data) term.writeln(ev.data);
+            }
+          }
+          if (!ended) term.writeln('\r\n\x1b[31mSSE connection lost\x1b[0m');
+        } catch {
+          if (!ac.signal.aborted && !ended) {
+            term.writeln('\r\n\x1b[31mSSE connection lost\x1b[0m');
+          }
+        }
+      })();
+
       return () => {
-        source.close();
+        ac.abort();
         observer.disconnect();
         term.dispose();
       };

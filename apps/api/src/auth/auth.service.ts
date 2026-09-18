@@ -1,10 +1,18 @@
-import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  TooManyRequestsException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as argon2 from 'argon2';
 import { PrismaService } from '@/prisma/prisma.service';
+import { AuthRateLimiter } from './auth-rate-limit';
 import type { LoginDto } from './dto/login.dto';
 import type { RegisterDto } from './dto/register.dto';
 import { effectiveRole, type UserRoleName } from './effective-role';
+
+const limiter = new AuthRateLimiter();
 
 export interface JwtPayload {
   sub: string;
@@ -18,7 +26,10 @@ export class AuthService {
     private readonly jwt: JwtService,
   ) {}
 
-  async register(dto: RegisterDto): Promise<{ accessToken: string }> {
+  async register(dto: RegisterDto, ip: string): Promise<{ accessToken: string }> {
+    if (!limiter.consume(ip)) {
+      throw new TooManyRequestsException({ message: 'Too many requests' });
+    }
     const existing = await this.prisma.user.findUnique({ where: { email: dto.email } });
     if (existing) throw new ConflictException('Email already in use');
 
@@ -30,7 +41,10 @@ export class AuthService {
     return this.signToken({ sub: user.id, email: user.email });
   }
 
-  async login(dto: LoginDto): Promise<{ accessToken: string }> {
+  async login(dto: LoginDto, ip: string): Promise<{ accessToken: string }> {
+    if (!limiter.consume(ip)) {
+      throw new TooManyRequestsException({ message: 'Too many requests' });
+    }
     const user = await this.prisma.user.findUnique({ where: { email: dto.email } });
     if (!user) throw new UnauthorizedException('Invalid credentials');
 

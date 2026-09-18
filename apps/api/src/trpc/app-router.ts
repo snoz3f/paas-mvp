@@ -119,8 +119,8 @@ export interface GithubRepo {
 // ── Deps interface ────────────────────────────────────────
 
 export interface AppRouterDeps {
-  login(d: { email: string; password: string }): Promise<{ accessToken: string }>;
-  register(d: { email: string; password: string }): Promise<{ accessToken: string }>;
+  login(d: { email: string; password: string }, ip: string): Promise<{ accessToken: string }>;
+  register(d: { email: string; password: string }, ip: string): Promise<{ accessToken: string }>;
   getMe(userId: string): Promise<{
     id: string;
     email: string;
@@ -171,11 +171,11 @@ export function buildAppRouter(deps: AppRouterDeps) {
     auth: t.router({
       login: t.procedure
         .input(z.object({ email: z.string().email(), password: z.string() }))
-        .mutation(({ input }) => deps.login(input)),
+        .mutation(({ ctx, input }) => deps.login(input, ctx.ip)),
 
       register: t.procedure
         .input(z.object({ email: z.string().email(), password: z.string().min(8) }))
-        .mutation(({ input }) => deps.register(input)),
+        .mutation(({ ctx, input }) => deps.register(input, ctx.ip)),
 
       getMe: protectedProcedure
         .query(({ ctx }) => deps.getMe(ctx.userId)),
