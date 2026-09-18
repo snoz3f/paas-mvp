@@ -10,6 +10,5 @@ export class AppResponseDto {
   @ApiProperty() port: number;
   @ApiProperty({ type: Object }) envVars: Record<string, string>;
   @ApiProperty() hasGitToken: boolean;
-  @ApiPropertyOptional() webhookSecret?: string | null;
   @ApiProperty() createdAt: Date;
 }

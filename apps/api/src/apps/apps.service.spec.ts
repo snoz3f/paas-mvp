@@ -83,3 +83,79 @@ describe('AppsService gitToken / webhookSecret at rest', () => {
     expect(crypto.decrypt(data.gitToken)).toBe(PLAIN);
   });
 });
+
+describe('AppsService.toSafe / remove', () => {
+  const fixture = {
+    id: 'app-1',
+    projectId: 'proj-1',
+    name: 'api',
+    repoUrl: 'https://github.com/acme/app',
+    rootDir: '.',
+    domain: null,
+    framework: 'node',
+    port: 3000,
+    envVars: {},
+    createdAt: new Date('2026-01-01T00:00:00.000Z'),
+    ramMb: 512,
+    cpuMilli: 500,
+    diskGb: 5,
+    gitToken: 'enc:v1:git-token-ciphertext',
+    webhookSecret: 'enc:v1:webhook-secret-ciphertext',
+    project: {
+      id: 'proj-1',
+      userId: 'user-1',
+      name: 'proj',
+      passwordHash: 'argon2-hash-must-not-leak',
+    },
+  };
+
+  it('toSafe allowlist omits secrets, project, and passwordHash', () => {
+    const service = new AppsService({} as never, {} as never, {} as never);
+    const safe = (
+      service as unknown as { toSafe(app: typeof fixture): Record<string, unknown> }
+    ).toSafe(fixture);
+    const json = JSON.stringify(safe);
+    expect(json).not.toContain('enc:v1:git-token-ciphertext');
+    expect(json).not.toContain('enc:v1:webhook-secret-ciphertext');
+    expect(json).not.toContain('argon2-hash-must-not-leak');
+    expect(json).not.toContain('"project"');
+    expect(json).not.toContain('"gitToken"');
+    expect(json).not.toContain('"webhookSecret"');
+    expect(json).not.toContain('"passwordHash"');
+    expect(safe.hasGitToken).toBe(true);
+    expect(safe.id).toBe('app-1');
+    expect(safe.rootDir).toBe('.');
+  });
+
+  it('remove returns undefined (no Prisma row body)', async () => {
+    const prisma = {
+      app: {
+        findUnique: jest.fn().mockResolvedValue(fixture),
+        delete: jest.fn().mockResolvedValue(fixture),
+      },
+    };
+    const service = new AppsService(prisma as never, {} as never, {} as never);
+    const result = await service.remove('user-1', 'proj-1', 'app-1');
+    expect(result).toBeUndefined();
+    expect(prisma.app.delete).toHaveBeenCalledWith({ where: { id: 'app-1' } });
+  });
+
+  it('create rejects unsafe rootDir', async () => {
+    const prisma = {
+      project: { findUnique: jest.fn().mockResolvedValue({ id: 'proj-1', userId: 'user-1' }) },
+      app: { create: jest.fn() },
+    };
+    const service = new AppsService(prisma as never, { getTokenForUser: jest.fn() } as never, {
+      encrypt: (v: string) => v,
+    } as never);
+    await expect(
+      service.create('user-1', 'proj-1', {
+        name: 'api',
+        repoUrl: 'https://github.com/acme/app',
+        framework: 'node',
+        rootDir: '../etc',
+      }),
+    ).rejects.toThrow(/invalid rootDir/);
+    expect(prisma.app.create).not.toHaveBeenCalled();
+  });
+});

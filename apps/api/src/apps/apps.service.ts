@@ -1,9 +1,45 @@
-import { ForbiddenException, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { assertSafeRootDir } from '@/common/root-dir';
 import { CryptoService } from '@/crypto/crypto.service';
 import { PrismaService } from '@/prisma/prisma.service';
 import { GithubService } from '@/github/github.service';
 import type { CreateAppDto } from './dto/create-app.dto';
 import type { UpdateAppDto } from './dto/update-app.dto';
+
+type AppRow = {
+  id: string;
+  projectId: string;
+  name: string;
+  repoUrl: string;
+  rootDir: string;
+  domain: string | null;
+  framework: string | null;
+  port: number;
+  envVars: unknown;
+  createdAt: Date;
+  ramMb: number;
+  cpuMilli: number;
+  diskGb: number;
+  gitToken?: string | null;
+  webhookSecret?: string | null;
+};
+
+export type SafeApp = {
+  id: string;
+  projectId: string;
+  name: string;
+  repoUrl: string;
+  rootDir: string;
+  domain: string | null;
+  framework: string | null;
+  port: number;
+  envVars: Record<string, string>;
+  createdAt: Date;
+  ramMb: number;
+  cpuMilli: number;
+  diskGb: number;
+  hasGitToken: boolean;
+};
 
 @Injectable()
 export class AppsService {
@@ -18,10 +54,17 @@ export class AppsService {
   async create(userId: string, projectId: string, dto: CreateAppDto) {
     await this.assertProjectOwner(userId, projectId);
 
+    let rootDir: string;
+    try {
+      rootDir = assertSafeRootDir(dto.rootDir);
+    } catch {
+      throw new BadRequestException('invalid rootDir');
+    }
+
     const gitToken = dto.gitToken ?? await this.github.getTokenForUser(userId);
 
     const app = await this.prisma.app.create({
-      data: { ...dto, projectId, gitToken: gitToken ? this.crypto.encrypt(gitToken) : undefined },
+      data: { ...dto, rootDir, projectId, gitToken: gitToken ? this.crypto.encrypt(gitToken) : undefined },
     });
 
     if (gitToken && app.repoUrl.includes('github.com')) {
@@ -64,9 +107,20 @@ export class AppsService {
 
   async update(userId: string, projectId: string, id: string, dto: UpdateAppDto) {
     await this.findOne(userId, projectId, id);
-    const { gitToken, ...rest } = dto;
+    const { gitToken, rootDir: rawRootDir, ...rest } = dto;
+
+    let rootDir: string | undefined;
+    if (rawRootDir !== undefined) {
+      try {
+        rootDir = assertSafeRootDir(rawRootDir);
+      } catch {
+        throw new BadRequestException('invalid rootDir');
+      }
+    }
+
     const data = {
       ...rest,
+      ...(rootDir !== undefined ? { rootDir } : {}),
       ...(gitToken !== undefined
         ? { gitToken: gitToken ? this.crypto.encrypt(gitToken) : gitToken }
         : {}),
@@ -75,9 +129,9 @@ export class AppsService {
     return this.toSafe(updated);
   }
 
-  async remove(userId: string, projectId: string, id: string) {
+  async remove(userId: string, projectId: string, id: string): Promise<void> {
     await this.findOne(userId, projectId, id);
-    return this.prisma.app.delete({ where: { id } });
+    await this.prisma.app.delete({ where: { id } });
   }
 
   private async assertProjectOwner(userId: string, projectId: string) {
@@ -86,8 +140,22 @@ export class AppsService {
     if (project.userId !== userId) throw new ForbiddenException();
   }
 
-  private toSafe(app: { gitToken?: string | null; webhookSecret?: string | null; [key: string]: unknown }) {
-    const { gitToken, ...safe } = app;
-    return { ...safe, hasGitToken: !!gitToken };
+  private toSafe(app: AppRow): SafeApp {
+    return {
+      id: app.id,
+      projectId: app.projectId,
+      name: app.name,
+      repoUrl: app.repoUrl,
+      rootDir: app.rootDir,
+      domain: app.domain,
+      framework: app.framework,
+      port: app.port,
+      envVars: app.envVars as Record<string, string>,
+      createdAt: app.createdAt,
+      ramMb: app.ramMb,
+      cpuMilli: app.cpuMilli,
+      diskGb: app.diskGb,
+      hasGitToken: !!app.gitToken,
+    };
   }
 }

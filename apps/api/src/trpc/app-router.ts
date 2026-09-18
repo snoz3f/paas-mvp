@@ -1,5 +1,18 @@
 import { initTRPC, TRPCError } from '@trpc/server';
 import { z } from 'zod';
+import { assertSafeRootDir } from '../common/root-dir';
+
+const optionalSafeRootDir = z
+  .string()
+  .optional()
+  .superRefine((val, ctx) => {
+    if (val === undefined) return;
+    try {
+      assertSafeRootDir(val);
+    } catch {
+      ctx.addIssue({ code: 'custom', message: 'invalid rootDir' });
+    }
+  });
 
 export interface TRPCContext {
   userId: string | null;
@@ -25,7 +38,7 @@ export const createAppInput = z.object({
   projectId: z.string(),
   name: z.string().min(1),
   repoUrl: z.string().url(),
-  rootDir: z.string().optional(),
+  rootDir: optionalSafeRootDir,
   framework: appFrameworkSchema,
   port: z.number().optional(),
   envVars: z.record(z.string(), z.string()).optional(),
@@ -40,8 +53,7 @@ export const updateAppInput = z.object({
   id: z.string(),
   name: z.string().optional(),
   repoUrl: z.string().url().optional(),
-  rootDir: z.string().optional(),
-  domain: z.string().nullable().optional(),
+  rootDir: optionalSafeRootDir,
   port: z.number().optional(),
   envVars: z.record(z.string(), z.string()).optional(),
   gitToken: z.string().nullable().optional(),
@@ -111,7 +123,7 @@ export interface AppRouterDeps {
     ramMb?: number; cpuMilli?: number; diskGb?: number;
   }): Promise<App>;
   updateApp(userId: string, projectId: string, id: string, d: {
-    name?: string; repoUrl?: string; rootDir?: string; domain?: string | null;
+    name?: string; repoUrl?: string; rootDir?: string;
     port?: number; envVars?: Record<string, string>; gitToken?: string | null;
     ramMb?: number; cpuMilli?: number; diskGb?: number;
   }): Promise<App>;

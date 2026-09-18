@@ -18,11 +18,6 @@ export class UpdateAppDto {
   rootDir?: string;
 
   @ApiPropertyOptional()
-  @IsString()
-  @IsOptional()
-  domain?: string;
-
-  @ApiPropertyOptional()
   @IsInt()
   @Min(1)
   @Max(65535)

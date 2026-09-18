@@ -75,4 +75,54 @@ describe('DeploymentsService clone URL', () => {
     expect(job.repoUrl).toContain(PLAIN);
     expect(job.repoUrl).toContain('x-access-token');
   });
+
+  it('does not send domain in the worker job', async () => {
+    process.env.ENCRYPTION_KEY = TEST_KEY;
+    process.env.API_INTERNAL_URL = 'http://api:5001';
+    const crypto = new CryptoService({} as never);
+    const app = {
+      id: 'app-1',
+      projectId: 'proj-1',
+      repoUrl: 'https://github.com/dev-user/node-api.git',
+      gitToken: null,
+      rootDir: '.',
+      port: 3000,
+      domain: 'api.infral.dev',
+      envVars: {},
+      ramMb: 512,
+      cpuMilli: 500,
+      project: { userId: 'user-1' },
+    };
+    const prisma = {
+      app: {
+        findUnique: jest.fn().mockResolvedValue(app),
+        findUniqueOrThrow: jest.fn().mockResolvedValue(app),
+      },
+      deployment: {
+        findFirst: jest.fn().mockResolvedValue(null),
+        create: jest.fn().mockResolvedValue({ id: 'dep-1' }),
+        update: jest.fn().mockResolvedValue({}),
+      },
+    };
+    const scheduler = {
+      selectNode: jest.fn().mockResolvedValue({ id: 'n1', ip: 'worker' }),
+    };
+    const workerClient = { sendJob: jest.fn() };
+    const sent = new Promise<[WorkerNode, WorkerJob]>((resolve) => {
+      workerClient.sendJob.mockImplementation(async (node: WorkerNode, job: WorkerJob) => {
+        resolve([node, job]);
+      });
+    });
+
+    const service = new DeploymentsService(
+      prisma as never,
+      scheduler as never,
+      workerClient as never,
+      crypto,
+    );
+    await service.create('user-1', 'proj-1', 'app-1');
+    const [, job] = await sent;
+
+    expect(job).not.toHaveProperty('domain');
+  });
 });

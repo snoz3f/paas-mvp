@@ -77,7 +77,6 @@ export class TrpcService {
       updateApp: async (userId, projectId, id, d) =>
         this.toApp(await this.apps.update(userId, projectId, id, {
           ...d,
-          domain: d.domain ?? undefined,
           gitToken: d.gitToken ?? undefined,
         }) as SafeApp),
       deleteApp: async (userId, projectId, id) => {

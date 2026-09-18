@@ -171,7 +171,6 @@ export class DeploymentsService {
         repoUrl,
         rootDir: app.rootDir,
         port: app.port,
-        domain: app.domain ?? undefined,
         containerId: oldContainerId,
         envVars: (app.envVars ?? {}) as Record<string, string>,
         projectId: app.projectId,

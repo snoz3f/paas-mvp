@@ -36,6 +36,52 @@ describe('updateAppInput', () => {
     expect(parsed).not.toHaveProperty('framework');
     expect(parsed.name).toBe('renamed');
   });
+
+  it('strips domain so custom hosts cannot be set', () => {
+    const parsed = updateAppInput.parse({
+      projectId: '11111111-1111-1111-1111-111111111111',
+      id: '22222222-2222-2222-2222-222222222222',
+      name: 'renamed',
+      domain: 'api.infral.dev',
+    });
+    expect(parsed).not.toHaveProperty('domain');
+    expect(parsed.name).toBe('renamed');
+  });
+
+  it('rejects unsafe rootDir', () => {
+    const result = updateAppInput.safeParse({
+      projectId: '11111111-1111-1111-1111-111111111111',
+      id: '22222222-2222-2222-2222-222222222222',
+      rootDir: '../etc',
+    });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues.some((i) => i.message === 'invalid rootDir')).toBe(true);
+    }
+  });
+});
+
+describe('createAppInput rootDir', () => {
+  it('rejects unsafe rootDir', () => {
+    const result = createAppInput.safeParse({
+      ...baseCreate,
+      framework: 'node',
+      rootDir: '..',
+    });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues.some((i) => i.message === 'invalid rootDir')).toBe(true);
+    }
+  });
+
+  it('accepts relative rootDir', () => {
+    const parsed = createAppInput.parse({
+      ...baseCreate,
+      framework: 'node',
+      rootDir: 'apps/web',
+    });
+    expect(parsed.rootDir).toBe('apps/web');
+  });
 });
 
 describe('parseAppFramework', () => {
