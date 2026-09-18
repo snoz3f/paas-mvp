@@ -13,6 +13,7 @@ import { AdminLayout } from '@/app/admin/AdminLayout';
 import { AdminOverviewPage } from '@/app/admin/AdminOverviewPage';
 import { AdminNodesPage } from '@/app/admin/AdminNodesPage';
 import { AuthGuard } from '@/components/AuthGuard';
+import { AdminGuard } from '@/components/AdminGuard';
 
 function Placeholder({ title }: { title: string }) {
   return <div style={{ padding: 40, color: '#666' }}>{title} — coming soon</div>;
@@ -46,7 +47,9 @@ export function App() {
         path="/admin"
         element={
           <AuthGuard>
-            <AdminLayout />
+            <AdminGuard>
+              <AdminLayout />
+            </AdminGuard>
           </AuthGuard>
         }
       >

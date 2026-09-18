@@ -19,6 +19,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { Public } from '@/auth/decorators/public.decorator';
+import { AdminGuard } from '@/auth/guards/admin.guard';
 import { WorkerAuthGuard } from '@/deployments/guards/worker-auth.guard';
 import { HeartbeatDto } from './dto/heartbeat.dto';
 import { NodeResponseDto } from './dto/node-response.dto';
@@ -28,6 +29,7 @@ import { NodesService } from './nodes.service';
 
 @ApiTags('nodes')
 @ApiBearerAuth('access-token')
+@UseGuards(AdminGuard)
 @Controller('nodes')
 export class NodesController {
   constructor(private readonly nodesService: NodesService) {}

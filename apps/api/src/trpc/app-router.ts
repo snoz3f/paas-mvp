@@ -1,5 +1,6 @@
 import { initTRPC, TRPCError } from '@trpc/server';
 import { z } from 'zod';
+import { effectiveRole } from '../auth/effective-role';
 import { assertSafeRootDir } from '../common/root-dir';
 
 const optionalSafeRootDir = z
@@ -16,13 +17,28 @@ const optionalSafeRootDir = z
 
 export interface TRPCContext {
   userId: string | null;
+  email: string | null;
+  ip: string;
 }
 
 const t = initTRPC.context<TRPCContext>().create();
 
 const protectedProcedure = t.procedure.use(({ ctx, next }) => {
   if (!ctx.userId) throw new TRPCError({ code: 'UNAUTHORIZED' });
-  return next({ ctx: { userId: ctx.userId as string } });
+  return next({
+    ctx: {
+      userId: ctx.userId as string,
+      email: ctx.email,
+      ip: ctx.ip,
+    },
+  });
+});
+
+const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
+  if (!ctx.email || effectiveRole(ctx.email) !== 'admin') {
+    throw new TRPCError({ code: 'FORBIDDEN' });
+  }
+  return next();
 });
 
 export const APP_FRAMEWORKS = ['static', 'node', 'python'] as const;
@@ -105,7 +121,12 @@ export interface GithubRepo {
 export interface AppRouterDeps {
   login(d: { email: string; password: string }): Promise<{ accessToken: string }>;
   register(d: { email: string; password: string }): Promise<{ accessToken: string }>;
-  getMe(userId: string): Promise<{ id: string; email: string; githubLogin: string | null }>;
+  getMe(userId: string): Promise<{
+    id: string;
+    email: string;
+    githubLogin: string | null;
+    role: 'user' | 'admin';
+  }>;
   getGithubOAuthUrl(userId: string): Promise<string>;
   listGithubRepos(userId: string): Promise<GithubRepo[]>;
 
@@ -266,7 +287,7 @@ export function buildAppRouter(deps: AppRouterDeps) {
     }),
 
     nodes: t.router({
-      list: protectedProcedure
+      list: adminProcedure
         .query(() => deps.listNodes()),
     }),
   });

@@ -128,13 +128,14 @@ export class TrpcService {
   }
 
   async createContext({ req }: { req: Request }): Promise<TRPCContext> {
+    const ip = req.ip || 'unknown';
     const [type, token] = req.headers.authorization?.split(' ') ?? [];
-    if (type !== 'Bearer' || !token) return { userId: null };
+    if (type !== 'Bearer' || !token) return { userId: null, email: null, ip };
     try {
       const payload = await this.jwt.verifyAsync<JwtPayload>(token);
-      return { userId: payload.sub };
+      return { userId: payload.sub, email: payload.email, ip };
     } catch {
-      return { userId: null };
+      return { userId: null, email: null, ip };
     }
   }
 

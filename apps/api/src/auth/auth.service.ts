@@ -4,6 +4,7 @@ import * as argon2 from 'argon2';
 import { PrismaService } from '@/prisma/prisma.service';
 import type { LoginDto } from './dto/login.dto';
 import type { RegisterDto } from './dto/register.dto';
+import { effectiveRole, type UserRoleName } from './effective-role';
 
 export interface JwtPayload {
   sub: string;
@@ -39,12 +40,26 @@ export class AuthService {
     return this.signToken({ sub: user.id, email: user.email });
   }
 
-  async getMe(userId: string) {
+  async getMe(userId: string): Promise<{
+    id: string;
+    email: string;
+    githubLogin: string | null;
+    role: UserRoleName;
+  }> {
     const user = await this.prisma.user.findUniqueOrThrow({ where: { id: userId } });
+    const role = effectiveRole(user.email);
+    if (user.role !== role) {
+      try {
+        await this.prisma.user.update({ where: { id: userId }, data: { role } });
+      } catch {
+        // write-through is best-effort; authz uses ADMIN_EMAILS only
+      }
+    }
     return {
       id: user.id,
       email: user.email,
       githubLogin: user.githubLogin ?? null,
+      role,
     };
   }
 
