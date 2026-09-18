@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { NodeStatus } from '@/generated/prisma/client.js';
+import { NodeStatus } from '@/generated/prisma/enums';
 
 export class NodeResponseDto {
   @ApiProperty({ example: '550e8400-e29b-41d4-a716-446655440000' })

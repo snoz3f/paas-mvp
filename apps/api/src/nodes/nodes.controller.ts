@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Headers,
   HttpCode,
   HttpStatus,
   Param,
@@ -56,8 +57,11 @@ export class InternalNodesController {
   @Post('register')
   @ApiOperation({ operationId: 'registerNode', summary: 'Worker self-registration' })
   @ApiCreatedResponse({ type: RegisterNodeResponseDto })
-  register(@Body() dto: RegisterNodeDto) {
-    return this.nodesService.register(dto);
+  register(
+    @Body() dto: RegisterNodeDto,
+    @Headers('x-node-token') nodeToken: string,
+  ) {
+    return this.nodesService.register(dto, nodeToken);
   }
 
   @Public()
@@ -66,7 +70,11 @@ export class InternalNodesController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ operationId: 'nodeHeartbeat', summary: 'Worker heartbeat' })
   @ApiNoContentResponse()
-  heartbeat(@Param('id', ParseUUIDPipe) id: string, @Body() dto: HeartbeatDto) {
-    return this.nodesService.heartbeat(id, dto);
+  heartbeat(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: HeartbeatDto,
+    @Headers('x-node-token') nodeToken: string,
+  ) {
+    return this.nodesService.heartbeat(id, dto, nodeToken);
   }
 }
