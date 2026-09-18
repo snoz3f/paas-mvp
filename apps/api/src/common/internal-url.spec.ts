@@ -1,11 +1,9 @@
 import { internalCallbackUrl } from './internal-url';
 
 describe('internalCallbackUrl', () => {
-  const origInternal = process.env.API_INTERNAL_URL;
-  const origPublic = process.env.API_URL;
   afterEach(() => {
-    process.env.API_INTERNAL_URL = origInternal;
-    process.env.API_URL = origPublic;
+    delete process.env.API_INTERNAL_URL;
+    delete process.env.API_URL;
   });
 
   it('prefers API_INTERNAL_URL', () => {
@@ -16,9 +14,8 @@ describe('internalCallbackUrl', () => {
     );
   });
 
-  it('falls back to API_URL', () => {
-    delete process.env.API_INTERNAL_URL;
-    process.env.API_URL = 'https://api.infral.dev';
+  it('falls back to API_URL and strips trailing slash', () => {
+    process.env.API_URL = 'https://api.infral.dev/';
     expect(internalCallbackUrl('/internal/services/x/status')).toBe(
       'https://api.infral.dev/internal/services/x/status',
     );
