@@ -31,6 +31,7 @@ import { TerminalInfoResponseDto } from './dto/terminal-info-response.dto';
 import { UpdateDeploymentStatusDto } from './dto/update-deployment-status.dto';
 import { WorkerAuthGuard } from './guards/worker-auth.guard';
 import { DeploymentsService } from './deployments.service';
+import { assertTerminalRestEnabled } from './terminal-enabled';
 
 @ApiTags('deployments')
 @ApiBearerAuth('access-token')
@@ -193,6 +194,7 @@ export class DeploymentsController {
     @Param('appId', ParseUUIDPipe) appId: string,
     @Param('id', ParseUUIDPipe) id: string,
   ) {
+    assertTerminalRestEnabled();
     const { node, containerId } = await this.deploymentsService.getWorkerForDeployment(
       user.sub, projectId, appId, id,
     );

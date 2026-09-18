@@ -8,6 +8,7 @@ import { GithubService } from '@/github/github.service';
 import { ProjectsService } from '@/projects/projects.service';
 import { AppsService } from '@/apps/apps.service';
 import { DeploymentsService } from '@/deployments/deployments.service';
+import { assertTerminalEnabled } from '@/deployments/terminal-enabled';
 import { ServicesService } from '@/services/services.service';
 import { ServiceTypeDto } from '@/services/dto/create-service.dto';
 import { NodesService } from '@/nodes/nodes.service';
@@ -115,6 +116,7 @@ export class TrpcService {
       stopDeployment: async (userId, projectId, appId, id) =>
         this.toDeployment(await this.deployments.stop(userId, projectId, appId, id)),
       getTerminalInfo: async (userId, projectId, appId, id) => {
+        assertTerminalEnabled();
         const { containerId } = await this.deployments.getWorkerForDeployment(
           userId, projectId, appId, id,
         );
