@@ -1,7 +1,8 @@
 import {
   ConflictException,
+  HttpException,
+  HttpStatus,
   Injectable,
-  TooManyRequestsException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
@@ -28,7 +29,7 @@ export class AuthService {
 
   async register(dto: RegisterDto, ip: string): Promise<{ accessToken: string }> {
     if (!limiter.consume(ip)) {
-      throw new TooManyRequestsException({ message: 'Too many requests' });
+      throw new HttpException({ message: 'Too many requests' }, HttpStatus.TOO_MANY_REQUESTS);
     }
     const existing = await this.prisma.user.findUnique({ where: { email: dto.email } });
     if (existing) throw new ConflictException('Email already in use');
@@ -43,7 +44,7 @@ export class AuthService {
 
   async login(dto: LoginDto, ip: string): Promise<{ accessToken: string }> {
     if (!limiter.consume(ip)) {
-      throw new TooManyRequestsException({ message: 'Too many requests' });
+      throw new HttpException({ message: 'Too many requests' }, HttpStatus.TOO_MANY_REQUESTS);
     }
     const user = await this.prisma.user.findUnique({ where: { email: dto.email } });
     if (!user) throw new UnauthorizedException('Invalid credentials');
