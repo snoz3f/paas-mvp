@@ -29,6 +29,7 @@ services:
       - --certificatesresolvers.letsencrypt-tls.acme.tlschallenge=true
     networks:
       - infral
+      - infral-control
 
   # Obtains and renews *.infral.dev wildcard cert on startup.
   # Deployed apps reuse it from acme.json instantly — zero wait.
@@ -48,4 +49,6 @@ services:
 
 networks:
   infral:
+    external: true
+  infral-control:
     external: true
