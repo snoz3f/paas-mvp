@@ -36,3 +36,4 @@ infra/**/.env
 .claude
 .worktrees
 .superpowers
+/plans

@@ -39,7 +39,7 @@ createRoot(document.getElementById('root')!).render(
         <BrowserRouter>
           <App />
         </BrowserRouter>
-        <ReactQueryDevtools />
+        {import.meta.env.DEV ? <ReactQueryDevtools /> : null}
       </QueryClientProvider>
     </trpc.Provider>
   </StrictMode>,

@@ -16,17 +16,6 @@ const NAV_ITEMS = [
       </svg>
     ),
   },
-  {
-    to: '/dashboard/settings',
-    end: false,
-    label: 'Settings',
-    icon: (
-      <svg className={s.navIcon} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
-        <circle cx="8" cy="8" r="2.5" />
-        <path d="M8 1v2M8 13v2M1 8h2M13 8h2M2.93 2.93l1.41 1.41M11.66 11.66l1.41 1.41M2.93 13.07l1.41-1.41M11.66 4.34l1.41-1.41" />
-      </svg>
-    ),
-  },
 ];
 
 export function DashboardLayout() {

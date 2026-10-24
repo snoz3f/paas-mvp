@@ -18,13 +18,13 @@ services:
       - --entrypoints.websecure.address=:443
       - --entrypoints.web.http.redirections.entrypoint.to=websecure
       # DNS-01 via Cloudflare — for *.infral.dev wildcard cert
-      - --certificatesresolvers.letsencrypt-dns.acme.email=pe4insky@gmail.com
+      - --certificatesresolvers.letsencrypt-dns.acme.email=${ACME_EMAIL}
       - --certificatesresolvers.letsencrypt-dns.acme.storage=/acme.json
       - --certificatesresolvers.letsencrypt-dns.acme.dnschallenge=true
       - --certificatesresolvers.letsencrypt-dns.acme.dnschallenge.provider=cloudflare
       - --certificatesresolvers.letsencrypt-dns.acme.dnschallenge.resolvers=1.1.1.1:53,8.8.8.8:53
       # TLS-ALPN-01 — for custom user domains
-      - --certificatesresolvers.letsencrypt-tls.acme.email=pe4insky@gmail.com
+      - --certificatesresolvers.letsencrypt-tls.acme.email=${ACME_EMAIL}
       - --certificatesresolvers.letsencrypt-tls.acme.storage=/acme.json
       - --certificatesresolvers.letsencrypt-tls.acme.tlschallenge=true
     networks:

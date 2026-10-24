@@ -6,9 +6,8 @@ import { useNavigate, useParams } from 'react-router';
 import { siNodedotjs, siPython } from 'simple-icons';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
-import { ResourceSlider } from '@/components/ui/ResourceSlider';
 import { FRAMEWORK_OPTIONS } from '@/lib/frameworks';
-import { RAM_STEPS, CPU_STEPS, DISK_STEPS, formatRam, formatCpu, formatDisk } from '@/lib/resources';
+import { DEFAULT_CPU_MILLI, DEFAULT_DISK_GB, DEFAULT_RAM_MB } from '@/lib/resources';
 import { trpc } from '@/lib/trpc';
 import * as s from './NewProjectPage.css';
 
@@ -30,9 +29,6 @@ export function NewAppPage() {
   const [repoSearch, setRepoSearch] = useState('');
   const [rootDir, setRootDir] = useState('.');
   const [formError, setFormError] = useState<string | null>(null);
-  const [ramMb, setRamMb] = useState(512);
-  const [cpuMilli, setCpuMilli] = useState(500);
-  const [diskGb, setDiskGb] = useState(5);
 
   const utils = trpc.useUtils();
   const { mutateAsync: createApp, isPending } = trpc.apps.create.useMutation();
@@ -73,9 +69,9 @@ export function NewAppPage() {
         repoUrl: selectedRepo.url,
         rootDir: rootDir || '.',
         framework: data.framework,
-        ramMb,
-        cpuMilli,
-        diskGb,
+        ramMb: DEFAULT_RAM_MB,
+        cpuMilli: DEFAULT_CPU_MILLI,
+        diskGb: DEFAULT_DISK_GB,
       });
       void navigate(`/dashboard/projects/${projectId}`);
     } catch {
@@ -232,13 +228,6 @@ export function NewAppPage() {
               ))}
             </div>
             {errors.framework && <div className={s.formError}>{errors.framework.message ?? 'Select a stack'}</div>}
-          </div>
-
-          <div className={s.resourcesSection}>
-            <span className={s.resourcesLabel}>Resources</span>
-            <ResourceSlider label="RAM" steps={RAM_STEPS} value={ramMb} format={formatRam} onChange={setRamMb} />
-            <ResourceSlider label="CPU" steps={CPU_STEPS} value={cpuMilli} format={formatCpu} onChange={setCpuMilli} />
-            <ResourceSlider label="Disk" steps={DISK_STEPS} value={diskGb} format={formatDisk} onChange={setDiskGb} />
           </div>
 
           {formError && <div className={s.formError}>{formError}</div>}

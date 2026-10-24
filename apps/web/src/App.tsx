@@ -15,10 +15,6 @@ import { AdminNodesPage } from '@/app/admin/AdminNodesPage';
 import { AuthGuard } from '@/components/AuthGuard';
 import { AdminGuard } from '@/components/AdminGuard';
 
-function Placeholder({ title }: { title: string }) {
-  return <div style={{ padding: 40, color: '#666' }}>{title} — coming soon</div>;
-}
-
 export function App() {
   return (
     <Routes>
@@ -40,7 +36,7 @@ export function App() {
         </Route>
         <Route path="projects/:id/apps/:appId/deployments/:deploymentId" element={<DeploymentPage />} />
         <Route path="projects/:id/settings" element={<Navigate to=".." relative="path" replace />} />
-        <Route path="settings" element={<Placeholder title="Settings" />} />
+        <Route path="settings" element={<Navigate to="/dashboard" replace />} />
         <Route path="billing" element={<Navigate to="/dashboard" replace />} />
       </Route>
       <Route

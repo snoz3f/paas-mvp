@@ -64,7 +64,7 @@ export function XTerm({ logsUrl, wsUrl, containerId, token }: XTermProps) {
 
     // ── Режим логов (SSE) ──────────────────────────────────
     if (logsUrl) {
-      term.writeln('\x1b[2m── build log ──\x1b[0m\r\n');
+      term.writeln('\x1b[2m── logs ──\x1b[0m\r\n');
       const ac = new AbortController();
       let ended = false;
 

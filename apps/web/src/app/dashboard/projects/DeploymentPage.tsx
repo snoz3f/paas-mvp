@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/Button';
 import { StatusBadge } from '@/components/ui/Badge';
 import { XTerm } from '@/components/ui/XTerm';
 import { trpc } from '@/lib/trpc';
+import { deploymentLogSessionKey } from './deployment-log-key';
 import * as s from './DeploymentPage.css';
 
 export function DeploymentPage() {
@@ -109,7 +110,14 @@ export function DeploymentPage() {
         )}
 
         <div className={s.termPanel}>
-          {logsUrl ? <XTerm logsUrl={logsUrl} /> : <div className={s.errorMsg}>No deployment selected.</div>}
+          {logsUrl && deployment ? (
+            <XTerm
+              key={deploymentLogSessionKey(deployment.status, deployment.id)}
+              logsUrl={logsUrl}
+            />
+          ) : (
+            <div className={s.errorMsg}>No deployment selected.</div>
+          )}
         </div>
       </div>
     </>
